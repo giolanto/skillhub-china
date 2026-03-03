@@ -17,7 +17,7 @@ export default function UploadPage() {
     return w
   }
 
-  const handleChange = (field, value) => {
+  const handleChange = (field: string, value: string) => {
     setForm({ ...form, [field]: value })
     if (field === 'description') setWarnings(detectApiKeys(value))
   }
