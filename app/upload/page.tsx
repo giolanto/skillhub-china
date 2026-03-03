@@ -9,7 +9,7 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<any>(null)
 
-  const detectApiKeys = (text) => {
+  const detectApiKeys = (text: string): string[] => {
     const w = []
     if (/sk-[A-Za-z0-9]{20,}/.test(text)) w.push('OpenAI API Key')
     if (/(api[_-]?key|apikey)/i.test(text)) w.push('API Key')
