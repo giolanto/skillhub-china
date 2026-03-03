@@ -22,8 +22,8 @@ export async function GET(request: Request) {
     result = skills.filter(s => s.channel.includes(channel))
   }
   
-  // 如果请求HTML格式（浏览器直接访问）
-  if (format === 'html') {
+  // 如果没有指定format，默认返回HTML格式（浏览器友好）
+  if (!format || format === 'html') {
     const html = `<!DOCTYPE html>
 <html>
 <head>
