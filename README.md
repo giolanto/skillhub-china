@@ -1,6 +1,6 @@
 # SkillHub China
 
-中国首个针对OpenClaw和渠道机器人的开源技能市场
+国人自己的针对OpenClaw和渠道机器人的开源技能市场
 
 ## 功能特性
 

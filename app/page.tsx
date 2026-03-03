@@ -97,7 +97,7 @@ export default function Home() {
       <section className="bg-gradient-to-br from-primary to-secondary text-white py-20">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-5xl font-bold mb-6">
-            中国首个AI Agent技能市场
+            国人自己的AI Agent技能市场
           </h1>
           <p className="text-xl text-blue-100 mb-8">
             专注于OpenClaw生态 • 飞书/微信/钉钉/Telegram渠道 • 中文场景
