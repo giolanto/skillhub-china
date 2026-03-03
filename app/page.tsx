@@ -1,4 +1,4 @@
-import { Search, Github, Feishu, MessageCircle, Phone, Download, Star, Tag, ArrowRight } from 'lucide-react'
+import { Search, Github, MessageCircle, Phone, Download, Star, Tag, ArrowRight, Send } from 'lucide-react'
 
 // 模拟技能数据（后续从数据库获取）
 const skills = [
