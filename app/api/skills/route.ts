@@ -16,10 +16,45 @@ function hideApiKeys(text: string): string {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const channel = searchParams.get('channel')
+  const format = searchParams.get('format')
   let result = skills
   if (channel && channel !== '全部') {
     result = skills.filter(s => s.channel.includes(channel))
   }
+  
+  // 如果请求HTML格式（浏览器直接访问）
+  if (format === 'html') {
+    const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SkillHub API - 技能列表</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+    h1 { color: #003366; }
+    .skill { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 8px; }
+    .skill h3 { margin: 0 0 10px; color: #0066cc; }
+    .tag { background: #e0e0e0; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-right: 5px; }
+    .stats { color: #666; font-size: 14px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 SkillHub API</h1>
+  <p>技能数量: ${result.length}</p>
+  <hr>
+  ${result.map(s => `<div class="skill">
+    <h3>${s.name}</h3>
+    <p>${s.description}</p>
+    <div class="tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+    <div class="stats">⬇️ ${s.downloads} | ⭐ ${s.stars}</div>
+  </div>`).join('')}
+  <hr>
+  <p><a href="/api/skills?format=json">JSON格式</a> | <a href="/api/skills?format=html">HTML格式</a></p>
+</body>
+</html>`
+    return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
+  }
+  
   return NextResponse.json({ success: true, count: result.length, data: result })
 }
 
