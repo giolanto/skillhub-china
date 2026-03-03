@@ -89,6 +89,13 @@ export default function Home() {
               <Github size={18} />
               GitHub
             </a>
+            <a 
+              href="/upload"
+              className="flex items-center gap-1 bg-accent text-primary px-4 py-2 rounded-lg hover:opacity-90 transition font-medium"
+            >
+              <Send size={16} />
+              上传技能
+            </a>
           </nav>
         </div>
       </header>
