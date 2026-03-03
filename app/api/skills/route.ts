@@ -13,7 +13,7 @@ function hideApiKeys(text: string): string {
     .replace(/Bearer\s+[A-Za-z0-9_.-]+/g, 'Bearer ****')
 }
 
-export async function GET(request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const channel = searchParams.get('channel')
   let result = skills
@@ -23,7 +23,7 @@ export async function GET(request) {
   return NextResponse.json({ success: true, count: result.length, data: result })
 }
 
-export async function POST(request) {
+export async function POST(request: Request) {
   try {
     const body = await request.json()
     const { name, description, github } = body
