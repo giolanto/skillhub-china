@@ -49,7 +49,7 @@ export async function GET(): Promise<Response> {
     const skillList = skills || []
     const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SkillHub</title></head><body>
     <h1>🤖 SkillHub API</h1><p>技能数量: ${skillList.length}</p><hr>
-    ${skillList.map((s: any) => `<div><h3>${s.name}</h3><p>${s.description || ''}</p></div>`).join('')}
+    ${skillList.map((s: any) => `<div><h3>${s.name}</h3><p>${s.description || ''}</p><a href="${s.download_url || s.github || '#'}">下载</a></div>`).join('')}
     </body></html>`
     return new Response(html, { headers: { 'Content-Type': 'text/html' } })
   } catch (err: any) {
@@ -57,8 +57,15 @@ export async function GET(): Promise<Response> {
   }
 }
 
-// ============ POST: 注册机器人 / 发布技能 ============
+// ============ POST: 注册机器人 / 发布技能 / 上传文件 ============
 export async function POST(request: Request): Promise<Response> {
+  const contentType = request.headers.get('content-type') || ''
+  
+  // 文件上传
+  if (contentType.includes('multipart/form-data')) {
+    return await handleFileUpload(request)
+  }
+  
   try {
     const body: any = await request.json()
     const apiKey = request.headers.get('X-API-Key')
@@ -99,7 +106,7 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json({ success: false, error: '无效的 API Key' }, { status: 401 })
     }
     
-    const { name, description, github, channel, tags } = body
+    const { name, description, github, download_url, channel, tags } = body
     if (!name) {
       return NextResponse.json({ success: false, error: '需要name参数' }, { status: 400 })
     }
@@ -108,6 +115,7 @@ export async function POST(request: Request): Promise<Response> {
       name,
       description: hideApiKeys(description || ''),
       github: hideApiKeys(github || ''),
+      download_url: download_url || '',
       channel: channel || ['通用'],
       tags: tags || [],
       downloads: 0,
@@ -128,5 +136,78 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json({ success: true, message: '技能发布成功', data })
   } catch (err: any) {
     return NextResponse.json({ success: false, error: '请求错误', details: err.message }, { status: 400 })
+  }
+}
+
+// 处理文件上传
+async function handleFileUpload(request: Request): Promise<Response> {
+  try {
+    const formData = await request.formData()
+    const apiKey = formData.get('X-API-Key') as string
+    const file = formData.get('file') as File
+    const name = formData.get('name') as string
+    const description = formData.get('description') as string
+    const channel = formData.get('channel') as string
+    const tags = formData.get('tags') as string
+    
+    if (!apiKey) {
+      return NextResponse.json({ success: false, error: '需要 X-API-Key' }, { status: 401 })
+    }
+    
+    const robot = await verifyApiKey(apiKey)
+    if (!robot) {
+      return NextResponse.json({ success: false, error: '无效的 API Key' }, { status: 401 })
+    }
+    
+    if (!file || !name) {
+      return NextResponse.json({ success: false, error: '需要file和name参数' }, { status: 400 })
+    }
+    
+    // 生成唯一文件名
+    const fileName = `${robot.id}_${Date.now()}_${file.name}`
+    
+    // 上传到 Supabase Storage
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('skills')
+      .upload(fileName, file, { upsert: true })
+    
+    if (uploadError) {
+      return NextResponse.json({ success: false, error: '文件上传失败', details: uploadError.message }, { status: 500 })
+    }
+    
+    // 获取公开URL
+    const { data: urlData } = supabase.storage.from('skills').getPublicUrl(fileName)
+    
+    // 保存技能信息
+    const skillData = {
+      name,
+      description: description || '',
+      download_url: urlData.publicUrl,
+      github: '',
+      channel: channel ? [channel] : ['通用'],
+      tags: tags ? tags.split(',').map(t => t.trim()) : [],
+      downloads: 0,
+      stars: 0,
+      robot_id: robot.id,
+    }
+    
+    const { data: skill, error: skillError } = await supabase
+      .from('skills')
+      .insert([skillData])
+      .select()
+      .single()
+    
+    if (skillError) {
+      return NextResponse.json({ success: false, error: '保存失败', details: skillError.message }, { status: 500 })
+    }
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: '技能上传成功', 
+      data: skill,
+      download_url: urlData.publicUrl
+    })
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: '上传错误', details: err.message }, { status: 400 })
   }
 }
