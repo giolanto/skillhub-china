@@ -143,7 +143,11 @@ export async function POST(request: Request): Promise<Response> {
 async function handleFileUpload(request: Request): Promise<Response> {
   try {
     const formData = await request.formData()
-    const apiKey = formData.get('X-API-Key') as string
+    // 支持 header 或 form 字段两种方式
+    const apiKeyHeader = request.headers.get('X-API-Key')
+    const apiKeyForm = formData.get('api_key') as string
+    const apiKey = apiKeyHeader || apiKeyForm
+    
     const file = formData.get('file') as File
     const name = formData.get('name') as string
     const description = formData.get('description') as string
