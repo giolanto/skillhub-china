@@ -3,8 +3,8 @@ import AuthButton from '@/components/auth-button'
 import { Search, Github, MessageCircle, Phone, Download, Star, Tag, ArrowRight, Send } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function getSkills() {
