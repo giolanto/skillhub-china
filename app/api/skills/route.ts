@@ -1,10 +1,5 @@
 import { NextResponse } from 'next/server'
-
-const skills: any[] = [
-  { id: 1, name: 'feishu-send', description: '飞书文件发送技能', github: 'https://github.com/example/feishu-send', channel: ['飞书'], tags: ['文件'], downloads: 1250, stars: 48 },
-  { id: 2, name: 'ecommerce-query', description: '淘宝京东比价', github: 'https://github.com/example/ecommerce-query', channel: ['通用'], tags: ['电商'], downloads: 980, stars: 36 },
-  { id: 3, name: 'baidu-ppt', description: 'AI PPT生成', github: 'https://github.com/example/baidu-ppt', channel: ['通用'], tags: ['PPT'], downloads: 2100, stars: 72 },
-]
+import { supabase } from '@/lib/supabase'
 
 function hideApiKeys(s: string): string {
   if (!s) return s
@@ -12,12 +7,34 @@ function hideApiKeys(s: string): string {
 }
 
 export async function GET(): Promise<Response> {
-  const result = skills
-  const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SkillHub</title></head><body>
-  <h1>🤖 SkillHub API</h1><p>技能数量: ${result.length}</p><hr>
-  ${result.map((s: any) => `<div><h3>${s.name}</h3><p>${s.description}</p></div>`).join('')}
-  </body></html>`
-  return new Response(html, { headers: { 'Content-Type': 'text/html' } })
+  try {
+    const { data: skills, error } = await supabase
+      .from('skills')
+      .select('*')
+      .order('id', { ascending: true })
+    
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ 
+        success: false, 
+        error: '数据库错误',
+        details: error.message 
+      }, { status: 500 })
+    }
+    
+    const skillList = skills || []
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SkillHub</title></head><body>
+    <h1>🤖 SkillHub API</h1><p>技能数量: ${skillList.length}</p><hr>
+    ${skillList.map((s: any) => `<div><h3>${s.name}</h3><p>${s.description || ''}</p></div>`).join('')}
+    </body></html>`
+    return new Response(html, { headers: { 'Content-Type': 'text/html' } })
+  } catch (err: any) {
+    return NextResponse.json({ 
+      success: false, 
+      error: '服务器错误',
+      details: err.message 
+    }, { status: 500 })
+  }
 }
 
 export async function POST(request: Request): Promise<Response> {
@@ -30,7 +47,6 @@ export async function POST(request: Request): Promise<Response> {
     }
     
     const newSkill = {
-      id: skills.length + 1,
       name,
       description: hideApiKeys(description || ''),
       github: hideApiKeys(github || ''),
@@ -40,10 +56,26 @@ export async function POST(request: Request): Promise<Response> {
       stars: 0,
     }
     
-    skills.push(newSkill)
+    const { data, error } = await supabase
+      .from('skills')
+      .insert([newSkill])
+      .select()
     
-    return NextResponse.json({ success: true, message: '技能发布成功', data: newSkill })
-  } catch {
-    return NextResponse.json({ success: false, error: '请求错误' }, { status: 400 })
+    if (error) {
+      console.error('Supabase insert error:', error)
+      return NextResponse.json({ 
+        success: false, 
+        error: '数据库插入失败',
+        details: error.message 
+      }, { status: 500 })
+    }
+    
+    return NextResponse.json({ success: true, message: '技能发布成功', data: data?.[0] })
+  } catch (err: any) {
+    return NextResponse.json({ 
+      success: false, 
+      error: '请求错误',
+      details: err.message 
+    }, { status: 400 })
   }
 }
