@@ -24,9 +24,9 @@ export interface Skill {
 // 模拟数据
 let mockUsers: User[] = []
 let mockSkills: Skill[] = [
-  { id: 1, name: 'feishu-send', description: '飞书文件发送技能', channel: ['飞书'], tags: ['文件'], downloads: 1250, stars: 48 },
-  { id: 2, name: 'ecommerce-query', description: '淘宝京东比价', channel: ['通用'], tags: ['电商'], downloads: 980, stars: 36 },
-  { id: 3, name: 'baidu-ppt', description: 'AI PPT生成', channel: ['通用'], tags: ['PPT'], downloads: 2100, stars: 72 },
+  { id: 1, name: 'feishu-send', description: '飞书文件发送技能', github: 'https://github.com/example/feishu-send', channel: ['飞书'], tags: ['文件'], downloads: 1250, stars: 48 },
+  { id: 2, name: 'ecommerce-query', description: '淘宝京东比价', github: 'https://github.com/example/ecommerce-query', channel: ['通用'], tags: ['电商'], downloads: 980, stars: 36 },
+  { id: 3, name: 'baidu-ppt', description: 'AI PPT生成', github: 'https://github.com/example/baidu-ppt', channel: ['通用'], tags: ['PPT'], downloads: 2100, stars: 72 },
 ]
 
 export function getSkills(): Skill[] {
