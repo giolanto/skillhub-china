@@ -7,7 +7,7 @@ let skills = [
   { id: 3, name: 'baidu-ppt', description: 'AI PPT生成', github: 'https://github.com/example/baidu-ppt', channel: ['通用'], tags: ['PPT'], downloads: 2100, stars: 72 },
 ]
 
-function hideApiKeys(text) {
+function hideApiKeys(text: string) {
   if (!text) return text
   return text.replace(/sk-[A-Za-z0-9]{20,}/g, 'sk-****')
     .replace(/(api[_-]?key|apikey)[=:]\s*['"]?([A-Za-z0-9_-]{16,})['"]?/gi, '$1=****')
