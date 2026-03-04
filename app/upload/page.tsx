@@ -1,16 +1,26 @@
 'use client'
 
-import { useState } from 'react'
-import { Upload, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Upload, AlertTriangle, CheckCircle, Loader2, Lock } from 'lucide-react'
+import { signInWithGithub, getCurrentUser, signOut, User } from '@/lib/supabase'
+import Link from 'next/link'
 
 export default function UploadPage() {
   const [form, setForm] = useState({ name: '', description: '', github: '', channel: '通用', tags: '' })
   const [warnings, setWarnings] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const currentUser = getCurrentUser()
+    setUser(currentUser)
+    setLoading(false)
+  }, [])
 
   const detectApiKeys = (text: string): string[] => {
-    const w = []
+    const w: string[] = []
     if (/sk-[A-Za-z0-9]{20,}/.test(text)) w.push('OpenAI API Key')
     if (/(api[_-]?key|apikey)/i.test(text)) w.push('API Key')
     if (/Bearer\s+/.test(text)) w.push('Bearer Token')
@@ -23,26 +33,89 @@ export default function UploadPage() {
   }
 
   const handleSubmit = async () => {
+    if (!user) return
     setUploading(true)
     try {
       const res = await fetch('/api/skills', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean) })
+        body: JSON.stringify({ 
+          ...form, 
+          tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+          user_id: user.id 
+        })
       })
       setResult(await res.json())
     } catch { setResult({ success: false, error: '上传失败' }) }
     setUploading(false)
   }
 
+  const handleLogin = async () => {
+    try {
+      const newUser = await signInWithGithub()
+      setUser(newUser)
+    } catch (error) {
+      console.error('Login error:', error)
+    }
+  }
+
+  const handleLogout = async () => {
+    await signOut()
+    setUser(null)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary" size={40} />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-primary text-white px-4 py-4 flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-bold text-primary">S</div>
+            <span className="text-xl font-bold">SkillHub China</span>
+          </Link>
+          <Link href="/" className="hover:text-accent">返回首页</Link>
+        </header>
+        <div className="max-w-2xl mx-auto px-4 py-12">
+          <div className="bg-white rounded-xl p-8 shadow-sm text-center">
+            <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Lock className="text-amber-500" size={40} />
+            </div>
+            <h1 className="text-2xl font-bold mb-4">登录后可上传技能</h1>
+            <p className="text-gray-500 mb-8">为了防止滥用，上传技能需要先登录GitHub账号</p>
+            <button onClick={handleLogin} className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition">
+              使用GitHub账号登录
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white px-4 py-4 flex justify-between items-center">
-        <a href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-bold text-primary">S</div>
           <span className="text-xl font-bold">SkillHub China</span>
-        </a>
-        <a href="/" className="hover:text-accent">返回首页</a>
+        </Link>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            {user.avatar_url ? (
+              <img src={user.avatar_url} alt={user.username} className="w-8 h-8 rounded-full" />
+            ) : (
+              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">U</div>
+            )}
+            <span className="text-sm">{user.username}</span>
+          </div>
+          <button onClick={handleLogout} className="text-sm hover:text-accent">退出</button>
+        </div>
       </header>
       <div className="max-w-2xl mx-auto px-4 py-12">
         <div className="bg-white rounded-xl p-8 shadow-sm">

@@ -1,3 +1,4 @@
+import AuthButton from '@/components/auth-button'
 import { Search, Github, MessageCircle, Phone, Download, Star, Tag, ArrowRight, Send } from 'lucide-react'
 
 // 模拟技能数据（后续从数据库获取）
@@ -96,6 +97,7 @@ export default function Home() {
               <Send size={16} />
               上传技能
             </a>
+            <AuthButton />
           </nav>
         </div>
       </header>
