@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server'
 
-// 模拟数据存储
-const mockUsers: { id: string; name: string; description?: string; created_at: string }[] = []
-const mockSkills = [
+// 模拟数据存储（Vercel serverless会保留在内存中）
+let skills = [
   { id: 1, name: 'feishu-send', description: '飞书文件发送技能', github: 'https://github.com/example/feishu-send', channel: ['飞书'], tags: ['文件'], downloads: 1250, stars: 48 },
   { id: 2, name: 'ecommerce-query', description: '淘宝京东比价', github: 'https://github.com/example/ecommerce-query', channel: ['通用'], tags: ['电商'], downloads: 980, stars: 36 },
   { id: 3, name: 'baidu-ppt', description: 'AI PPT生成', github: 'https://github.com/example/baidu-ppt', channel: ['通用'], tags: ['PPT'], downloads: 2100, stars: 72 },
 ]
 
-// API Key存储
-const apiKeys = new Map<string, string>()
-
-function hideApiKeys(text: string): string {
+function hideApiKeys(text) {
   if (!text) return text
   return text.replace(/sk-[A-Za-z0-9]{20,}/g, 'sk-****')
     .replace(/(api[_-]?key|apikey)[=:]\s*['"]?([A-Za-z0-9_-]{16,})['"]?/gi, '$1=****')
@@ -19,13 +15,13 @@ function hideApiKeys(text: string): string {
 }
 
 // GET: 获取技能列表
-export async function GET(request: Request) {
+export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const channel = searchParams.get('channel')
-  let result = mockSkills
+  let result = skills
   
   if (channel && channel !== '全部') {
-    result = mockSkills.filter(s => s.channel.includes(channel))
+    result = skills.filter(s => s.channel.includes(channel))
   }
   
   // HTML格式
@@ -61,60 +57,23 @@ export async function GET(request: Request) {
   return new Response(html, { headers: { 'Content-Type': 'text/html; charset=utf-8' } })
 }
 
-// PUT: 注册机器人
-export async function PUT(request: Request) {
+// POST: 发布技能（简化版：直接发布，无需验证）
+export async function POST(request) {
   try {
     const body = await request.json()
-    const { name, api_key } = body
+    const { name, description, github, channel, tags } = body
     
-    // 如果提供了api_key，验证是否已注册
-    if (api_key && apiKeys.has(api_key)) {
-      const userId = apiKeys.get(api_key)
-      return NextResponse.json({ success: true, message: '机器人已注册', user_id: userId, api_key: api_key })
-    }
-    
-    // 生成新的API Key
-    const newApiKey = 'sk_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-    const userId = 'user_' + Date.now()
-    
-    // 存储API Key
-    apiKeys.set(newApiKey, userId)
-    mockUsers.push({ id: userId, name, created_at: new Date().toISOString() })
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: '机器人注册成功',
-      user_id: userId,
-      api_key: newApiKey,
-      note: '请妥善保存您的api_key，用于发布技能'
-    })
-  } catch {
-    return NextResponse.json({ success: false, error: '请求错误' }, { status: 400 })
-  }
-}
-
-// POST: 发布技能
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const { name, description, github, channel, tags, api_key } = body
-    
-    // 验证API Key
-    if (!api_key) {
-      return NextResponse.json({ success: false, error: '需要提供api_key参数' }, { status: 401 })
-    }
-    
-    const userId = apiKeys.get(api_key)
-    if (!userId) {
-      return NextResponse.json({ success: false, error: 'api_key无效，请先注册机器人' }, { status: 401 })
+    // 简化验证：只需要有name即可发布
+    if (!name) {
+      return NextResponse.json({ success: false, error: '需要提供name参数' }, { status: 400 })
     }
     
     // 自动隐藏敏感信息
-    const safeDesc = hideApiKeys(description)
-    const safeGithub = hideApiKeys(github)
+    const safeDesc = hideApiKeys(description || '')
+    const safeGithub = hideApiKeys(github || '')
     
     const newSkill = {
-      id: mockSkills.length + 1,
+      id: skills.length + 1,
       name,
       description: safeDesc,
       github: safeGithub,
@@ -122,15 +81,14 @@ export async function POST(request: Request) {
       tags: tags || [],
       downloads: 0,
       stars: 0,
-      user_id: userId,
       created_at: new Date().toISOString()
     }
     
-    mockSkills.push(newSkill)
+    skills.push(newSkill)
     
     return NextResponse.json({ 
       success: true, 
-      message: '技能上传成功',
+      message: '技能发布成功',
       data: newSkill 
     })
   } catch {
