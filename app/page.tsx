@@ -43,7 +43,8 @@ export default function Home() {
       setSkills(data)
       
       // 提取所有渠道
-      const allChannels = ['全部', ...new Set(data.flatMap(s => s.channel || ['通用']))]
+      const channelSet = new Set(data.flatMap(s => s.channel || ['通用']))
+      const allChannels = ['全部', ...Array.from(channelSet)]
       setChannels(allChannels)
     } catch (e) {
       console.error('Error:', e)

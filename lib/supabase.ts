@@ -12,6 +12,7 @@ export interface User {
   avatar_url: string
   github_username: string
   created_at: string
+  api_key?: string
 }
 
 // 技能类型
@@ -30,12 +31,15 @@ export interface Skill {
 
 // 客户端认证函数
 export function signInWithGithub(): User {
+  // 生成模拟API Key
+  const apiKey = 'sk_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
   const mockUser: User = {
     id: 'user_' + Date.now(),
     username: 'GitHub用户',
     avatar_url: 'https://github.com/ghost.png',
     github_username: 'github_user',
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    api_key: apiKey
   }
   if (typeof window !== 'undefined') {
     localStorage.setItem('skillhub_user', JSON.stringify(mockUser))
