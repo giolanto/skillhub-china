@@ -1,225 +1,371 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest, NextResponse } from 'next/server'
 
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
-const supabase = createClient(supabaseUrl, supabaseKey)
-
-function hideApiKeys(s: string): string {
-  if (!s) return s
-  return s.replace(/sk-[A-Za-z0-9]{20,}/g, 'sk-****')
-}
-
-// 生成随机 API Key
-function generateApiKey(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  let key = 'sk_'
-  for (let i = 0; i < 32; i++) {
-    key += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return key
-}
 
 // 验证 API Key
 async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string } | null> {
   if (!apiKey || !apiKey.startsWith('sk_')) return null
-  
-  const { data, error } = await supabase
-    .from('robots')
-    .select('id, name')
-    .eq('api_key', apiKey)
-    .single()
-  
-  if (error || !data) return null
-  return data
+  const res = await fetch(
+    `${supabaseUrl}/rest/v1/robots?api_key=eq.${apiKey}`,
+    { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+  )
+  const data = await res.json()
+  if (!data || data.length === 0) return null
+  return { id: data[0].id, name: data[0].name }
 }
 
-// ============ GET: 获取技能列表 ============
-export async function GET(): Promise<Response> {
-  try {
-    const { data: skills, error } = await supabase
-      .from('skills')
-      .select('*')
-      .order('id', { ascending: true })
-    
-    if (error) {
-      return NextResponse.json({ success: false, error: '数据库错误', details: error.message }, { status: 500 })
-    }
-    
-    const skillList = skills || []
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>SkillHub</title></head><body>
-    <h1>🤖 SkillHub API</h1><p>技能数量: ${skillList.length}</p><hr>
-    ${skillList.map((s: any) => `<div><h3>${s.name}</h3><p>${s.description || ''}</p><a href="${s.download_url || s.github || '#'}">下载</a></div>`).join('')}
-    </body></html>`
-    return new Response(html, { headers: { 'Content-Type': 'text/html' } })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: '服务器错误', details: err.message }, { status: 500 })
-  }
-}
-
-// ============ POST: 注册机器人 / 发布技能 / 上传文件 ============
-export async function POST(request: Request): Promise<Response> {
-  const contentType = request.headers.get('content-type') || ''
-  
-  // 文件上传
-  if (contentType.includes('multipart/form-data')) {
-    return await handleFileUpload(request)
-  }
-  
-  try {
-    const body: any = await request.json()
-    const apiKey = request.headers.get('X-API-Key')
-    
-    // 路由1: 注册机器人
-    if (body.action === 'register') {
-      const { name, description } = body
-      if (!name) {
-        return NextResponse.json({ success: false, error: '需要name参数' }, { status: 400 })
-      }
-      
-      const newApiKey = generateApiKey()
-      const { data, error } = await supabase
-        .from('robots')
-        .insert([{ name, description: description || '', api_key: newApiKey }])
-        .select()
-        .single()
-      
-      if (error) {
-        return NextResponse.json({ success: false, error: '注册失败', details: error.message }, { status: 500 })
-      }
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: '机器人注册成功', 
-        api_key: newApiKey,
-        data: { id: data.id, name: data.name }
+// 创建 Supabase 客户端
+function createSupabaseClient() {
+  return {
+    storage: {
+      from: (bucket: string) => ({
+        upload: async (path: string, file: File, options?: any) => {
+          const formData = new FormData()
+          formData.append('file', file)
+          const res = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${path}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${supabaseKey}` },
+            body: formData
+          })
+          return { data: res.ok ? { path } : null, error: res.ok ? null : await res.text() }
+        },
+        getPublicUrl: (path: string) => ({ data: { publicUrl: `${supabaseUrl}/storage/v1/object/public/${bucket}/${path}` } })
       })
     }
-    
-    // 路由2: 发布技能（需要 API Key）
-    if (!apiKey) {
-      return NextResponse.json({ success: false, error: '需要 X-API-Key header' }, { status: 401 })
-    }
-    
-    const robot = await verifyApiKey(apiKey)
-    if (!robot) {
-      return NextResponse.json({ success: false, error: '无效的 API Key' }, { status: 401 })
-    }
-    
-    const { name, description, github, download_url, channel, tags } = body
-    if (!name) {
-      return NextResponse.json({ success: false, error: '需要name参数' }, { status: 400 })
-    }
-    
-    // 验证：必须提供文件或有效的download_url
-    if (!download_url && !github) {
-      return NextResponse.json({ 
-        success: false, 
-        error: '请提供文件上传或GitHub仓库地址或下载链接' 
-      }, { status: 400 })
-    }
-    
-    const newSkill = {
-      name,
-      description: hideApiKeys(description || ''),
-      github: hideApiKeys(github || ''),
-      download_url: download_url || '',
-      channel: channel || ['通用'],
-      tags: tags || [],
-      downloads: 0,
-      stars: 0,
-      robot_id: robot.id,
-    }
-    
-    const { data, error } = await supabase
-      .from('skills')
-      .insert([newSkill])
-      .select()
-      .single()
-    
-    if (error) {
-      return NextResponse.json({ success: false, error: '发布失败', details: error.message }, { status: 500 })
-    }
-    
-    return NextResponse.json({ success: true, message: '技能发布成功', data })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: '请求错误', details: err.message }, { status: 400 })
   }
 }
 
 // 处理文件上传
-async function handleFileUpload(request: Request): Promise<Response> {
+async function handleFileUpload(request: NextRequest, robotId: number) {
+  const formData = await request.formData()
+  const file = formData.get('file') as File
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string || ''
+  const channel = formData.get('channel') as string || '通用'
+  const tags = formData.get('tags') as string || ''
+  const github = formData.get('github') as string || ''
+
+  if (!file || !name) {
+    return NextResponse.json({ success: false, error: '需要file和name参数' }, { status: 400 })
+  }
+
+  // 支持 .zip 和 .skill 格式
+  const allowedTypes = ['application/zip', 'application/x-zip-compressed', 'application/gzip', 'application/octet-stream']
+  const ext = file.name.split('.').pop()?.toLowerCase()
+  
+  if (ext !== 'zip' && ext !== 'skill') {
+    return NextResponse.json({ success: false, error: '只支持 .zip 或 .skill 格式的文件' }, { status: 400 })
+  }
+
+  const fileName = `${robotId}_${Date.now()}_${file.name}`
+  
   try {
-    const formData = await request.formData()
-    // 支持 header 或 form 字段两种方式
-    const apiKeyHeader = request.headers.get('X-API-Key')
-    const apiKeyForm = formData.get('api_key') as string
-    const apiKey = apiKeyHeader || apiKeyForm
+    const supabase = createSupabaseClient()
+    const { data, error } = await supabase.storage.from('skills').upload(fileName, file, { upsert: true })
     
-    const file = formData.get('file') as File
-    const name = formData.get('name') as string
-    const description = formData.get('description') as string
-    const channel = formData.get('channel') as string
-    const tags = formData.get('tags') as string
-    
-    if (!apiKey) {
-      return NextResponse.json({ success: false, error: '需要 X-API-Key' }, { status: 401 })
+    if (error) {
+      return NextResponse.json({ success: false, error: '上传失败: ' + error }, { status: 500 })
     }
+
+    const { data: urlData } = supabase.storage.from('skills').getPublicUrl(fileName)
+    const downloadUrl = urlData.publicUrl
+
+    // 保存到数据库
+    const res = await fetch(`${supabaseUrl}/rest/v1/skills`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        name,
+        description,
+        github,
+        channel: [channel],
+        tags: tags ? tags.split(',').map((t: string) => t.trim()) : [],
+        download_url: downloadUrl,
+        robot_id: robotId
+      })
+    })
+
+    const skill = await res.json()
+    return NextResponse.json({ success: true, message: '技能上传成功', data: skill[0], download_url: downloadUrl })
+  } catch (error) {
+    return NextResponse.json({ success: false, error: '上传失败' }, { status: 500 })
+  }
+}
+
+// GET: 获取技能列表
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const channel = searchParams.get('channel')
+  const tag = searchParams.get('tag')
+  const search = searchParams.get('search')
+  const robot_id = searchParams.get('robot_id')
+  const limit = searchParams.get('limit') || '50'
+  const offset = searchParams.get('offset') || '0'
+
+  try {
+    let query = `${supabaseUrl}/rest/v1/skills?select=*&order=downloads.desc&limit=${limit}&offset=${offset}`
     
+    if (channel) query += `&channel=cs.{${channel}}`
+    if (tag) query += `&tags=cs.{${tag}}`
+    if (robot_id) query += `&robot_id=eq.${robot_id}`
+    if (search) query += `&or=(name.ilike.*${search}*,description.ilike.*${search}*)`
+
+    const res = await fetch(query, {
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    })
+    const skills = await res.json()
+
+    // 获取统计
+    const countRes = await fetch(`${supabaseUrl}/rest/v1/skills?select=id`, {
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    })
+    const total = (await countRes.json())?.length || 0
+
+    return NextResponse.json({ 
+      skills: skills || [], 
+      total,
+      pagination: { limit: Number(limit), offset: Number(offset) }
+    })
+  } catch (error) {
+    return NextResponse.json({ error: '获取失败' }, { status: 500 })
+  }
+}
+
+// POST: 注册或发布技能
+export async function POST(request: NextRequest) {
+  const contentType = request.headers.get('content-type') || ''
+  const apiKey = request.headers.get('X-API-Key')
+
+  // 文件上传
+  if (contentType.includes('multipart/form-data')) {
+    if (!apiKey) {
+      return NextResponse.json({ error: '需要 X-API-Key' }, { status: 401 })
+    }
     const robot = await verifyApiKey(apiKey)
     if (!robot) {
-      return NextResponse.json({ success: false, error: '无效的 API Key' }, { status: 401 })
+      return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
     }
-    
-    if (!file || !name) {
-      return NextResponse.json({ success: false, error: '需要file和name参数' }, { status: 400 })
+    return await handleFileUpload(request, robot.id)
+  }
+
+  // JSON 请求
+  try {
+    const body = await request.json()
+    const { action } = body
+
+    // 注册机器人
+    if (action === 'register') {
+      const { name, description } = body
+      if (!name) {
+        return NextResponse.json({ error: '需要 name 参数' }, { status: 400 })
+      }
+
+      // 生成 API Key
+      const apiKey = 'sk_' + Math.random().toString(36).substring(2, 18) + Math.random().toString(36).substring(2, 18)
+
+      const res = await fetch(`${supabaseUrl}/rest/v1/robots`, {
+        method: 'POST',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({ name, description: description || '', api_key: apiKey })
+      })
+
+      const robot = await res.json()
+      return NextResponse.json({
+        success: true,
+        message: '机器人注册成功',
+        api_key: apiKey,
+        data: robot[0]
+      })
     }
-    
-    // 生成唯一文件名
-    const fileName = `${robot.id}_${Date.now()}_${file.name}`
-    
-    // 上传到 Supabase Storage
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('skills')
-      .upload(fileName, file, { upsert: true })
-    
-    if (uploadError) {
-      return NextResponse.json({ success: false, error: '文件上传失败', details: uploadError.message }, { status: 500 })
+
+    // 发布技能（需要认证）
+    if (!apiKey) {
+      return NextResponse.json({ error: '需要 X-API-Key' }, { status: 401 })
     }
-    
-    // 获取公开URL
-    const { data: urlData } = supabase.storage.from('skills').getPublicUrl(fileName)
-    
-    // 保存技能信息
-    const skillData = {
-      name,
-      description: description || '',
-      download_url: urlData.publicUrl,
-      github: '',
-      channel: channel ? [channel] : ['通用'],
-      tags: tags ? tags.split(',').map(t => t.trim()) : [],
-      downloads: 0,
-      stars: 0,
-      robot_id: robot.id,
+
+    const robot = await verifyApiKey(apiKey)
+    if (!robot) {
+      return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
     }
-    
-    const { data: skill, error: skillError } = await supabase
-      .from('skills')
-      .insert([skillData])
-      .select()
-      .single()
-    
-    if (skillError) {
-      return NextResponse.json({ success: false, error: '保存失败', details: skillError.message }, { status: 500 })
+
+    const { name, description, github, download_url, channel, tags } = body
+
+    if (!name) {
+      return NextResponse.json({ error: '需要 name 参数' }, { status: 400 })
     }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: '技能上传成功', 
-      data: skill,
-      download_url: urlData.publicUrl
+
+    // 保存到数据库
+    const res = await fetch(`${supabaseUrl}/rest/v1/skills`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        name,
+        description: description || '',
+        github: github || '',
+        download_url: download_url || '',
+        channel: Array.isArray(channel) ? channel : channel ? [channel] : ['通用'],
+        tags: Array.isArray(tags) ? tags : tags ? tags.split(',').map((t: string) => t.trim()) : [],
+        robot_id: robot.id
+      })
     })
-  } catch (err: any) {
-    return NextResponse.json({ success: false, error: '上传错误', details: err.message }, { status: 400 })
+
+    const skill = await res.json()
+    return NextResponse.json({
+      success: true,
+      message: '技能发布成功',
+      data: skill[0]
+    })
+
+  } catch (error) {
+    return NextResponse.json({ error: '请求失败' }, { status: 500 })
+  }
+}
+
+// PUT: 批量操作
+export async function PUT(request: NextRequest) {
+  const apiKey = request.headers.get('X-API-Key')
+  
+  if (!apiKey) {
+    return NextResponse.json({ error: '需要 X-API-Key' }, { status: 401 })
+  }
+
+  const robot = await verifyApiKey(apiKey)
+  if (!robot) {
+    return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
+  }
+
+  try {
+    const body = await request.json()
+    const { action, ids, ...updateData } = body
+
+    // 批量删除
+    if (action === 'batch_delete') {
+      if (!ids || !Array.isArray(ids)) {
+        return NextResponse.json({ error: '需要 ids 数组' }, { status: 400 })
+      }
+
+      // 检查权限
+      for (const id of ids) {
+        const skillRes = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+          headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+        })
+        const skills = await skillRes.json()
+        const skill = skills?.[0]
+        
+        if (skill && skill.robot_id !== robot.id) {
+          return NextResponse.json({ error: `无权限删除技能 ${id}` }, { status: 403 })
+        }
+      }
+
+      // 执行批量删除
+      await fetch(`${supabaseUrl}/rest/v1/skills?id=in.(${ids.join(',')})`, {
+        method: 'DELETE',
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+      })
+
+      return NextResponse.json({ success: true, message: `已删除 ${ids.length} 个技能` })
+    }
+
+    // 批量更新
+    if (action === 'batch_update') {
+      if (!ids || !Array.isArray(ids)) {
+        return NextResponse.json({ error: '需要 ids 数组' }, { status: 400 })
+      }
+
+      // 检查权限
+      for (const id of ids) {
+        const skillRes = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+          headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+        })
+        const skills = await skillRes.json()
+        const skill = skills?.[0]
+        
+        if (skill && skill.robot_id !== robot.id) {
+          return NextResponse.json({ error: `无权限修改技能 ${id}` }, { status: 403 })
+        }
+      }
+
+      // 执行批量更新
+      await fetch(`${supabaseUrl}/rest/v1/skills?id=in.(${ids.join(',')})`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(updateData)
+      })
+
+      return NextResponse.json({ success: true, message: `已更新 ${ids.length} 个技能` })
+    }
+
+    return NextResponse.json({ error: '未知操作' }, { status: 400 })
+
+  } catch (error) {
+    return NextResponse.json({ error: '操作失败' }, { status: 500 })
+  }
+}
+
+// DELETE: 批量删除
+export async function DELETE(request: NextRequest) {
+  const apiKey = request.headers.get('X-API-Key')
+  const { searchParams } = new URL(request.url)
+  const ids = searchParams.get('ids')
+
+  if (!apiKey) {
+    return NextResponse.json({ error: '需要 X-API-Key' }, { status: 401 })
+  }
+
+  const robot = await verifyApiKey(apiKey)
+  if (!robot) {
+    return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
+  }
+
+  try {
+    if (ids) {
+      // 批量删除
+      const idList = ids.split(',')
+      
+      // 检查权限
+      for (const id of idList) {
+        const skillRes = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+          headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+        })
+        const skills = await skillRes.json()
+        const skill = skills?.[0]
+        
+        if (skill && skill.robot_id !== robot.id) {
+          return NextResponse.json({ error: `无权限删除技能 ${id}` }, { status: 403 })
+        }
+      }
+
+      await fetch(`${supabaseUrl}/rest/v1/skills?id=in.(${ids})`, {
+        method: 'DELETE',
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+      })
+
+      return NextResponse.json({ success: true, message: '批量删除成功' })
+    }
+
+    return NextResponse.json({ error: '需要 ids 参数' }, { status: 400 })
+
+  } catch (error) {
+    return NextResponse.json({ error: '删除失败' }, { status: 500 })
   }
 }

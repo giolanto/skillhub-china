@@ -8,6 +8,17 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
+// 获取筛选参数
+function getFilterParams() {
+  if (typeof window === 'undefined') return {}
+  const params = new URLSearchParams(window.location.search)
+  return {
+    channel: params.get('channel'),
+    tag: params.get('tag'),
+    search: params.get('q')
+  }
+}
+
 interface Skill {
   id: number
   name: string
