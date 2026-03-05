@@ -212,9 +212,8 @@ async function getSkill(id: string) {
   }
 }
 
-export default async function SkillDetail({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const skill = await getSkill(id)
+export default async function SkillDetail({ params }: { params: { slug: string } }) {
+  const skill = await getSkill(params.slug)
   
   if (!skill) {
     return (
