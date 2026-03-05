@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Download, Star, Tag, ArrowLeft, Github, Calendar, User } from 'lucide-react'
+import { Download, Star, Tag, ArrowLeft, Github, Calendar, User, Terminal } from 'lucide-react'
 
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
@@ -110,10 +110,16 @@ export default async function SkillDetail({ params }: { params: { id: string } }
             {/* Actions */}
             <div className="flex gap-4 pt-6 border-t">
               {skill.download_url && (
-                <a href={skill.download_url} target="_blank" className="btn btn-primary">
-                  <Download className="w-5 h-5 mr-2" />
-                  下载技能
-                </a>
+                <>
+                  <a href={skill.download_url} target="_blank" className="btn btn-primary">
+                    <Download className="w-5 h-5 mr-2" />
+                    下载技能
+                  </a>
+                  <div className="btn btn-success text-white">
+                    <Terminal className="w-5 h-5 mr-2" />
+                    一键安装
+                  </div>
+                </>
               )}
               {skill.github && skill.github.startsWith('http') && (
                 <a href={skill.github} target="_blank" className="btn btn-outline">
@@ -122,6 +128,17 @@ export default async function SkillDetail({ params }: { params: { id: string } }
                 </a>
               )}
             </div>
+
+            {/* 安装说明 */}
+            {skill.download_url && (
+              <div className="mt-6 p-4 bg-gray-900 rounded-lg">
+                <h3 className="text-white font-bold mb-2">🤖 Agent机器人安装命令</h3>
+                <p className="text-gray-400 text-sm mb-2">复制以下命令到OpenClaw执行：</p>
+                <code className="block bg-black p-3 rounded text-green-400 text-sm break-all">
+                  openclaw install https://agent-skills.net.cn/api/skills/{skill.id}/download
+                </code>
+              </div>
+            )}
           </div>
         </div>
 
