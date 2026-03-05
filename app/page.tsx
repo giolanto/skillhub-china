@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { Search, Download, Star, Tag, ArrowRight, Loader2 } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
@@ -20,40 +20,48 @@ interface Skill {
   created_at: string
 }
 
-export default function Home() {
-  const [skills, setSkills] = useState<Skill[]>([])
-  const [loading, setLoading] = useState(true)
+// 服务器端获取数据
+async function getSkills() {
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/skills?order=downloads.desc`, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      },
+      cache: 'no-store'
+    })
+    return await res.json() as Skill[]
+  } catch (e) {
+    console.error('Error:', e)
+    return []
+  }
+}
+
+export default async function Home() {
+  const skills = await getSkills()
+  const allChannels = ['全部', ...Array.from(new Set(skills.flatMap(s => s.channel || ['通用'])))]
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <HomeContent initialSkills={skills} initialChannels={allChannels} />
+    </Suspense>
+  )
+}
+
+function Loading() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    </div>
+  )
+}
+
+function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[], initialChannels: string[] }) {
+  const [skills] = useState<Skill[]>(initialSkills)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedChannel, setSelectedChannel] = useState('全部')
-  const [channels, setChannels] = useState<string[]>(['全部'])
+  const [channels] = useState<string[]>(initialChannels)
 
-  useEffect(() => {
-    fetchSkills()
-  }, [])
-
-  const fetchSkills = async () => {
-    try {
-      const res = await fetch(`${supabaseUrl}/rest/v1/skills?order=downloads.desc`, {
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`
-        }
-      })
-      const data: Skill[] = await res.json()
-      setSkills(data)
-      
-      // 提取所有渠道
-      const channelSet = new Set(data.flatMap(s => s.channel || ['通用']))
-      const allChannels = ['全部', ...Array.from(channelSet)]
-      setChannels(allChannels)
-    } catch (e) {
-      console.error('Error:', e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 过滤技能
   const filteredSkills = skills.filter(skill => {
     const matchesSearch = !searchTerm || 
       skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -106,7 +114,7 @@ export default function Home() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              {loading && <Loader2 className="w-5 h-5 animate-spin text-gray-400" />}
+              
             </div>
           </div>
           
@@ -149,11 +157,7 @@ export default function Home() {
           </span>
         </div>
         
-        {loading ? (
-          <div className="text-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
-          </div>
-        ) : filteredSkills.length === 0 ? (
+        {filteredSkills.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>没有找到相关技能</p>
             {searchTerm && (

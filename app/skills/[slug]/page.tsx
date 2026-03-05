@@ -144,7 +144,9 @@ feishu-send --file /path/to/file.pdf --user "用户名"`
 
 async function getSkill(id: string) {
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+    // 支持 id 或 name (slug) 查询
+    const queryParam = isNaN(Number(id)) ? `name=eq.${id}` : `id=eq.${id}`
+    const res = await fetch(`${supabaseUrl}/rest/v1/skills?${queryParam}`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`
@@ -171,6 +173,32 @@ async function getSkill(id: string) {
     return skill
   } catch (e) {
     console.error('Error:', e)
+    // 如果 name 查询失败，尝试模糊匹配
+    try {
+      const res2 = await fetch(`${supabaseUrl}/rest/v1/skills?name=ilike.*${id}*`, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`
+        },
+        next: { revalidate: 10 }
+      })
+      const data2 = await res2.json()
+      if (data2?.length > 0) {
+        const skill = data2[0]
+        const details = skillDetails[skill.name] || {}
+        return {
+          ...skill,
+          version: details.version || '1.0.0',
+          openclow_version: details.openclow_version || '>=0.9.0',
+          tools_required: details.tools_required || [],
+          config_required: details.config_required || [],
+          setup_guide: details.setup_guide || '请下载技能包查看详细设置指南',
+          example_usage: details.example_usage || '请下载技能包查看使用示例',
+          dependencies: details.dependencies || [],
+          content: details.content || skill.description || '暂无详细说明'
+        }
+      }
+    } catch (e2) {}
     return null
   }
 }
