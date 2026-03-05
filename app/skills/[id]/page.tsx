@@ -121,11 +121,25 @@ export default async function SkillDetail({ params }: { params: { id: string } }
                   </div>
                 </>
               )}
-              {skill.download_url && (
-                <a href={skill.download_url} target="_blank" className="btn btn-outline">
-                  <Github className="w-5 h-5 mr-2" />
-                  查看源码
-                </a>
+            </div>
+
+            {/* 技能说明 */}
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <h3 className="text-blue-800 font-bold mb-2 flex items-center gap-2">
+                <Github className="w-5 h-5" />
+                技能说明
+              </h3>
+              <p className="text-blue-700 text-sm leading-relaxed">
+                {skill.description || '暂无详细说明。请下载技能包查看完整SKILL.md文档。'}
+              </p>
+              {skill.tags && skill.tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {skill.tags.map((tag: string) => (
+                    <span key={tag} className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               )}
             </div>
 
