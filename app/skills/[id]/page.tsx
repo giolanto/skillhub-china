@@ -121,8 +121,8 @@ export default async function SkillDetail({ params }: { params: { id: string } }
                   </div>
                 </>
               )}
-              {skill.github && skill.github.startsWith('http') && (
-                <a href={skill.github} target="_blank" className="btn btn-outline">
+              {skill.download_url && (
+                <a href={skill.download_url} target="_blank" className="btn btn-outline">
                   <Github className="w-5 h-5 mr-2" />
                   查看源码
                 </a>
