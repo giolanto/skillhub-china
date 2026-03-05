@@ -1,132 +1,16 @@
 import Link from 'next/link'
-import { Download, Star, Tag, ArrowLeft, Github, Calendar, Terminal, Wrench, Settings, BookOpen, Code, Shield, User, Eye, GitBranch } from 'lucide-react'
+import { Download, Star, Tag, ArrowLeft, Github, Calendar, Terminal, BookOpen, ExternalLink, Copy, Check } from 'lucide-react'
 
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
-// 技能详细信息
+// 技能详细信息（用于补充数据库中缺失的字段）
 const skillDetails: Record<string, any> = {
-  'Feishu Bridge': {
-    tools_required: ['WebSocket', '飞书OpenAPI'],
-    config_required: ['FEISHU_APP_ID', 'FEISHU_APP_SECRET'],
-    setup_guide: `## 配置步骤
-
-### 1. 创建飞书应用
-访问 [飞书开放平台](https://open.feishu.cn/) 创建应用
-
-### 2. 添加权限
-- im:message:send (发送消息)
-- im:chat:create (创建群聊)
-- im:chat:manage_robots (管理机器人)
-
-### 3. 获取凭证
-获取 App ID 和 App Secret
-
-### 4. 配置环境变量
-\`\`\`bash
-export FEISHU_APP_ID="your-app-id"
-export FEISHU_APP_SECRET="your-secret"
-\`\`\``,
-    example_usage: `# 发送消息
-feishu-send --user "张三" --message "Hello"
-
-# 创建群聊
-feishu-create-chat --name "项目组"
-
-# 发送文件
-feishu-send-file --file /path/to/file.pdf`,
-    version: '1.0.0',
-    openclow_version: '>=0.9.0',
-    dependencies: [],
-    content: `# Feishu Bridge
-连接飞书机器人到Clawdbot via WebSocket长连接。
-
-## 功能
-- WebSocket长连接
-- 无需公网服务器
-- 支持飞书消息收发
-
-## Setup
-1. 创建飞书应用
-2. 添加权限：im:message:send
-3. 配置环境变量
-
-## Usage
-配置完成后，机器人自动连接飞书渠道。`
-  },
-  'Feishu Messaging': {
-    tools_required: ['飞书OpenAPI', 'curl'],
-    config_required: ['FEISHU_APP_ID', 'FEISHU_APP_SECRET'],
-    setup_guide: `## 配置步骤
-
-### 1. 创建飞书应用
-访问飞书开放平台创建应用
-
-### 2. 获取凭证
-获取 App ID 和 App Secret
-
-### 3. 配置环境变量
-\`\`\`bash
-export FEISHU_APP_ID="your-app-id"
-export FEISHU_APP_SECRET="your-secret"
-\`\`\``,
-    example_usage: `# 发送文本消息
-feishu-message send --user "用户名" --text "消息内容"
-
-# 发送图片
-feishu-message send-image --user "用户名" --image /path/to/image.jpg
-
-# 创建群聊
-feishu-message create-chat --name "群聊名称"`,
-    version: '1.0.0',
-    openclow_version: '>=0.9.0',
-    dependencies: [],
-    content: `# Feishu Messaging
-飞书消息发送与文档创建工作流。
-
-## 功能
-- 发送文本、图片、文件消息
-- 创建和管理群聊
-- 查找群成员、群ID
-
-## Setup
-1. 创建飞书应用
-2. 配置App ID和Secret
-
-## Usage
-详见上方使用示例`
-  },
-  'feishu-send': {
+  '飞书文件发送': {
     tools_required: ['飞书OpenAPI'],
     config_required: ['FEISHU_APP_ID', 'FEISHU_APP_SECRET'],
-    setup_guide: `## 配置步骤
-
-### 1. 创建飞书应用
-访问飞书开放平台创建应用
-
-### 2. 添加权限
-- im:message:send (发送消息)
-- im:file:upload (上传文件)
-- im:file:download (下载文件)
-
-### 3. 配置环境变量
-\`\`\`bash
-export FEISHU_APP_ID="your-app-id"
-export FEISHU_APP_SECRET="your-secret"
-\`\`\``,
-    example_usage: `# 发送文件
-feishu-send --file /path/to/document.pdf --user "张三"
-
-# 发送图片
-feishu-send --image /path/to/photo.jpg --chat-id "群ID"
-
-# 发送文本
-feishu-send --text "Hello" --user "李四"`,
-    version: '1.0.0',
-    openclow_version: '>=0.9.0',
-    dependencies: [],
-    content: `# feishu-send
-飞书文件发送技能 - 通过飞书发送文件、图片、消息给指定用户
+    content: `# 飞书文件发送
+通过飞书发送文件、图片、消息给指定用户
 
 ## 功能
 - 发送文件附件
@@ -139,20 +23,40 @@ feishu-send --text "Hello" --user "李四"`,
 
 ## Usage
 feishu-send --file /path/to/file.pdf --user "用户名"`
+  },
+  '微信日报': {
+    tools_required: ['微信聊天记录导出'],
+    config_required: [],
+    content: `# 微信日报
+微信群聊天记录日报生成工具
+
+## 功能
+- 自动分析群聊记录
+- AI生成内容摘要
+- 生成手机端日报图片`
+  },
+  '钉钉推送': {
+    tools_required: ['钉钉机器人Webhook'],
+    config_required: ['DINGTALK_WEBHOOK', 'DINGTALK_SECRET'],
+    content: `# 钉钉推送
+钉钉群消息推送机器人
+
+## 功能
+- Markdown格式消息
+- @提及成员
+- 签名验证`
   }
 }
 
-async function getSkill(id: string) {
+async function getSkill(slug: string) {
   try {
-    // 支持 id 或 name (slug) 查询
     let queryParam = ''
-    if (!isNaN(Number(id))) {
-      queryParam = `id=eq.${id}`
+    if (!isNaN(Number(slug))) {
+      queryParam = `id=eq.${slug}`
     } else {
-      // slug查询：先精确匹配，再模糊匹配
-      queryParam = `name=ilike.*${id}*`
+      queryParam = `name=ilike.*${slug}*`
     }
-    console.log('Fetching skill:', queryParam)
+    
     const res = await fetch(`${supabaseUrl}/rest/v1/skills?${queryParam}`, {
       headers: {
         'apikey': supabaseKey,
@@ -160,31 +64,25 @@ async function getSkill(id: string) {
       },
       next: { revalidate: 10 }
     })
-    console.log('Response status:', res.status)
     const data = await res.json()
-    console.log('Skill data:', data)
     const skill = data?.[0] || null
     
     if (skill) {
+      // 尝试用 name 精确匹配 details
       const details = skillDetails[skill.name] || {}
       return {
         ...skill,
         version: details.version || '1.0.0',
-        openclow_version: details.openclow_version || '>=0.9.0',
         tools_required: details.tools_required || [],
         config_required: details.config_required || [],
-        setup_guide: details.setup_guide || '请下载技能包查看详细设置指南',
-        example_usage: details.example_usage || '请下载技能包查看使用示例',
-        dependencies: details.dependencies || [],
         content: details.content || skill.description || '暂无详细说明'
       }
     }
     return skill
   } catch (e) {
-    console.error('Error:', e)
-    // 如果 name 查询失败，尝试模糊匹配
+    // 模糊匹配
     try {
-      const res2 = await fetch(`${supabaseUrl}/rest/v1/skills?name=ilike.*${id}*`, {
+      const res2 = await fetch(`${supabaseUrl}/rest/v1/skills?name=ilike.*${slug}*`, {
         headers: {
           'apikey': supabaseKey,
           'Authorization': `Bearer ${supabaseKey}`
@@ -198,12 +96,8 @@ async function getSkill(id: string) {
         return {
           ...skill,
           version: details.version || '1.0.0',
-          openclow_version: details.openclow_version || '>=0.9.0',
           tools_required: details.tools_required || [],
           config_required: details.config_required || [],
-          setup_guide: details.setup_guide || '请下载技能包查看详细设置指南',
-          example_usage: details.example_usage || '请下载技能包查看使用示例',
-          dependencies: details.dependencies || [],
           content: details.content || skill.description || '暂无详细说明'
         }
       }
@@ -227,155 +121,138 @@ export default async function SkillDetail({ params }: { params: { slug: string }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition">
             <ArrowLeft className="w-5 h-5" />
-            返回首页
+            返回技能列表
           </Link>
+          <a 
+            href={skill.github || '#'} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition"
+          >
+            <Github className="w-5 h-5" />
+            GitHub
+          </a>
         </div>
       </header>
 
-      <main className="max-w-5xl mx-auto px-4 py-8">
-        {/* 技能头部信息 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-          <div className="p-8">
-            {/* 标题和描述 */}
-            <div className="mb-4">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{skill.name}</h1>
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        {/* 技能头部 - 模仿 ClawHub 风格 */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">{skill.name}</h1>
               <p className="text-lg text-gray-600">{skill.description}</p>
             </div>
-            
-            {/* 统计信息 */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mb-4">
-              <span className="flex items-center gap-1 text-yellow-500">
-                <Star className="w-4 h-4" />
-                <strong className="text-gray-900">{skill.stars || 0}</strong>
-              </span>
-              <span className="flex items-center gap-1">
-                <Download className="w-4 h-4" />
-                <strong className="text-gray-900">{skill.downloads || 0}</strong> 次下载
-              </span>
-              <span className="flex items-center gap-1">
-                <Eye className="w-4 h-4" />
-                <strong className="text-gray-900">{skill.downloads || 0}</strong> 总安装
-              </span>
-              <span className="text-gray-400">|</span>
-              <span className="flex items-center gap-1">
-                <GitBranch className="w-4 h-4" />
-                v{skill.version || '1.0.0'}
-              </span>
-              <span className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                {skill.created_at ? new Date(skill.created_at).toLocaleDateString('zh-CN') : '最近更新'}
-              </span>
-            </div>
-
-            {/* 标签 */}
-            <div className="flex flex-wrap gap-2">
-              {(skill.channel || []).map((c: string) => (
-                <span key={c} className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full">
-                  {c}
-                </span>
-              ))}
-              {(skill.tags || []).map((tag: string) => (
-                <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
-                  {tag}
-                </span>
-              ))}
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+              <span>{skill.stars || 0}</span>
             </div>
           </div>
-
-          {/* 运行时要求 */}
-          <div className="border-t border-gray-100 bg-gray-50 px-8 py-6">
-            <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Wrench className="w-5 h-5" />
-              运行时要求
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* 所需工具 */}
-              <div className="bg-white p-4 rounded-lg border">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">工具</h4>
-                <div className="flex flex-wrap gap-2">
-                  {(skill.tools_required || []).length > 0 ? (
-                    (skill.tools_required || []).map((tool: string) => (
-                      <span key={tool} className="px-2 py-1 bg-purple-100 text-purple-700 text-sm rounded">
-                        {tool}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 text-sm">无特殊要求</span>
-                  )}
-                </div>
-              </div>
-              
-              {/* 环境变量 */}
-              <div className="bg-white p-4 rounded-lg border">
-                <h4 className="text-sm font-medium text-gray-500 mb-2">环境变量</h4>
-                <div className="flex flex-wrap gap-2">
-                  {(skill.config_required || []).length > 0 ? (
-                    (skill.config_required || []).map((config: string) => (
-                      <code key={config} className="px-2 py-1 bg-orange-100 text-orange-700 text-sm rounded font-mono">
-                        {config}
-                      </code>
-                    ))
-                  ) : (
-                    <span className="text-gray-400 text-sm">无需配置</span>
-                  )}
-                </div>
-              </div>
-            </div>
+          
+          {/* 标签 */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {(skill.channel || []).map((c: string) => (
+              <span key={c} className="px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded-full font-medium">
+                {c}
+              </span>
+            ))}
+            {(skill.tags || []).map((tag: string) => (
+              <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full">
+                {tag}
+              </span>
+            ))}
           </div>
-
-          {/* 操作按钮 */}
-          <div className="border-t border-gray-100 px-8 py-6 flex flex-wrap gap-3">
+          
+          {/* 安装按钮 */}
+          <div className="flex flex-wrap gap-3">
             {skill.download_url && (
-              <>
-                <a href={skill.download_url} target="_blank" className="btn btn-primary btn-lg">
-                  <Download className="w-5 h-5 mr-2" />
-                  下载ZIP
-                </a>
-                <button className="btn btn-success btn-lg text-white">
-                  <Terminal className="w-5 h-5 mr-2" />
-                  一键安装
-                </button>
-              </>
+              <a 
+                href={skill.download_url} 
+                target="_blank"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:opacity-90 transition"
+              >
+                <Download className="w-5 h-5" />
+                下载技能
+              </a>
+            )}
+            {skill.github && (
+              <a 
+                href={skill.github} 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition"
+              >
+                <Github className="w-5 h-5" />
+                查看源码
+              </a>
             )}
           </div>
         </div>
 
         {/* 安装命令 */}
         {skill.download_url && (
-          <div className="bg-gray-900 rounded-xl p-6 mb-6">
-            <h3 className="text-white font-bold mb-3">🤖 Agent安装命令</h3>
-            <code className="block bg-black p-4 rounded-lg text-green-400 text-sm overflow-x-auto">
+          <div className="bg-gray-900 rounded-xl p-6 mb-8">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-white font-semibold flex items-center gap-2">
+                <Terminal className="w-5 h-5" />
+                OpenClaw 安装命令
+              </h3>
+              <button 
+                onClick={() => navigator.clipboard.writeText(`openclaw install https://agent-skills.net.cn/api/skills/${skill.id}?action=download`)}
+                className="text-gray-400 hover:text-white transition"
+                title="复制命令"
+              >
+                <Copy className="w-4 h-4" />
+              </button>
+            </div>
+            <code className="block bg-black/50 p-4 rounded-lg text-green-400 text-sm overflow-x-auto">
               openclaw install https://agent-skills.net.cn/api/skills/{skill.id}?action=download
             </code>
           </div>
         )}
 
-        {/* SKILL.md 内容 */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              SKILL.md
-            </h2>
+        {/* 统计信息 */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">{skill.downloads || 0}</div>
+            <div className="text-sm text-gray-500">下载次数</div>
           </div>
-          <div className="p-6">
-            <div className="prose prose-sm max-w-none">
-              <pre className="whitespace-pre-wrap text-gray-700 text-sm font-mono bg-gray-50 p-4 rounded-lg overflow-x-auto">
-{skill.content || skill.setup_guide || '暂无内容'}
-              </pre>
+          <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">v{skill.version || '1.0.0'}</div>
+            <div className="text-sm text-gray-500">版本</div>
+          </div>
+          <div className="bg-white rounded-xl p-4 border border-gray-200 text-center">
+            <div className="text-2xl font-bold text-gray-900">
+              {skill.created_at ? new Date(skill.created_at).toLocaleDateString('zh-CN') : '-'}
             </div>
+            <div className="text-sm text-gray-500">更新时间</div>
           </div>
         </div>
 
-        {/* 相关技能 */}
-        <div className="mt-8">
-          <Link href="/" className="text-primary hover:underline font-medium">
+        {/* SKILL.md 内容 */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <BookOpen className="w-5 h-5" />
+              README
+            </h2>
+          </div>
+          <div className="p-6">
+            <pre className="whitespace-pre-wrap text-gray-700 text-sm leading-relaxed font-mono bg-gray-50 p-4 rounded-lg overflow-x-auto">
+{skill.content || '暂无详细说明'}
+            </pre>
+          </div>
+        </div>
+
+        {/* 底部 */}
+        <div className="mt-8 text-center">
+          <Link href="/" className="text-primary hover:underline">
             ← 返回技能列表
           </Link>
         </div>
