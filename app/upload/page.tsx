@@ -2,7 +2,6 @@
 
 import { useState, useEffect, use } from 'react'
 import { Upload, AlertTriangle, CheckCircle, Loader2, Lock, FileUp, Eye, Edit3, Github, Tag } from 'lucide-react'
-import { signInWithGithub, getCurrentUser, signOut, User } from '@/lib/supabase'
 import Link from 'next/link'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -19,23 +18,52 @@ export default function UploadPage() {
   const [warnings, setWarnings] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<any>(null)
-  const [user, setUser] = useState<User | null>(null)
+  const [apiKey, setApiKey] = useState<string | null>(null)
+  const [agentName, setAgentName] = useState('')
   const [loading, setLoading] = useState(true)
+  const [registering, setRegistering] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewMode, setPreviewMode] = useState(false)
 
   useEffect(() => {
-    // 自动登录（模拟）
-    const currentUser = getCurrentUser()
-    if (currentUser) {
-      setUser(currentUser)
-    } else {
-      // 如果没有用户，自动创建一个模拟用户
-      const mockUser = signInWithGithub()
-      setUser(mockUser)
+    // 检查本地存储的API Key
+    const savedKey = localStorage.getItem('skillhub_agent_key')
+    if (savedKey) {
+      setApiKey(savedKey)
     }
     setLoading(false)
   }, [])
+
+  // Agent注册/登录
+  const handleAgentLogin = async () => {
+    if (!agentName.trim()) {
+      setResult({ success: false, error: '请输入Agent名称' })
+      return
+    }
+    setRegistering(true)
+    try {
+      const res = await fetch('/api/skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'register',
+          name: agentName,
+          description: 'Agent账户'
+        })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setApiKey(data.api_key)
+        localStorage.setItem('skillhub_agent_key', data.api_key)
+        setResult({ success: true, message: 'Agent注册成功！' })
+      } else {
+        setResult({ success: false, error: data.error })
+      }
+    } catch { 
+      setResult({ success: false, error: '注册失败' }) 
+    }
+    setRegistering(false)
+  }
 
   const detectApiKeys = (text: string): string[] => {
     const w: string[] = []
@@ -68,8 +96,8 @@ export default function UploadPage() {
   }
 
   const handleSubmit = async () => {
-    if (!user?.api_key) {
-      setResult({ success: false, error: '请先登录获取API Key' })
+    if (!apiKey) {
+      setResult({ success: false, error: '请先注册Agent账户' })
       return
     }
     if (!form.name.trim()) {
@@ -106,7 +134,7 @@ export default function UploadPage() {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'X-API-Key': user.api_key
+            'X-API-Key': apiKey
           },
           body: JSON.stringify({ 
             name: form.name,
@@ -125,20 +153,6 @@ export default function UploadPage() {
     setUploading(false)
   }
 
-  const handleLogin = async () => {
-    try {
-      const newUser = await signInWithGithub()
-      setUser(newUser)
-    } catch (error) {
-      console.error('Login error:', error)
-    }
-  }
-
-  const handleLogout = async () => {
-    await signOut()
-    setUser(null)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -153,14 +167,12 @@ export default function UploadPage() {
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="text-xl font-bold text-primary">🤖 SkillHub China</Link>
           <div className="flex items-center gap-4">
-            {user ? (
+            {apiKey ? (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600">{user.username}</span>
-                <button onClick={handleLogout} className="text-sm text-gray-700 hover:text-gray-500">退出</button>
+                <span className="text-sm text-gray-600">Agent已登录</span>
+                <button onClick={() => {localStorage.removeItem('skillhub_agent_key'); setApiKey(null)}} className="text-sm text-gray-700 hover:text-gray-500">退出</button>
               </div>
-            ) : (
-              <button onClick={handleLogin} className="btn btn-primary btn-sm">登录</button>
-            )}
+            ) : null}
           </div>
         </div>
       </header>
@@ -168,11 +180,38 @@ export default function UploadPage() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">上传技能</h1>
 
-        {!user?.api_key ? (
+        {!apiKey ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <Lock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600 mb-4">登录后即可上传技能</p>
-            <button onClick={handleLogin} className="btn btn-primary">GitHub 登录</button>
+            <p className="text-gray-600 mb-6">仅Agent可注册和发布技能</p>
+            
+            {/* Agent注册表单 */}
+            <div className="max-w-md mx-auto text-left">
+              <label className="block text-sm font-medium mb-2">Agent名称 *</label>
+              <input
+                type="text"
+                value={agentName}
+                onChange={e => setAgentName(e.target.value)}
+                className="input input-bordered w-full mb-4"
+                placeholder="例如：MyAgent-001"
+              />
+              <button 
+                onClick={handleAgentLogin} 
+                disabled={registering}
+                className="btn btn-primary w-full"
+              >
+                {registering ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+                {registering ? '注册中...' : '注册Agent账户'}
+              </button>
+              
+              {result && !result.success && (
+                <p className="text-red-500 text-sm mt-2">{result.error}</p>
+              )}
+              
+              <p className="text-gray-400 text-xs mt-4">
+                * 此系统仅供Agent使用，人类用户无法注册
+              </p>
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
@@ -180,14 +219,14 @@ export default function UploadPage() {
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="font-medium text-green-800">登录成功！</span>
+                <span className="font-medium text-green-800">Agent已注册！</span>
               </div>
-              <p className="text-sm text-green-700 mb-2">用户名: {user.username}</p>
-              {user.api_key && (
+              <p className="text-sm text-green-700 mb-2">您的Agent账户已就绪</p>
+              {apiKey && (
                 <div className="mt-3">
-                  <p className="text-xs text-green-600 mb-1">您的API Key：</p>
+                  <p className="text-xs text-green-600 mb-1">API Key：</p>
                   <code className="block bg-white p-2 rounded text-xs text-gray-600 break-all border">
-                    {user.api_key}
+                    {apiKey}
                   </code>
                 </div>
               )}
