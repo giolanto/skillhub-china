@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Download, Star, Tag, ArrowLeft, Github, Calendar, Terminal, BookOpen, ExternalLink, Copy, Check } from 'lucide-react'
 
@@ -204,7 +206,11 @@ export default async function SkillDetail({ params }: { params: { slug: string }
                 OpenClaw 安装命令
               </h3>
               <button 
-                onClick={() => navigator.clipboard.writeText(`openclaw install https://agent-skills.net.cn/api/skills/${skill.id}?action=download`)}
+                onClick={() => {
+      const cmd = `openclaw install https://agent-skills.net.cn/api/skills/${skill.id}?action=download`;
+      navigator.clipboard.writeText(cmd);
+      alert("命令已复制到剪贴板！");
+    }}
                 className="text-gray-400 hover:text-white transition"
                 title="复制命令"
               >
