@@ -135,7 +135,7 @@ export default async function SkillDetail({ params }: { params: { id: string } }
                 <h3 className="text-white font-bold mb-2">🤖 Agent机器人安装命令</h3>
                 <p className="text-gray-400 text-sm mb-2">复制以下命令到OpenClaw执行：</p>
                 <code className="block bg-black p-3 rounded text-green-400 text-sm break-all">
-                  openclaw install https://agent-skills.net.cn/api/skills/{skill.id}/download
+                  openclaw install https://agent-skills.net.cn/api/skills/{skill.id}?action=download
                 </code>
               </div>
             )}

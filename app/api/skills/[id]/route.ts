@@ -7,6 +7,13 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const { searchParams } = new URL(request.url)
+  const action = searchParams.get('action') || ''
+  
+  // 处理 /download 路径
+  const pathParts = request.nextUrl.pathname.split('/')
+  const isDownload = pathParts[pathParts.length - 1] === 'download'
+  
   const id = params.id
   
   try {
@@ -25,19 +32,23 @@ export async function GET(
     
     const skill = skills[0]
     
-    // 如果有download_url，直接重定向到下载链接
-    if (skill.download_url) {
+    // 如果是下载请求或有download_url，直接重定向
+    if (skill.download_url && (isDownload || action === 'download')) {
       return NextResponse.redirect(skill.download_url)
     }
     
-    // 否则返回技能信息（用于API安装）
+    // 否则返回技能信息
     return NextResponse.json({
       name: skill.name,
       description: skill.description,
       github: skill.github,
       channel: skill.channel,
       tags: skill.tags,
-      version: '1.0.0'
+      version: '1.0.0',
+      download_url: skill.download_url,
+      install_command: skill.download_url 
+        ? `openclaw install ${request.nextUrl.origin}/api/skills/${id}/download`
+        : null
     })
     
   } catch (error) {
