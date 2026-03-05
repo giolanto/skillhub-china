@@ -3,57 +3,33 @@ import { NextRequest, NextResponse } from 'next/server'
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
-// 技能详细信息（用于补充数据库中缺失的字段）
-const skillDetails: Record<string, any> = {
-  'Feishu Bridge': {
-    tools_required: ['websocket', '飞书OpenAPI'],
-    config_required: ['FEISHU_APP_ID', 'FEISHU_APP_SECRET'],
-    setup_guide: '在飞书开放平台创建应用，获取App ID和App Secret',
-    example_usage: '配置飞书机器人：\n1. 创建飞书应用\n2. 添加权限：im:message:send,im:chat:create\n3. 获取App ID和Secret\n4. 配置到OpenClaw',
-    version: '1.0.0',
-    openclow_version: '>=0.9.0',
-    dependencies: []
-  },
-  'Feishu Messaging': {
-    tools_required: ['飞书OpenAPI'],
-    config_required: ['FEISHU_APP_ID', 'FEISHU_APP_SECRET'],
-    setup_guide: '创建飞书应用并获取App ID和Secret',
-    example_usage: '发送消息：\nopenclaw feishu-send --user "张三" --message "Hello"',
-    version: '1.0.0',
-    openclow_version: '>=0.9.0',
-    dependencies: []
-  },
-  'feishu-send': {
-    tools_required: ['飞书OpenAPI'],
-    config_required: ['FEISHU_APP_ID', 'FEISHU_APP_SECRET'],
-    setup_guide: '配置飞书应用权限：im:message:send,im:file:upload',
-    example_usage: '发送文件：\nopenclaw feishu-send --file /path/to/file.pdf',
-    version: '1.0.0',
-    openclow_version: '>=0.9.0',
-    dependencies: []
-  }
+// 验证 API Key
+async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string } | null> {
+  if (!apiKey || !apiKey.startsWith('sk_')) return null
+  const res = await fetch(
+    `${supabaseUrl}/rest/v1/robots?api_key=eq.${apiKey}`,
+    { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+  )
+  const data = await res.json()
+  if (!data || data.length === 0) return null
+  return { id: data[0].id, name: data[0].name }
 }
 
+// GET: 获取单个技能
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const { searchParams } = new URL(request.url)
   const action = searchParams.get('action') || ''
-  
-  // 处理 /download 路径
-  const pathParts = request.nextUrl.pathname.split('/')
-  const isDownload = pathParts[pathParts.length - 1] === 'download'
-  
   const id = params.id
   
   try {
-    // 获取技能信息
+    // 处理下载
+    const isDownload = request.nextUrl.pathname.endsWith('/download')
+    
     const res = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`
-      }
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
     })
     const skills = await res.json()
     
@@ -63,44 +39,127 @@ export async function GET(
     
     const skill = skills[0]
     
-    // 如果是下载请求或有download_url，直接重定向
+    // 下载重定向
     if (skill.download_url && (isDownload || action === 'download')) {
+      // 更新下载计数
+      fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ downloads: (skill.downloads || 0) + 1 })
+      })
       return NextResponse.redirect(skill.download_url, 302)
     }
     
-    // 获取技能的详细信息
-    const details = skillDetails[skill.name] || {}
-    
-    // 返回完整的技能信息
-    return NextResponse.json({
-      id: skill.id,
-      name: skill.name,
-      description: skill.description,
-      github: skill.github,
-      channel: skill.channel,
-      tags: skill.tags,
-      downloads: skill.downloads,
-      stars: skill.stars,
-      created_at: skill.created_at,
-      
-      // 新增字段
-      version: details.version || '1.0.0',
-      openclow_version: details.openclow_version || '>=0.9.0',
-      last_updated: skill.created_at,
-      tools_required: details.tools_required || [],
-      config_required: details.config_required || [],
-      setup_guide: details.setup_guide || '请下载技能包查看详细设置指南',
-      example_usage: details.example_usage || '请下载技能包查看使用示例',
-      dependencies: details.dependencies || [],
-      
-      // 下载和安装
-      download_url: skill.download_url,
-      install_command: skill.download_url 
-        ? `openclaw install ${request.nextUrl.origin}/api/skills/${id}?action=download`
-        : null
-    })
+    return NextResponse.json(skill)
     
   } catch (error) {
     return NextResponse.json({ error: '获取失败' }, { status: 500 })
+  }
+}
+
+// PUT: 更新技能
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const apiKey = request.headers.get('X-API-Key')
+  const id = params.id
+  
+  if (!apiKey) {
+    return NextResponse.json({ error: '需要 X-API-Key' }, { status: 401 })
+  }
+  
+  const robot = await verifyApiKey(apiKey)
+  if (!robot) {
+    return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
+  }
+  
+  try {
+    // 检查技能是否存在
+    const skillRes = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    })
+    const skills = await skillRes.json()
+    const skill = skills?.[0]
+    
+    if (!skill) {
+      return NextResponse.json({ error: '技能不存在' }, { status: 404 })
+    }
+    
+    // 检查权限
+    if (skill.robot_id !== robot.id) {
+      return NextResponse.json({ error: '无权限修改此技能' }, { status: 403 })
+    }
+    
+    const body = await request.json()
+    
+    // 更新技能
+    const updateRes = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify({
+        name: body.name || skill.name,
+        description: body.description !== undefined ? body.description : skill.description,
+        github: body.github !== undefined ? body.github : skill.github,
+        download_url: body.download_url !== undefined ? body.download_url : skill.download_url,
+        channel: body.channel || skill.channel,
+        tags: body.tags || skill.tags
+      })
+    })
+    
+    const updated = await updateRes.json()
+    return NextResponse.json({ success: true, data: updated[0] })
+    
+  } catch (error) {
+    return NextResponse.json({ error: '更新失败' }, { status: 500 })
+  }
+}
+
+// DELETE: 删除技能
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const apiKey = request.headers.get('X-API-Key')
+  const id = params.id
+  
+  if (!apiKey) {
+    return NextResponse.json({ error: '需要 X-API-Key' }, { status: 401 })
+  }
+  
+  const robot = await verifyApiKey(apiKey)
+  if (!robot) {
+    return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
+  }
+  
+  try {
+    const skillRes = await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    })
+    const skills = await skillRes.json()
+    const skill = skills?.[0]
+    
+    if (!skill) {
+      return NextResponse.json({ error: '技能不存在' }, { status: 404 })
+    }
+    
+    if (skill.robot_id !== robot.id) {
+      return NextResponse.json({ error: '无权限删除此技能' }, { status: 403 })
+    }
+    
+    await fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
+      method: 'DELETE',
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    })
+    
+    return NextResponse.json({ success: true, message: '技能已删除' })
+    
+  } catch (error) {
+    return NextResponse.json({ error: '删除失败' }, { status: 500 })
   }
 }
