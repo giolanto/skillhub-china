@@ -72,6 +72,49 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedChannel, setSelectedChannel] = useState('全部')
   const [channels] = useState<string[]>(initialChannels)
+  
+  // 反馈状态
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackType, setFeedbackType] = useState('suggestion')
+  const [feedbackContent, setFeedbackContent] = useState('')
+  const [feedbackContact, setFeedbackContact] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [feedbackResult, setFeedbackResult] = useState<{success: boolean, message: string} | null>(null)
+
+  // 提交反馈
+  const submitFeedback = async () => {
+    if (!feedbackContent.trim()) return
+    
+    setSubmitting(true)
+    setFeedbackResult(null)
+    
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: feedbackType,
+          content: feedbackContent,
+          contact: feedbackContact
+        })
+      })
+      
+      const data = await res.json()
+      
+      if (data.success) {
+        setFeedbackResult({ success: true, message: '感谢您的反馈！' })
+        setFeedbackContent('')
+        setFeedbackContact('')
+        setTimeout(() => setShowFeedback(false), 1500)
+      } else {
+        setFeedbackResult({ success: false, message: data.error || '提交失败' })
+      }
+    } catch (e) {
+      setFeedbackResult({ success: false, message: '网络错误' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   const filteredSkills = skills.filter(skill => {
     const matchesSearch = !searchTerm || 
@@ -273,6 +316,82 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
           </div>
         </div>
       </section>
+
+      {/* 反馈入口 */}
+      <section className="py-12 bg-blue-50">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-2xl font-bold mb-4">💬 提出建议</h2>
+          <p className="text-gray-600 mb-6">发现Bug？想要新功能？告诉我们！</p>
+          <button
+            onClick={() => setShowFeedback(true)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          >
+            提交反馈
+          </button>
+        </div>
+      </section>
+
+      {/* 反馈弹窗 */}
+      {showFeedback && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4">提交反馈</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">反馈类型</label>
+                <select
+                  value={feedbackType}
+                  onChange={(e) => setFeedbackType(e.target.value)}
+                  className="w-full p-2 border rounded-lg"
+                >
+                  <option value="suggestion">💡 功能建议</option>
+                  <option value="bug">🐛 报告Bug</option>
+                  <option value="other">💬 其他</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">反馈内容</label>
+                <textarea
+                  value={feedbackContent}
+                  onChange={(e) => setFeedbackContent(e.target.value)}
+                  placeholder="请详细描述您的建议或问题..."
+                  className="w-full p-2 border rounded-lg h-32 resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">联系方式（可选）</label>
+                <input
+                  type="text"
+                  value={feedbackContact}
+                  onChange={(e) => setFeedbackContact(e.target.value)}
+                  placeholder="邮箱或微信"
+                  className="w-full p-2 border rounded-lg"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                取消
+              </button>
+              <button
+                onClick={submitFeedback}
+                disabled={submitting || !feedbackContent.trim()}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {submitting ? '提交中...' : '提交'}
+              </button>
+            </div>
+            {feedbackResult && (
+              <p className={`mt-3 text-center ${feedbackResult.success ? 'text-green-600' : 'text-red-600'}`}>
+                {feedbackResult.message}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       <footer className="bg-gray-800 text-gray-400 py-8 text-center">
         <p className="mb-2">© 2026 SkillHub China. All rights reserved.</p>
