@@ -152,6 +152,7 @@ async function getSkill(id: string) {
       // slug查询：先精确匹配，再模糊匹配
       queryParam = `name=ilike.*${id}*`
     }
+    console.log('Fetching skill:', queryParam)
     const res = await fetch(`${supabaseUrl}/rest/v1/skills?${queryParam}`, {
       headers: {
         'apikey': supabaseKey,
@@ -159,7 +160,9 @@ async function getSkill(id: string) {
       },
       next: { revalidate: 10 }
     })
+    console.log('Response status:', res.status)
     const data = await res.json()
+    console.log('Skill data:', data)
     const skill = data?.[0] || null
     
     if (skill) {
@@ -209,8 +212,9 @@ async function getSkill(id: string) {
   }
 }
 
-export default async function SkillDetail({ params }: { params: { id: string } }) {
-  const skill = await getSkill(params.id)
+export default async function SkillDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const skill = await getSkill(id)
   
   if (!skill) {
     return (
