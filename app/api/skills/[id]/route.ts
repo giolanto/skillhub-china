@@ -3,6 +3,24 @@ import { NextRequest, NextResponse } from 'next/server'
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
+// ========== 下载队列系统 ==========
+// 限制并发下载数量，避免 Supabase 并发限制
+const downloadQueue: Promise<any>[] = []
+const MAX_CONCURRENT = 3
+const QUEUE_DELAY_MS = 500 // 队列中每个请求间隔
+
+async function waitForQueueSlot(): Promise<void> {
+  while (downloadQueue.length >= MAX_CONCURRENT) {
+    await Promise.race(downloadQueue)
+  }
+  const promise = new Promise(resolve => setTimeout(resolve, QUEUE_DELAY_MS))
+  downloadQueue.push(promise)
+  promise.then(() => {
+    const idx = downloadQueue.indexOf(promise)
+    if (idx > -1) downloadQueue.splice(idx, 1)
+  })
+}
+
 // 验证 API Key
 async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string } | null> {
   if (!apiKey || !apiKey.startsWith('sk_')) return null
@@ -39,14 +57,18 @@ export async function GET(
     
     const skill = skills[0]
     
-    // 下载重定向
+    // 下载重定向 - 使用队列控制并发
     if (skill.download_url && (isDownload || action === 'download')) {
-      // 更新下载计数
+      // 等待队列空位
+      await waitForQueueSlot()
+      
+      // 异步更新下载计数（不阻塞）
       fetch(`${supabaseUrl}/rest/v1/skills?id=eq.${id}`, {
         method: 'PATCH',
         headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ downloads: (skill.downloads || 0) + 1 })
       })
+      
       return NextResponse.redirect(skill.download_url, 302)
     }
     
