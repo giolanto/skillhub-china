@@ -171,9 +171,9 @@ export default async function SkillDetail({ params }: { params: { slug: string }
             ))}
           </div>
           
-          {/* 安装按钮 */}
+          {/* 下载按钮 - 优先Supabase，其次GitHub */}
           <div className="flex flex-wrap gap-3">
-            {skill.download_url && (
+            {skill.download_url ? (
               <a 
                 href={skill.download_url} 
                 target="_blank"
@@ -182,6 +182,18 @@ export default async function SkillDetail({ params }: { params: { slug: string }
                 <Download className="w-5 h-5" />
                 下载技能
               </a>
+            ) : skill.github ? (
+              <a 
+                href={skill.github} 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:opacity-90 transition"
+              >
+                <Download className="w-5 h-5" />
+                从GitHub下载
+              </a>
+            ) : (
+              <span className="text-gray-400">暂无可下载文件</span>
             )}
             {skill.github && (
               <a 
@@ -191,7 +203,7 @@ export default async function SkillDetail({ params }: { params: { slug: string }
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-gray-800 transition"
               >
                 <Github className="w-5 h-5" />
-                查看源码
+                GitHub
               </a>
             )}
           </div>
