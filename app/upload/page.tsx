@@ -69,6 +69,11 @@ export default function UploadPage() {
       setResult({ success: false, error: '请填写技能名称' })
       return
     }
+    // 验证：必须上传文件或提供GitHub地址/下载链接
+    if (!selectedFile && !form.github.trim() && !form.readme.trim()) {
+      setResult({ success: false, error: '请上传技能文件或填写GitHub仓库地址' })
+      return
+    }
     
     setUploading(true)
     try {

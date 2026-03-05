@@ -111,6 +111,14 @@ export async function POST(request: Request): Promise<Response> {
       return NextResponse.json({ success: false, error: '需要name参数' }, { status: 400 })
     }
     
+    // 验证：必须提供文件或有效的download_url
+    if (!download_url && !github) {
+      return NextResponse.json({ 
+        success: false, 
+        error: '请提供文件上传或GitHub仓库地址或下载链接' 
+      }, { status: 400 })
+    }
+    
     const newSkill = {
       name,
       description: hideApiKeys(description || ''),
