@@ -25,8 +25,15 @@ export default function UploadPage() {
   const [previewMode, setPreviewMode] = useState(false)
 
   useEffect(() => {
+    // 自动登录（模拟）
     const currentUser = getCurrentUser()
-    setUser(currentUser)
+    if (currentUser) {
+      setUser(currentUser)
+    } else {
+      // 如果没有用户，自动创建一个模拟用户
+      const mockUser = signInWithGithub()
+      setUser(mockUser)
+    }
     setLoading(false)
   }, [])
 
