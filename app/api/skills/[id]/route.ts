@@ -34,7 +34,8 @@ export async function GET(
     
     // 如果是下载请求或有download_url，直接重定向
     if (skill.download_url && (isDownload || action === 'download')) {
-      return NextResponse.redirect(skill.download_url)
+      // 使用完整URL进行重定向
+      return NextResponse.redirect(skill.download_url, 302)
     }
     
     // 否则返回技能信息
