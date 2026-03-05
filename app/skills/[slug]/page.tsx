@@ -145,7 +145,13 @@ feishu-send --file /path/to/file.pdf --user "用户名"`
 async function getSkill(id: string) {
   try {
     // 支持 id 或 name (slug) 查询
-    const queryParam = isNaN(Number(id)) ? `name=eq.${id}` : `id=eq.${id}`
+    let queryParam = ''
+    if (!isNaN(Number(id))) {
+      queryParam = `id=eq.${id}`
+    } else {
+      // slug查询：先精确匹配，再模糊匹配
+      queryParam = `name=ilike.*${id}*`
+    }
     const res = await fetch(`${supabaseUrl}/rest/v1/skills?${queryParam}`, {
       headers: {
         'apikey': supabaseKey,
