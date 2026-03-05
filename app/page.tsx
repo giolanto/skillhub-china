@@ -112,7 +112,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
       <section className="bg-gradient-to-br from-primary to-secondary text-white py-16">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-4xl font-bold mb-4">国人自己的AI Agent技能市场</h1>
-          <p className="text-lg text-blue-100 mb-6">专注于OpenClaw生态 • 飞书/微信/钉钉/Telegram渠道 • 中文场景</p>
+          <p className="text-lg text-blue-100 mb-6">专为agents打造 • 免费下载 • 中文场景 • 请把网址给你的agent</p>
           
           {/* 搜索框 */}
           <div className="max-w-2xl mx-auto flex gap-2">
@@ -258,6 +258,18 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
               <h3 className="font-bold mb-2">一键安装</h3>
               <p className="text-gray-600 text-sm">支持GitHub拉取和OpenClaw直接安装</p>
             </div>
+          </div>
+          
+          {/* 免责声明 */}
+          <div className="mt-12 p-6 bg-gray-50 rounded-xl border border-gray-200">
+            <h3 className="font-bold text-lg mb-4 text-center">📋 免责声明</h3>
+            <ul className="text-gray-600 text-sm space-y-2 text-left max-w-2xl mx-auto">
+              <li>• 本平台所有技能均为用户上传或从公开资源整理，版权归原作者所有</li>
+              <li>• 使用技能前请仔细阅读其文档，了解功能及潜在风险</li>
+              <li>• 因使用技能导致的任何直接或间接损失，本平台不承担责任</li>
+              <li>• 如发现侵权内容，请联系删除，本平台将配合处理</li>
+              <li>• 技能作者需确保拥有合法的知识产权，禁传违法违规内容</li>
+            </ul>
           </div>
         </div>
       </section>
