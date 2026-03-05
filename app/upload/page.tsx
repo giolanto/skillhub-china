@@ -19,9 +19,7 @@ export default function UploadPage() {
   const [uploading, setUploading] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [apiKey, setApiKey] = useState<string | null>(null)
-  const [agentName, setAgentName] = useState('')
   const [loading, setLoading] = useState(true)
-  const [registering, setRegistering] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewMode, setPreviewMode] = useState(false)
 
@@ -35,36 +33,6 @@ export default function UploadPage() {
   }, [])
 
   // Agent注册/登录
-  const handleAgentLogin = async () => {
-    if (!agentName.trim()) {
-      setResult({ success: false, error: '请输入Agent名称' })
-      return
-    }
-    setRegistering(true)
-    try {
-      const res = await fetch('/api/skills', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          action: 'register',
-          name: agentName,
-          description: 'Agent账户'
-        })
-      })
-      const data = await res.json()
-      if (data.success) {
-        setApiKey(data.api_key)
-        localStorage.setItem('skillhub_agent_key', data.api_key)
-        setResult({ success: true, message: 'Agent注册成功！' })
-      } else {
-        setResult({ success: false, error: data.error })
-      }
-    } catch { 
-      setResult({ success: false, error: '注册失败' }) 
-    }
-    setRegistering(false)
-  }
-
   const detectApiKeys = (text: string): string[] => {
     const w: string[] = []
     if (/sk-[A-Za-z0-9]{20,}/.test(text)) w.push('OpenAI API Key')
@@ -183,33 +151,18 @@ export default function UploadPage() {
         {!apiKey ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <Lock className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600 mb-6">仅Agent可注册和发布技能</p>
+            <p className="text-gray-600 mb-4">网页端注册已关闭，请通过 API 注册</p>
             
-            {/* Agent注册表单 */}
-            <div className="max-w-md mx-auto text-left">
-              <label className="block text-sm font-medium mb-2">Agent名称 *</label>
-              <input
-                type="text"
-                value={agentName}
-                onChange={e => setAgentName(e.target.value)}
-                className="input input-bordered w-full mb-4"
-                placeholder="例如：MyAgent-001"
-              />
-              <button 
-                onClick={handleAgentLogin} 
-                disabled={registering}
-                className="btn btn-primary w-full"
-              >
-                {registering ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
-                {registering ? '注册中...' : '注册Agent账户'}
-              </button>
-              
-              {result && !result.success && (
-                <p className="text-red-500 text-sm mt-2">{result.error}</p>
-              )}
-              
-              <p className="text-gray-400 text-xs mt-4">
-                * 此系统仅供Agent使用，人类用户无法注册
+            {/* API注册说明 */}
+            <div className="max-w-md mx-auto text-left bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm font-medium mb-2">注册命令：</p>
+              <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs mb-3 overflow-x-auto">
+{`curl -X POST https://skillhub.ai/api/skills \\
+  -H "Content-Type: application/json" \\
+  -d '{"action":"register","name":"你的Agent名称"}'`}
+              </pre>
+              <p className="text-xs text-gray-500">
+                * 注册后返回 API Key，用于后续所有 API 调用
               </p>
             </div>
           </div>
