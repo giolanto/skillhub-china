@@ -57,7 +57,30 @@ export default function SkillDetail() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const renderStars = (rating: number) => Array.from({length:5},(_,i)=><Star key={i} className={`w-4 h-4 ${i<rating?'text-yellow-500 fill-yellow-500':'text-gray-300'}`}/>)
+  const [newRating, setNewRating] = useState(0)
+  const [reviewContent, setReviewContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [reviewMsg, setReviewMsg] = useState('')
+
+  const renderStars = (rating: number, size: string = 'w-4 h-4') => Array.from({length:5},(_,i)=><Star key={i} className={`${size} ${i<rating?'text-yellow-500 fill-yellow-500':'text-gray-300'}`}/>)
+
+  const submitReview = async () => {
+    if (!skill || newRating === 0) { setReviewMsg('请选择星级'); return }
+    setSubmitting(true)
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/reviews`, {
+        method: 'POST',
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}`, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ skill_id: skill.id, rating: newRating, content: reviewContent })
+      })
+      if (res.ok) {
+        setReviews([{ id: Date.now(), rating: newRating, content: reviewContent, created_at: new Date().toISOString() }, ...reviews])
+        setNewRating(0); setReviewContent(''); setReviewMsg('评价成功！')
+      } else setReviewMsg('提交失败')
+    } catch { setReviewMsg('提交失败') }
+    setSubmitting(false)
+    setTimeout(() => setReviewMsg(''), 3000)
+  }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="text-gray-400">加载中...</div></div>
   if (!skill) return <div className="min-h-screen flex items-center justify-center"><div><h1 className="text-2xl font-bold mb-4">技能不存在</h1><Link href="/" className="text-primary">返回首页</Link></div></div>
@@ -102,7 +125,23 @@ export default function SkillDetail() {
         </div>
         <div className="bg-white rounded-xl border p-6">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><MessageCircle className="w-5 h-5"/>用户评价 ({reviews.length})</h2>
-          {reviews.length===0?<p className="text-gray-400">暂无评价</p>:<div className="space-y-4">{reviews.map(r=><div key={r.id} className="border-b pb-4"><div className="flex gap-2 mb-2">{renderStars(r.rating)}<span className="text-sm text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span></div><p>{r.content}</p></div>)}</div>}
+          {/* 评价表单 */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-3">
+              <span className="text-sm text-gray-600 mr-2">我的评分：</span>
+              <button className="flex gap-1" onClick={() => setNewRating(0)}>
+                {[1,2,3,4,5].map(i => (
+                  <Star key={i} className={`w-6 h-6 cursor-pointer transition ${i <= newRating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300 hover:text-yellow-400'}`} onClick={(e) => { e.stopPropagation(); setNewRating(i) }}/>
+                ))}
+              </button>
+            </div>
+            <textarea value={reviewContent} onChange={(e) => setReviewContent(e.target.value)} placeholder="写下你的评价..." className="w-full p-3 border rounded-lg mb-3 text-sm" rows={3}/>
+            <div className="flex items-center gap-3">
+              <button onClick={submitReview} disabled={submitting} className="px-4 py-2 bg-primary text-white rounded-lg text-sm disabled:opacity-50">{submitting ? '提交中...' : '提交评价'}</button>
+              {reviewMsg && <span className={`text-sm ${reviewMsg.includes('成功') ? 'text-green-600' : 'text-red-500'}`}>{reviewMsg}</span>}
+            </div>
+          </div>
+          {reviews.length===0?<p className="text-gray-400">暂无评价</p>:<div className="space-y-4">{reviews.map(r=><div key={r.id} className="border-b pb-4"><div className="flex gap-2 mb-2">{renderStars(r.rating, 'w-4 h-4')}<span className="text-sm text-gray-400">{new Date(r.created_at).toLocaleDateString()}</span></div><p>{r.content}</p></div>)}</div>}
         </div>
       </main>
     </div>

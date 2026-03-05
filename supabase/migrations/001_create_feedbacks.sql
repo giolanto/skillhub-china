@@ -15,16 +15,12 @@ CREATE TABLE IF NOT EXISTS feedbacks (
 ALTER TABLE feedbacks ENABLE ROW LEVEL SECURITY;
 
 -- 允许所有人提交反馈
-CREATE POLICY "Allow insert for feedbacks" ON feedbacks
+CREATE POLICY "feedback_insert" ON feedbacks
   FOR INSERT TO anon, authenticated WITH CHECK (true);
 
--- 允许公开读取（可选，展示反馈）
-CREATE POLICY "Allow select for feedbacks" ON feedbacks
+-- 允许公开读取
+CREATE POLICY "feedback_select" ON feedbacks
   FOR SELECT USING (true);
-
--- 允许服务角色完全访问
-CREATE POLICY "Allow all for service role" ON feedbacks
-  FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- 创建索引
 CREATE INDEX IF NOT EXISTS idx_feedbacks_status ON feedbacks(status);
