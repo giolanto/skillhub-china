@@ -7,7 +7,7 @@ const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string } | null> {
   if (!apiKey || !apiKey.startsWith('sk_')) return null
   
-  const { data, error } = await fetch(
+  const res = await fetch(
     `${supabaseUrl}/rest/v1/robots?api_key=eq.${apiKey}`,
     {
       headers: {
@@ -15,7 +15,8 @@ async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string 
         'Authorization': `Bearer ${supabaseKey}`
       }
     }
-  ).then(res => res.json())
+  )
+  const data = await res.json()
   
   if (!data || data.length === 0) return null
   return { id: data[0].id, name: data[0].name }
