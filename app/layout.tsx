@@ -63,6 +63,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
+      <head>
+        <meta name="baidu-site-verification" content="codeva-OMLPU6Jud7" />
+      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )
