@@ -156,6 +156,19 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
     return matchesSearch && matchesChannel
   })
 
+  // 分离精选技能（下载量前10）和其他技能（按时间倒序）
+  const featuredSkills = [...skills]
+    .filter(s => s.downloads > 0)
+    .sort((a, b) => b.downloads - a.downloads)
+    .slice(0, 10)
+  
+  const otherSkills = [...skills]
+    .filter(s => !featuredSkills.find(f => f.id === s.id))
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  const displayFeatured = featuredSkills.length > 0 && !searchTerm && selectedChannel === '全部'
+  const displaySkills = displayFeatured ? otherSkills : filteredSkills
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white">
@@ -229,17 +242,78 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
 
       {/* 技能列表 */}
       <section id="skills" className="max-w-7xl mx-auto px-4 py-12">
+        {/* 精选技能展示 */}
+        {displayFeatured && (
+          <div className="mb-12">
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-2xl">🔥</span>
+              <h2 className="text-2xl font-bold text-gray-800">精选技能</h2>
+              <span className="text-sm text-gray-500">（下载量TOP10）</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featuredSkills.map(skill => (
+                <div key={skill.id} className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 shadow-sm hover:shadow-md transition border border-amber-200">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center text-white font-bold">
+                        {skill.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-800">{skill.name}</h3>
+                        <p className="text-xs text-gray-500">{skill.channel?.[0] || '通用'}</p>
+                      </div>
+                    </div>
+                    <span className="px-2 py-1 bg-amber-500 text-white text-xs rounded-full">
+                      TOP {featuredSkills.indexOf(skill) + 1}
+                    </span>
+                  </div>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                    {skill.description || '暂无描述'}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {(skill.tags || []).map((tag: string) => (
+                      <span 
+                        key={tag} 
+                        className="px-2 py-1 bg-white text-gray-600 text-xs rounded cursor-pointer hover:bg-gray-100"
+                        onClick={() => handleSearchChange(tag)}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-amber-200">
+                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <Download className="w-4 h-4" /> {skill.downloads || 0}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Star className="w-4 h-4 text-yellow-500" /> {skill.stars || 0}
+                      </span>
+                    </div>
+                    <Link 
+                      href={`/skills/${skill.id}`} 
+                      className="flex items-center gap-1 text-secondary hover:underline text-sm"
+                    >
+                      查看 <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">
-            {searchTerm ? `搜索结果` : '精选技能'}
+            {searchTerm ? `搜索结果` : (displayFeatured ? '最新技能' : '精选技能')}
           </h2>
           <span className="text-gray-500">
-            {filteredSkills.length} 个技能
+            {displaySkills.length} 个技能
             {searchTerm && <span className="ml-2">（搜索: "{searchTerm}"）</span>}
           </span>
         </div>
         
-        {filteredSkills.length === 0 ? (
+        {displaySkills.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <p>没有找到相关技能</p>
             {searchTerm && (
@@ -253,7 +327,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredSkills.map(skill => (
+            {displaySkills.map(skill => (
               <div key={skill.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition border border-gray-100">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
