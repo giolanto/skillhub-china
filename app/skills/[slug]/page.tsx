@@ -21,6 +21,12 @@ export default function SkillDetail() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // 浏览器后退按钮处理
+    const handlePopState = () => {
+      window.location.reload()
+    }
+    window.addEventListener('popstate', handlePopState)
+    
     if (!slug) return
     
     // 获取技能
@@ -39,6 +45,10 @@ export default function SkillDetail() {
       setReviews(reviews || [])
       setLoading(false)
     })
+    
+    return () => {
+      window.removeEventListener('popstate', handlePopState)
+    }
   }, [slug])
 
   const handleLike = async () => {
