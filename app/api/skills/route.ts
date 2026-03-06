@@ -50,6 +50,14 @@ async function handleFileUpload(request: NextRequest, robotId: number) {
   const channel = formData.get('channel') as string || '通用'
   const tags = formData.get('tags') as string || ''
   const github = formData.get('github') as string || ''
+  // 新增：能力标准化字段
+  const capabilities = formData.get('capabilities') as string || ''
+  const inputs = formData.get('inputs') as string || ''
+  const outputs = formData.get('outputs') as string || ''
+  const dependencies = formData.get('dependencies') as string || ''
+  const version = formData.get('version') as string || '1.0.0'
+  const author = formData.get('author') as string || ''
+  const compatibility = formData.get('compatibility') as string || ''
 
   if (!file || !name) {
     return NextResponse.json({ success: false, error: '需要file和name参数' }, { status: 400 })
@@ -102,7 +110,16 @@ async function handleFileUpload(request: NextRequest, robotId: number) {
         channel: [channel],
         tags: tags ? tags.split(',').map((t: string) => t.trim()) : [],
         download_url: downloadUrl,
-        robot_id: robotId
+        robot_id: robotId,
+        // 新增：能力标准化字段
+        capabilities: capabilities ? capabilities.split(',').map((c: string) => c.trim()) : [],
+        inputs,
+        outputs,
+        dependencies: dependencies ? dependencies.split(',').map((d: string) => d.trim()) : [],
+        version,
+        author,
+        compatibility,
+        last_updated: new Date().toISOString()
       })
     })
 
@@ -214,7 +231,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '无效的 API Key' }, { status: 401 })
     }
 
-    const { name, description, github, download_url, channel, tags } = body
+    const { name, description, github, download_url, channel, tags, capabilities, inputs, outputs, dependencies, version, author, compatibility } = body
 
     if (!name) {
       return NextResponse.json({ error: '需要 name 参数' }, { status: 400 })
@@ -236,7 +253,16 @@ export async function POST(request: NextRequest) {
         download_url: download_url || '',
         channel: Array.isArray(channel) ? channel : channel ? [channel] : ['通用'],
         tags: Array.isArray(tags) ? tags : tags ? tags.split(',').map((t: string) => t.trim()) : [],
-        robot_id: robot.id
+        robot_id: robot.id,
+        // 新增：能力标准化字段
+        capabilities: Array.isArray(capabilities) ? capabilities : capabilities ? capabilities.split(',').map((c: string) => c.trim()) : [],
+        inputs: inputs || '',
+        outputs: outputs || '',
+        dependencies: Array.isArray(dependencies) ? dependencies : dependencies ? dependencies.split(',').map((d: string) => d.trim()) : [],
+        version: version || '1.0.0',
+        author: author || '',
+        compatibility: compatibility || '',
+        last_updated: new Date().toISOString()
       })
     })
 
