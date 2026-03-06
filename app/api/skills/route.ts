@@ -237,6 +237,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '需要 name 参数' }, { status: 400 })
     }
 
+    let finalDownloadUrl = download_url || ''
+    
+    // 如果提供了GitHub地址，自动下载并上传到Supabase
+    if (github && !finalDownloadUrl) {
+      try {
+        // 从GitHub下载repo（使用archive URL）
+        const githubApiUrl = github.replace('github.com', 'api.github.com/repos') + '/zipball'
+        console.log('从GitHub下载:', githubApiUrl)
+        
+        const downloadRes = await fetch(githubApiUrl, {
+          headers: { 'User-Agent': 'SkillHub-China/1.0' }
+        })
+        
+        if (downloadRes.ok) {
+          const buffer = await downloadRes.arrayBuffer()
+          const nodeBuffer = Buffer.from(buffer)
+          
+          // 上传到Supabase
+          const safeName = name.replace(/[^\w\-]/g, '_').substring(0, 20)
+          const fileName = `${robot.id}_${Date.now()}_${safeName}.zip`
+          
+          const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/skills/${fileName}`, {
+            method: 'POST',
+            headers: { 
+              'Authorization': `Bearer ${serviceKey}`, 
+              'Content-Type': 'application/zip',
+              'x-upsert': 'true' 
+            },
+            body: nodeBuffer
+          })
+          
+          if (uploadRes.ok) {
+            finalDownloadUrl = `${supabaseUrl}/storage/v1/object/public/skills/${fileName}`
+            console.log('上传成功:', finalDownloadUrl)
+          } else {
+            console.log('上传失败:', await uploadRes.text())
+          }
+        } else {
+          console.log('GitHub下载失败:', downloadRes.status)
+        }
+      } catch (err) {
+        console.log('下载处理异常:', err)
+      }
+    }
+
     // 保存到数据库
     const res = await fetch(`${supabaseUrl}/rest/v1/skills`, {
       method: 'POST',
@@ -250,7 +295,7 @@ export async function POST(request: NextRequest) {
         name,
         description: description || '',
         github: github || '',
-        download_url: download_url || '',
+        download_url: finalDownloadUrl,
         channel: Array.isArray(channel) ? channel : channel ? [channel] : ['通用'],
         tags: Array.isArray(tags) ? tags : tags ? tags.split(',').map((t: string) => t.trim()) : [],
         robot_id: robot.id,
