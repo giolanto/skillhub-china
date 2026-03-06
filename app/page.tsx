@@ -2,22 +2,12 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Search, Download, Star, Tag, ArrowRight, Loader2 } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
-
-// 获取筛选参数
-function getFilterParams() {
-  if (typeof window === 'undefined') return {}
-  const params = new URLSearchParams(window.location.search)
-  return {
-    channel: params.get('channel'),
-    tag: params.get('tag'),
-    search: params.get('q')
-  }
-}
 
 interface Skill {
   id: number
@@ -68,9 +58,17 @@ function Loading() {
 }
 
 function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[], initialChannels: string[] }) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  
+  // 从URL初始化状态（支持浏览器后退）
+  const initialChannel = searchParams.get('channel') || '全部'
+  const initialSearch = searchParams.get('q') || ''
+  
   const [skills] = useState<Skill[]>(initialSkills)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [selectedChannel, setSelectedChannel] = useState('全部')
+  const [searchTerm, setSearchTerm] = useState(initialSearch)
+  const [selectedChannel, setSelectedChannel] = useState(initialChannel)
   const [channels] = useState<string[]>(initialChannels)
   
   // 反馈状态
@@ -78,6 +76,36 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
   const [feedbackType, setFeedbackType] = useState('suggestion')
   const [feedbackContent, setFeedbackContent] = useState('')
   const [feedbackContact, setFeedbackContact] = useState('')
+
+  // 监听URL参数变化（支持浏览器后退/前进）
+  useEffect(() => {
+    const channel = searchParams.get('channel')
+    const q = searchParams.get('q')
+    if (channel) setSelectedChannel(channel)
+    if (q !== null) setSearchTerm(q)
+  }, [searchParams])
+
+  // 更新URL（不刷新页面，支持浏览器历史）
+  const updateUrl = (channel: string, q: string) => {
+    const params = new URLSearchParams()
+    if (channel && channel !== '全部') params.set('channel', channel)
+    if (q) params.set('q', q)
+    const queryString = params.toString()
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname
+    router.replace(newUrl, { scroll: false })
+  }
+
+  // 搜索处理
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    updateUrl(selectedChannel, value)
+  }
+
+  // 频道筛选处理
+  const handleChannelChange = (channel: string) => {
+    setSelectedChannel(channel)
+    updateUrl(channel, searchTerm)
+  }
   const [submitting, setSubmitting] = useState(false)
   const [feedbackResult, setFeedbackResult] = useState<{success: boolean, message: string} | null>(null)
 
@@ -166,7 +194,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
                 placeholder="搜索技能名称、描述、标签..." 
                 className="flex-1 outline-none text-gray-700"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
               />
               
             </div>
@@ -186,7 +214,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
           {channels.map(channel => (
             <button
               key={channel}
-              onClick={() => setSelectedChannel(channel)}
+              onClick={() => handleChannelChange(channel)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${
                 selectedChannel === channel 
                   ? 'bg-primary text-white' 
@@ -216,7 +244,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
             <p>没有找到相关技能</p>
             {searchTerm && (
               <button 
-                onClick={() => setSearchTerm('')}
+                onClick={() => handleSearchChange('')}
                 className="text-primary hover:underline mt-2"
               >
                 清除搜索
@@ -246,7 +274,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
                     <span 
                       key={tag} 
                       className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded cursor-pointer hover:bg-gray-200"
-                      onClick={() => setSearchTerm(tag)}
+                      onClick={() => handleSearchChange(tag)}
                     >
                       {tag}
                     </span>
