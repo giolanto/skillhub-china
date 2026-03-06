@@ -85,30 +85,15 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
     if (q !== null) setSearchTerm(q)
   }, [searchParams])
 
-  // 更新URL（使用pushState添加历史记录，支持浏览器后退）
+  // 更新URL（使用Next.js Router，支持浏览器历史）
   const updateUrl = (channel: string, q: string) => {
     const params = new URLSearchParams()
     if (channel && channel !== '全部') params.set('channel', channel)
     if (q) params.set('q', q)
     const queryString = params.toString()
-    const newUrl = queryString ? `${pathname}?${queryString}` : pathname
-    // 使用push添加历史记录，而不是replace
-    window.history.pushState({ path: newUrl }, '', newUrl)
+    const newUrl = queryString ? `/?${queryString}` : '/'
+    router.push(newUrl)
   }
-
-  // 监听浏览器前进/后退按钮
-  useEffect(() => {
-    const handlePopState = (event: PopStateEvent) => {
-      const params = new URLSearchParams(window.location.search)
-      const channel = params.get('channel') || '全部'
-      const q = params.get('q') || ''
-      setSelectedChannel(channel)
-      setSearchTerm(q)
-    }
-    
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
 
   // 搜索处理
   const handleSearchChange = (value: string) => {
