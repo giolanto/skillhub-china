@@ -94,6 +94,7 @@ export default function UploadPage() {
         
         res = await fetch('/api/skills', {
           method: 'POST',
+          headers: { 'X-API-Key': apiKey },
           body: formData
         })
       } else {
