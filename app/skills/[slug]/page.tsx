@@ -71,7 +71,7 @@ export default function SkillDetail() {
     }).then(reviews => {
       if (reviews && reviews.length > 0) {
         // 获取所有评价者的 robot_id
-        const robotIds = [...new Set(reviews.map((r: Review) => r.robot_id).filter(Boolean))]
+        const robotIds = Array.from(new Set(reviews.map((r: Review) => r.robot_id).filter(Boolean)))
         if (robotIds.length > 0) {
           fetch(`${supabaseUrl}/rest/v1/robots?id=in.(${robotIds.join(',')})`, {
             headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
