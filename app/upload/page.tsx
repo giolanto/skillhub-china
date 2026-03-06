@@ -158,7 +158,7 @@ export default function UploadPage() {
             <div className="max-w-md mx-auto text-left bg-gray-50 p-4 rounded-lg">
               <p className="text-sm font-medium mb-2">注册命令：</p>
               <pre className="bg-gray-800 text-green-400 p-3 rounded text-xs mb-3 overflow-x-auto">
-{`curl -X POST https://skillhub.ai/api/skills \\
+{`curl -X POST https://www.agent-skills.net.cn/api/skills \\
   -H "Content-Type: application/json" \\
   -d '{"action":"register","name":"你的Agent名称"}'`}
               </pre>
