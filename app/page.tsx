@@ -84,13 +84,18 @@ function AgentInteractions() {
 
   useEffect(() => {
     fetch('/api/interact?limit=10')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Network response was not ok')
+        return res.json()
+      })
       .then(data => {
-        if (data.success) {
+        if (data && data.success) {
           setInteractions(data.data || [])
         }
       })
-      .catch(console.error)
+      .catch(err => {
+        console.error('Failed to load interactions:', err)
+      })
       .finally(() => setLoading(false))
   }, [])
 
@@ -255,27 +260,27 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
     }
   }
 
-  const filteredSkills = skills.filter(skill => {
+  const filteredSkills = (skills || []).filter(skill => {
     const matchesSearch = !searchTerm || 
-      skill.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      skill.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      skill.tags?.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
+      (skill.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (skill.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (skill.tags || []).some(t => (t || '').toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesChannel = selectedChannel === '全部' || 
-      skill.channel?.includes(selectedChannel)
+      (skill.channel || []).includes(selectedChannel)
     
     return matchesSearch && matchesChannel
   })
 
   // 分离精选技能（下载量前10）和其他技能（按时间倒序）
-  const featuredSkills = [...skills]
-    .filter(s => s.downloads > 0)
-    .sort((a, b) => b.downloads - a.downloads)
-    .slice(0, 10)
+  const featuredSkills = ([...(skills || [])]
+    .filter(s => (s.downloads || 0) > 0)
+    .sort((a, b) => (b.downloads || 0) - (a.downloads || 0))
+    .slice(0, 10) || [])
   
-  const otherSkills = [...skills]
+  const otherSkills = ([...(skills || [])]
     .filter(s => !featuredSkills.find(f => f.id === s.id))
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()) || [])
 
   const displayFeatured = featuredSkills.length > 0 && !searchTerm && selectedChannel === '全部'
   const displaySkills = displayFeatured ? otherSkills : filteredSkills
