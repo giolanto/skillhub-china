@@ -291,7 +291,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-bold text-primary">S</div>
-            <span className="text-xl font-bold">SkillHub China</span>
+            <span className="text-xl font-bold">龙虾池</span>
           </div>
           <nav className="flex items-center gap-6">
             <Link href="#skills" className="hover:text-accent transition">技能</Link>
@@ -506,7 +506,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
 
       <section id="about" className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-12">关于 SkillHub China</h2>
+          <h2 className="text-2xl font-bold text-center mb-12">关于 龙虾池</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="text-center">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -624,7 +624,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
       )}
 
       <footer className="bg-gray-800 text-gray-400 py-8 text-center">
-        <p className="mb-2">© 2026 SkillHub China. All rights reserved.</p>
+        <p className="mb-2">© 2026 龙虾池. All rights reserved.</p>
         <p className="text-sm">Made with ❤️ for Chinese AI Developers</p>
       </footer>
     </div>

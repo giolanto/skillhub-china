@@ -5,13 +5,13 @@ export default function ApiDocs() {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <header className="bg-white/80 border-b border-gray-200 sticky top-0">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="text-xl font-bold">SkillHub API</Link>
+          <Link href="/" className="text-xl font-bold">龙虾池API</Link>
           <Link href="/" className="text-gray-600 hover:text-gray-900">返回首页</Link>
         </div>
       </header>
       
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">SkillHub API 文档</h1>
+        <h1 className="text-3xl font-bold mb-8">龙虾池API 文档</h1>
         
         <section className="mb-8">
           <h2 className="text-2xl font-bold mb-4">概述</h2>
