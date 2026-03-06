@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
-const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
+// anon key for public reads
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODkyOTIsImV4cCI6MjA4ODE2NTI5Mn0.CR96VqyLwoUxz0xCaNZe0P_JsrYZdsxC0aLVD0p3D9g'
+// service role key for storage operations
+const serviceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjU4OTI5MiwiZXhwIjoyMDg4MTY1MjkyfQ.2Cw7_nf-ewqLNQXN_R7n0zJU7DQs_eU4uGxSbCwtHHc'
 
 // 验证 API Key
 async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string } | null> {
@@ -15,7 +18,7 @@ async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string 
   return { id: data[0].id, name: data[0].name }
 }
 
-// 创建 Supabase 客户端
+// 创建 Supabase 客户端 (使用service key for storage)
 function createSupabaseClient() {
   return {
     storage: {
@@ -25,7 +28,7 @@ function createSupabaseClient() {
           formData.append('file', file)
           const res = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${path}`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${supabaseKey}` },
+            headers: { 'Authorization': `Bearer ${serviceKey}`, 'x-upsert': 'true' },
             body: formData
           })
           return { data: res.ok ? { path } : null, error: res.ok ? null : await res.text() }
@@ -51,7 +54,6 @@ async function handleFileUpload(request: NextRequest, robotId: number) {
   }
 
   // 支持 .zip 和 .skill 格式
-  const allowedTypes = ['application/zip', 'application/x-zip-compressed', 'application/gzip', 'application/octet-stream']
   const ext = file.name.split('.').pop()?.toLowerCase()
   
   if (ext !== 'zip' && ext !== 'skill') {
@@ -61,15 +63,26 @@ async function handleFileUpload(request: NextRequest, robotId: number) {
   const fileName = `${robotId}_${Date.now()}_${file.name}`
   
   try {
-    const supabase = createSupabaseClient()
-    const { data, error } = await supabase.storage.from('skills').upload(fileName, file, { upsert: true })
+    // 直接用arrayBuffer上传，避免FormData问题
+    const arrayBuffer = await file.arrayBuffer()
+    const buffer = Buffer.from(arrayBuffer)
     
-    if (error) {
-      return NextResponse.json({ success: false, error: '上传失败: ' + error }, { status: 500 })
+    const uploadRes = await fetch(`${supabaseUrl}/storage/v1/object/skills/${fileName}`, {
+      method: 'POST',
+      headers: { 
+        'Authorization': `Bearer ${serviceKey}`, 
+        'Content-Type': 'application/zip',
+        'x-upsert': 'true' 
+      },
+      body: buffer
+    })
+    
+    if (!uploadRes.ok) {
+      const errText = await uploadRes.text()
+      return NextResponse.json({ success: false, error: '上传失败: ' + errText }, { status: 500 })
     }
-
-    const { data: urlData } = supabase.storage.from('skills').getPublicUrl(fileName)
-    const downloadUrl = urlData.publicUrl
+    
+    const downloadUrl = `${supabaseUrl}/storage/v1/object/public/skills/${fileName}`
 
     // 保存到数据库
     const res = await fetch(`${supabaseUrl}/rest/v1/skills`, {
