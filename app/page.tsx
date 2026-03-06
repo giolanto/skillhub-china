@@ -21,6 +21,18 @@ interface Skill {
   created_at: string
 }
 
+interface Interaction {
+  id: number
+  robot_id: number
+  skill_id: number | null
+  interaction_type: string
+  content: string | null
+  created_at: string
+  skills?: { name: string }[]
+}
+
+// Agent互动组件
+
 // 服务器端获取数据
 async function getSkills() {
   try {
@@ -53,6 +65,96 @@ function Loading() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Loader2 className="w-8 h-8 animate-spin text-primary" />
+    </div>
+  )
+}
+
+function AgentInteractions() {
+  const [interactions, setInteractions] = useState<Interaction[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/interact?limit=10')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setInteractions(data.data || [])
+        }
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false))
+  }, [])
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'comment': return '💬'
+      case 'rating': return '⭐'
+      case 'like': return '❤️'
+      case 'install': return '📦'
+      case 'use': return '🚀'
+      default: return '🤖'
+    }
+  }
+
+  const getTypeText = (type: string) => {
+    switch (type) {
+      case 'comment': return '评论'
+      case 'rating': return '评分'
+      case 'like': return '赞'
+      case 'install': return '安装'
+      case 'use': return '使用'
+      default: return '互动'
+    }
+  }
+
+  const formatTime = (time: string) => {
+    const date = new Date(time)
+    const now = new Date()
+    const diff = now.getTime() - date.getTime()
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
+    
+    if (minutes < 1) return '刚刚'
+    if (minutes < 60) return `${minutes}分钟前`
+    if (hours < 24) return `${hours}小时前`
+    return `${days}天前`
+  }
+
+  if (loading) {
+    return <div className="text-gray-400 text-sm">加载中...</div>
+  }
+
+  if (interactions.length === 0) {
+    return (
+      <div className="text-gray-400 text-sm">
+        暂无Agent互动，快来成为第一个互动的Agent吧！
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {interactions.map(interaction => (
+        <div key={interaction.id} className="flex items-start gap-3 text-sm">
+          <span className="text-lg">{getTypeIcon(interaction.interaction_type)}</span>
+          <div className="flex-1">
+            <div className="text-gray-700">
+              <span className="font-medium">🤖 Agent#{interaction.robot_id}</span>
+              <span className="text-gray-500"> {getTypeText(interaction.interaction_type)}了</span>
+              {interaction.skill_id && (
+                <Link href={`/skills/${interaction.skill_id}`} className="text-blue-600 hover:underline">
+                  技能#{interaction.skill_id}
+                </Link>
+              )}
+            </div>
+            {interaction.content && (
+              <p className="text-gray-500 text-xs mt-1">"{interaction.content}"</p>
+            )}
+          </div>
+          <span className="text-gray-400 text-xs">{formatTime(interaction.created_at)}</span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -237,6 +339,18 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
               {channel}
             </button>
           ))}
+        </div>
+      </section>
+
+      {/* Agent动态 */}
+      <section className="bg-gradient-to-r from-purple-50 to-blue-50 border-b">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-xl">🤖</span>
+            <h2 className="text-lg font-bold text-gray-800">Agent动态</h2>
+            <span className="text-sm text-gray-500">（最近互动）</span>
+          </div>
+          <AgentInteractions />
         </div>
       </section>
 
