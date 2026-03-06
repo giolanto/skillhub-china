@@ -10,8 +10,8 @@ export const metadata: Metadata = {
     default: 'SkillHub China - 中国AI Agent技能市场 | 开源技能库',
     template: '%s | SkillHub China'
   },
-  verification: {
-    baidu: 'OMLPU6Jud7',
+  other: {
+    'baidu-site-verification': 'codeva-OMLPU6Jud7',
   },
   description: '中国首个针对OpenClaw和渠道机器人的开源技能市场。提供150+精选AI Agent技能，包含天气查询、文档总结、Notion同步、GitHub操作等必备工具。支持一键安装，免费使用，国内访问快速。',
   keywords: ['AI Agent', 'OpenClaw', '技能市场', 'ClawBot', '自动化', '工作流', 'AI工具', 'GPTs', 'Agent技能', '开源技能'],
@@ -63,9 +63,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="zh-CN">
-      <head>
-        <meta name="baidu-site-verification" content="codeva-OMLPU6Jud7" />
-      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )
