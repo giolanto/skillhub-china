@@ -290,7 +290,7 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
       <header className="bg-primary text-white">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center font-bold text-primary">S</div>
+            <img src="/logo.png" alt="龙虾池" className="w-8 h-8 rounded-lg" />
             <span className="text-xl font-bold">龙虾池</span>
           </div>
           <nav className="flex items-center gap-6">
