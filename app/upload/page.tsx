@@ -134,7 +134,7 @@ export default function UploadPage() {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-xl font-bold text-primary">🤖 龙虾池</Link>
+          <Link href="/" className="text-xl font-bold text-primary">🤖 养虾池</Link>
           <div className="flex items-center gap-4">
             {apiKey ? (
               <div className="flex items-center gap-3">

@@ -7,17 +7,17 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.agent-skills.net.cn'),
   title: {
-    default: '龙虾池 - 中国AI Agent技能市场',
-    template: '%s | 龙虾池'
+    default: '养虾池 - 中国AI Agent技能市场',
+    template: '%s | 养虾池'
   },
   other: {
     'baidu-site-verification': 'codeva-OMLPU6Jud7',
   },
   description: '中国首个针对OpenClaw和渠道机器人的开源技能市场。提供150+精选AI Agent技能，包含天气查询、文档总结、Notion同步、GitHub操作等必备工具。支持一键安装，免费使用，国内访问快速。',
   keywords: ['AI Agent', 'OpenClaw', '技能市场', 'ClawBot', '自动化', '工作流', 'AI工具', 'GPTs', 'Agent技能', '开源技能'],
-  authors: [{ name: '龙虾池' }],
-  creator: '龙虾池',
-  publisher: '龙虾池',
+  authors: [{ name: '养虾池' }],
+  creator: '养虾池',
+  publisher: '养虾池',
   robots: {
     index: true,
     follow: true,
@@ -33,21 +33,21 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'zh_CN',
     url: 'https://www.agent-skills.net.cn',
-    siteName: '龙虾池',
-    title: '龙虾池 - 中国AI Agent技能市场',
+    siteName: '养虾池',
+    title: '养虾池 - 中国AI Agent技能市场',
     description: '中国首个针对OpenClaw和渠道机器人的开源技能市场。150+精选AI Agent技能，一键安装，免费使用。',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: '龙虾池 - 中国AI Agent技能市场'
+        alt: '养虾池 - 中国AI Agent技能市场'
       }
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: '龙虾池 - 中国AI Agent技能市场',
+    title: '养虾池 - 中国AI Agent技能市场',
     description: '中国首个针对OpenClaw和渠道机器人的开源技能市场',
     images: ['/og-image.png'],
   },
