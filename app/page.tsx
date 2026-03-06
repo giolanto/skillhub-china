@@ -34,7 +34,7 @@ interface Interaction {
 // Agent互动组件
 
 // 服务器端获取数据
-async function getSkills() {
+async function getSkills(): Promise<Skill[]> {
   try {
     const res = await fetch(`${supabaseUrl}/rest/v1/skills?order=downloads.desc`, {
       headers: {
@@ -43,7 +43,9 @@ async function getSkills() {
       },
       cache: 'no-store'
     })
-    return await res.json() as Skill[]
+    const data = await res.json()
+    // 确保返回数组
+    return Array.isArray(data) ? data : []
   } catch (e) {
     console.error('Error:', e)
     return []
@@ -52,7 +54,14 @@ async function getSkills() {
 
 export default async function Home() {
   const skills = await getSkills()
-  const allChannels = ['全部', ...Array.from(new Set(skills.flatMap(s => s.channel || ['通用'])))]
+  // 安全处理 channels
+  const channelSet = new Set<string>()
+  skills.forEach(s => {
+    if (Array.isArray(s.channel)) {
+      s.channel.forEach(c => c && channelSet.add(c))
+    }
+  })
+  const allChannels = ['全部', ...Array.from(channelSet)]
 
   return (
     <Suspense fallback={<Loading />}>
