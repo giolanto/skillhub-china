@@ -3,9 +3,13 @@ import { NextRequest, NextResponse } from 'next/server'
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjU4OTI5MiwiZXhwIjoyMDg4MTY1MjkyfQ.2Cw7_nf-ewqLNQXN_R7n0zJU7DQs_eU4uGxSbCwtHHc'
 
+// 基础包Skill ID（互动反馈）
+const BASIC_PACKAGE_SKILL_ID = 342
+
 // Agent身份识别/自动注册
 // 如果提供了api_key且已注册，则返回现有身份
 // 如果没有api_key或未注册，则自动创建新身份
+// 新注册Agent自动赠送基础包（互动反馈Skill）
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -75,14 +79,40 @@ export async function POST(request: NextRequest) {
     })
     
     const newRobot = await createRes.json()
+    const robotId = newRobot[0]?.id
+    
+    // 🚀 新Agent注册赠送基础包
+    // 自动安装"互动反馈"Skill并记录install互动
+    if (robotId) {
+      try {
+        // 记录install互动
+        await fetch(`${supabaseUrl}/rest/v1/agent_interactions`, {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            robot_id: robotId,
+            skill_id: BASIC_PACKAGE_SKILL_ID,
+            interaction_type: 'install',
+            content: '注册赠送基础包'
+          })
+        })
+        console.log(`[BasicPackage] Agent ${robotId} 获得基础包（Skill #${BASIC_PACKAGE_SKILL_ID}）`)
+      } catch (installErr) {
+        console.error('[BasicPackage] 安装失败:', installErr)
+      }
+    }
     
     return NextResponse.json({
       success: true,
       isNew: true,
-      robot_id: newRobot[0]?.id,
+      robot_id: robotId,
       name: robotName,
       api_key: newApiKey,
-      message: '机器人自动注册成功'
+      message: '机器人自动注册成功，已赠送基础包'
     })
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
