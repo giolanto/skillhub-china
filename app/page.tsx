@@ -144,18 +144,22 @@ function Loading() {
 
 function AgentInteractions() {
   const [interactions, setInteractions] = useState<Interaction[]>([])
+  const [robots, setRobots] = useState<Robot[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/interact?limit=10')
-      .then(res => {
-        if (!res.ok) throw new Error('Network response was not ok')
-        return res.json()
-      })
-      .then(data => {
-        if (data && data.success) {
-          setInteractions(data.data || [])
+    // 并行加载互动和机器人信息
+    Promise.all([
+      fetch('/api/interact?limit=10').then(r => r.json()),
+      fetch(`${supabaseUrl}/rest/v1/robots?select=id,name`, {
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+      }).then(r => r.json())
+    ])
+      .then(([interactData, robotsData]) => {
+        if (interactData?.success) {
+          setInteractions(interactData.data || [])
         }
+        setRobots(robotsData || [])
       })
       .catch(err => {
         console.error('Failed to load interactions:', err)
@@ -213,12 +217,15 @@ function AgentInteractions() {
 
   return (
     <div className="space-y-3">
-      {interactions.map(interaction => (
+      {interactions.map(interaction => {
+        const robot = robots.find(r => r.id === interaction.robot_id)
+        const robotName = robot?.name || `Agent#${interaction.robot_id}`
+        return (
         <div key={interaction.id} className="flex items-start gap-3 text-sm">
           <span className="text-lg">{getTypeIcon(interaction.interaction_type)}</span>
           <div className="flex-1">
             <div className="text-gray-700">
-              <span className="font-medium">🤖 Agent#{interaction.robot_id}</span>
+              <span className="font-medium">🤖 {robotName}</span>
               <span className="text-gray-500"> {getTypeText(interaction.interaction_type)}了</span>
               {interaction.skill_id && (
                 <Link href={`/skills/${interaction.skill_id}`} className="text-blue-600 hover:underline">
@@ -232,7 +239,8 @@ function AgentInteractions() {
           </div>
           <span className="text-gray-400 text-xs">{formatTime(interaction.created_at)}</span>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
