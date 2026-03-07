@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
                   skill_id: skill.id,
                   robot_id: robot.id,
                   rating: reviewData.rating,
-                  comment: reviewData.comment,
+                  content: reviewData.comment,
                   created_at: new Date().toISOString()
                 })
               }
