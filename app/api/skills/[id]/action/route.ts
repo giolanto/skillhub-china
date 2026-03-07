@@ -22,15 +22,89 @@ async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string 
   return { id: data[0].id, name: data[0].name }
 }
 
-// 获取技能评价
+// 获取技能评价 / 下载技能
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const skillId = params.id
+  const { searchParams } = new URL(request.url)
+  const action = searchParams.get('action')
+  const robotId = searchParams.get('robot_id')
   
+  // 处理下载请求
+  if (action === 'download') {
+    try {
+      // 获取技能信息
+      const skillRes = await fetch(
+        `${supabaseUrl}/rest/v1/skills?id=eq.${skillId}`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        }
+      )
+      const skills = await skillRes.json()
+      const skill = skills?.[0]
+      
+      if (!skill) {
+        return NextResponse.json({ error: '技能不存在' }, { status: 404 })
+      }
+      
+      // 增加下载计数
+      await fetch(
+        `${supabaseUrl}/rest/v1/skills?id=eq.${skillId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ downloads: (skill.downloads || 0) + 1 })
+        }
+      )
+      
+      // 如果提供了robot_id，记录安装互动
+      if (robotId) {
+        await fetch(
+          `${supabaseUrl}/rest/v1/agent_interactions`,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': supabaseKey,
+              'Authorization': `Bearer ${supabaseKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              robot_id: robotId,
+              skill_id: parseInt(skillId),
+              interaction_type: 'install',
+              content: '从网站下载安装'
+            })
+          }
+        )
+      }
+      
+      // 触发AI评价
+      triggerReviewForSkill(skillId, skill).catch(console.error)
+      
+      // 返回下载信息（重定向到GitHub或直接返回内容）
+      if (skill.download_url) {
+        return NextResponse.redirect(skill.download_url)
+      } else if (skill.github) {
+        return NextResponse.redirect(skill.github)
+      } else {
+        return NextResponse.json({ error: '无可用下载链接' }, { status: 404 })
+      }
+    } catch (error) {
+      return NextResponse.json({ error: '下载失败' }, { status: 500 })
+    }
+  }
+  
+  // 获取评价列表
   try {
-    // 获取评价列表
     const reviewsRes = await fetch(
       `${supabaseUrl}/rest/v1/reviews?skill_id=eq.${skillId}&order=created_at.desc`,
       {
@@ -42,7 +116,6 @@ export async function GET(
     )
     const reviews = await reviewsRes.json()
     
-    // 获取统计信息
     const statsRes = await fetch(
       `${supabaseUrl}/rest/v1/skills?id=eq.${skillId}&select=downloads,stars`,
       {

@@ -113,7 +113,9 @@ export default function SkillDetail() {
   }
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(`openclaw install https://agent-skills.net.cn/api/skills/${skill?.id}?action=download`)
+    const robotId = getRobotId()
+    const robotIdParam = robotId ? `&robot_id=${robotId}` : ''
+    navigator.clipboard.writeText(`openclaw install https://agent-skills.net.cn/api/skills/${skill?.id}?action=download${robotIdParam}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
