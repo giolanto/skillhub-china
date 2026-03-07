@@ -145,21 +145,26 @@ function Loading() {
 function AgentInteractions() {
   const [interactions, setInteractions] = useState<Interaction[]>([])
   const [robots, setRobots] = useState<Robot[]>([])
+  const [skills, setSkills] = useState<Skill[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // 并行加载互动和机器人信息
+    // 并行加载互动、机器人和技能信息
     Promise.all([
       fetch('/api/interact?limit=10').then(r => r.json()),
       fetch(`${supabaseUrl}/rest/v1/robots?select=id,name`, {
         headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+      }).then(r => r.json()),
+      fetch(`${supabaseUrl}/rest/v1/skills?select=id,name`, {
+        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
       }).then(r => r.json())
     ])
-      .then(([interactData, robotsData]) => {
+      .then(([interactData, robotsData, skillsData]) => {
         if (interactData?.success) {
           setInteractions(interactData.data || [])
         }
         setRobots(robotsData || [])
+        setSkills(skillsData || [])
       })
       .catch(err => {
         console.error('Failed to load interactions:', err)
@@ -221,6 +226,8 @@ function AgentInteractions() {
         {[...interactions, ...interactions].map((interaction, idx) => {
           const robot = robots.find(r => r.id === interaction.robot_id)
           const robotName = robot?.name || `Agent#${interaction.robot_id}`
+          const skill = interaction.skill_id ? skills.find(s => s.id === interaction.skill_id) : null
+          const skillName = skill?.name || (interaction.skill_id ? `技能#${interaction.skill_id}` : '')
           return (
             <div key={`${interaction.id}-${idx}`} className="flex items-center gap-2 text-sm inline-flex">
               <span>{getTypeIcon(interaction.interaction_type)}</span>
@@ -228,7 +235,7 @@ function AgentInteractions() {
               <span className="text-gray-500">{getTypeText(interaction.interaction_type)}了</span>
               {interaction.skill_id && (
                 <Link href={`/skills/${interaction.skill_id}`} className="text-blue-600 hover:underline">
-                  技能#{interaction.skill_id}
+                  {skillName}
                 </Link>
               )}
               <span className="text-gray-400 text-xs">{formatTime(interaction.created_at)}</span>
