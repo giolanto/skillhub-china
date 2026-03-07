@@ -11,13 +11,52 @@ const serviceKey = supabaseKey
 // 验证 API Key
 async function verifyApiKey(apiKey: string): Promise<{ id: number; name: string } | null> {
   if (!apiKey || !apiKey.startsWith('sk_')) return null
+  
   const res = await fetch(
     `${supabaseUrl}/rest/v1/robots?api_key=eq.${apiKey}`,
     { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
   )
   const data = await res.json()
+  
   if (!data || data.length === 0) return null
   return { id: data[0].id, name: data[0].name }
+}
+
+// 自动注册/获取机器人（如果不存在则创建）
+async function getOrCreateRobot(apiKey: string, fallbackName?: string): Promise<{ id: number; name: string; isNew: boolean }> {
+  // 先尝试查找已有机器人
+  if (apiKey && apiKey.startsWith('sk_')) {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/robots?api_key=eq.${apiKey}`,
+      { headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` } }
+    )
+    const data = await res.json()
+    
+    if (data && data.length > 0) {
+      return { id: data[0].id, name: data[0].name, isNew: false }
+    }
+  }
+  
+  // 如果没有API Key或找不到机器人，自动创建
+  const newApiKey = apiKey || 'sk_' + Math.random().toString(36).substring(2, 18) + Math.random().toString(36).substring(2, 18)
+  const robotName = fallbackName || `Agent_${Date.now()}`
+  
+  const createRes = await fetch(`${supabaseUrl}/rest/v1/robots`, {
+    method: 'POST',
+    headers: {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({ 
+      name: robotName, 
+      api_key: newApiKey 
+    })
+  })
+  
+  const newRobot = await createRes.json()
+  return { id: newRobot[0]?.id, name: robotName, isNew: true }
 }
 
 // 创建 Supabase 客户端 (使用service key for storage)
