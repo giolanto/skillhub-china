@@ -9,6 +9,24 @@ import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
+// 标签归类映射
+const CATEGORY_MAP: Record<string, string> = {
+  "AI": "🤖 AI与模型", "Agent": "🤖 AI与模型", "免费": "🤖 AI与模型", "MCP": "🤖 AI与模型",
+  "GitHub": "💻 开发工具", "CLI": "💻 开发工具", "API": "💻 开发工具", "开发": "💻 开发工具", "集成": "💻 开发工具",
+  "PDF": "📝 文档处理", "Markdown": "📝 文档处理", "笔记": "📝 文档处理", "文档": "📝 文档处理", "总结": "📝 文档处理", "写作": "📝 文档处理", "编辑": "📝 文档处理",
+  "搜索": "🔍 搜索与发现", "发现": "🔍 搜索与发现", "天气": "🔍 搜索与发现",
+  "自动化": "⚙️ 自动化", "更新": "⚙️ 自动化", "持久化": "⚙️ 自动化", "记忆": "⚙️ 自动化", "上下文": "⚙️ 自动化",
+  "存储": "📦 存储与媒体", "YouTube": "📦 存储与媒体", "语音": "📦 存储与媒体", "转录": "📦 存储与媒体", "国内": "📦 存储与媒体"
+}
+
+const CATEGORIES = ["全部", "🤖 AI与模型", "💻 开发工具", "📝 文档处理", "🔍 搜索与发现", "⚙️ 自动化", "📦 存储与媒体"]
+
+function getCategoryName(tag: string): string {
+  return CATEGORY_MAP[tag] || "📦 存储与媒体"
+}
+
+
+
 interface Skill {
   id: number
   name: string
@@ -106,7 +124,7 @@ export default async function Home() {
       s.channel.forEach(c => c && channelSet.add(c))
     }
   })
-  const allChannels = ['全部', ...Array.from(channelSet)]
+  const allChannels = CATEGORIES
 
   return (
     <Suspense fallback={<Loading />}>
@@ -338,7 +356,7 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
       (skill.tags || []).some(t => (t || '').toLowerCase().includes(searchTerm.toLowerCase()))
     
     const matchesChannel = selectedChannel === '全部' || 
-      (skill.channel || []).includes(selectedChannel)
+      getCategoryName(skill.tags?.[0] || '通用') === selectedChannel
     
     return matchesSearch && matchesChannel
   })
@@ -497,15 +515,14 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
                     {skill.description || '暂无描述'}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {(skill.tags || []).map((tag: string) => (
-                      <span 
-                        key={tag} 
-                        className="px-2 py-1 bg-white text-gray-600 text-xs rounded cursor-pointer hover:bg-gray-100"
-                        onClick={() => handleSearchChange(tag)}
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                    {(() => {
+                      const mainTag = skill.tags?.[0] || '通用'
+                      return (
+                        <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">
+                          {getCategoryName(mainTag)}
+                        </span>
+                      )
+                    })()}
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-amber-200">
                     <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -577,15 +594,14 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
                   {skill.description || '暂无描述'}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {(skill.tags || []).map((tag: string) => (
-                    <span 
-                      key={tag} 
-                      className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded cursor-pointer hover:bg-gray-200"
-                      onClick={() => handleSearchChange(tag)}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  {(() => {
+                    const mainTag = skill.tags?.[0] || '通用'
+                    return (
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                        {getCategoryName(mainTag)}
+                      </span>
+                    )
+                  })()}
                 </div>
                 <div className="flex items-center justify-between pt-4 border-t">
                   <div className="flex items-center gap-4 text-sm text-gray-500">
