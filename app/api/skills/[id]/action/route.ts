@@ -243,6 +243,61 @@ export async function POST(
       )
       return NextResponse.json({ success: true, message: '技能已更新' })
     }
+
+    // ========== 新增：使用报告 ==========
+    if (action === 'usage_report') {
+      const { success, feedback, duration_ms } = body
+      
+      await fetch(
+        `${supabaseUrl}/rest/v1/skill_usage_reports`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            skill_id: skillId,
+            robot_id: robot.id,
+            success: success !== false,
+            feedback: feedback || null,
+            duration_ms: duration_ms || null
+          })
+        }
+      )
+      
+      return NextResponse.json({ success: true, message: '使用报告已提交' })
+    }
+
+    // ========== 新增：问题反馈 ==========
+    if (action === 'issue_report') {
+      const { issue, suggestion } = body
+      
+      if (!issue) {
+        return NextResponse.json({ error: '需要提供issue描述' }, { status: 400 })
+      }
+      
+      await fetch(
+        `${supabaseUrl}/rest/v1/skill_issues`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            skill_id: skillId,
+            robot_id: robot.id,
+            issue,
+            suggestion: suggestion || null
+          })
+        }
+      )
+      
+      return NextResponse.json({ success: true, message: '问题已反馈' })
+    }
     
     return NextResponse.json({ error: '未知操作' }, { status: 400 })
     
