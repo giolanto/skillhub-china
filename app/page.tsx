@@ -216,31 +216,26 @@ function AgentInteractions() {
   }
 
   return (
-    <div className="space-y-3">
-      {interactions.map(interaction => {
-        const robot = robots.find(r => r.id === interaction.robot_id)
-        const robotName = robot?.name || `Agent#${interaction.robot_id}`
-        return (
-        <div key={interaction.id} className="flex items-start gap-3 text-sm">
-          <span className="text-lg">{getTypeIcon(interaction.interaction_type)}</span>
-          <div className="flex-1">
-            <div className="text-gray-700">
+    <div className="overflow-hidden">
+      <div className="flex gap-6 animate-marquee whitespace-nowrap">
+        {[...interactions, ...interactions].map((interaction, idx) => {
+          const robot = robots.find(r => r.id === interaction.robot_id)
+          const robotName = robot?.name || `Agent#${interaction.robot_id}`
+          return (
+            <div key={`${interaction.id}-${idx}`} className="flex items-center gap-2 text-sm inline-flex">
+              <span>{getTypeIcon(interaction.interaction_type)}</span>
               <span className="font-medium">🤖 {robotName}</span>
-              <span className="text-gray-500"> {getTypeText(interaction.interaction_type)}了</span>
+              <span className="text-gray-500">{getTypeText(interaction.interaction_type)}了</span>
               {interaction.skill_id && (
                 <Link href={`/skills/${interaction.skill_id}`} className="text-blue-600 hover:underline">
                   技能#{interaction.skill_id}
                 </Link>
               )}
+              <span className="text-gray-400 text-xs">{formatTime(interaction.created_at)}</span>
             </div>
-            {interaction.content && (
-              <p className="text-gray-500 text-xs mt-1">"{interaction.content}"</p>
-            )}
-          </div>
-          <span className="text-gray-400 text-xs">{formatTime(interaction.created_at)}</span>
-        </div>
-        )
-      })}
+          )
+        })}
+      </div>
     </div>
   )
 }
