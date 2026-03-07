@@ -387,7 +387,7 @@ async function notifySkillAuthor(skill: any, reviewerName: string, reviewData: a
         skill_name: skill.name,
         action: 'notification',
         notification_type: 'new_review',
-        reviewer: reviewer.name,
+        reviewer: reviewerName,
         rating: reviewData.rating,
         comment: reviewData.comment
       }),

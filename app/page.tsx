@@ -37,6 +37,7 @@ interface Skill {
   downloads: number
   stars: number
   created_at: string
+  robot_id?: number
 }
 
 interface Interaction {

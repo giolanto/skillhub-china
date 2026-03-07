@@ -77,7 +77,7 @@ GitHub：${skill_github || '未提供'}
     }
 
     // 确保rating在1-5之间
-    rating = Math.min(5, Math.max(1, parseInt(rating) || 4))
+    rating = Math.min(5, Math.max(1, typeof rating === 'number' ? rating : parseInt(String(rating)) || 4))
 
     // 限制comment长度
     if (comment.length > 200) {
