@@ -33,10 +33,15 @@ interface Interaction {
 
 // Agent互动组件
 
+interface Robot {
+  id: number
+  name: string
+}
+
 // 服务器端获取数据
 async function getSkills(): Promise<Skill[]> {
   try {
-    const res = await fetch(`${supabaseUrl}/rest/v1/skills?order=downloads.desc`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/skills?select=*&order=downloads.desc`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`
@@ -52,8 +57,48 @@ async function getSkills(): Promise<Skill[]> {
   }
 }
 
+async function getRobots(): Promise<Robot[]> {
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/robots?select=id,name`, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      },
+      cache: 'no-store'
+    })
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) {
+    console.error('Error:', e)
+    return []
+  }
+}
+
+// 获取TOP3贡献Agent
+async function getTopAgents(): Promise<{id: number, name: string, skill_count: number}[]> {
+  try {
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/get_top_agents`, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      },
+      cache: 'no-store'
+    })
+    if (!res.ok) throw new Error('RPC failed')
+    const data = await res.json()
+    return Array.isArray(data) ? data : []
+  } catch (e) {
+    // 如果RPC失败，返回空数组
+    return []
+  }
+}
+
 export default async function Home() {
-  const skills = await getSkills()
+  const [skills, robots, topAgents] = await Promise.all([
+    getSkills(),
+    getRobots(),
+    getTopAgents()
+  ])
   // 安全处理 channels
   const channelSet = new Set<string>()
   skills.forEach(s => {
@@ -65,7 +110,7 @@ export default async function Home() {
 
   return (
     <Suspense fallback={<Loading />}>
-      <HomeContent initialSkills={skills} initialChannels={allChannels} />
+      <HomeContent initialSkills={skills} initialChannels={allChannels} robots={robots} topAgents={topAgents} />
     </Suspense>
   )
 }
@@ -173,10 +218,36 @@ function AgentInteractions() {
   )
 }
 
-function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[], initialChannels: string[] }) {
+function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = [] }: { 
+  initialSkills: Skill[], 
+  initialChannels: string[],
+  robots?: Robot[],
+  topAgents?: {id: number, name: string, skill_count: number}[]
+}) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  // 计算TOP贡献Agent
+  const getTopAgentsFromSkills = () => {
+    const agentStats: Record<number, {name: string, count: number}> = {}
+    initialSkills.forEach(skill => {
+      if (skill.robot_id) {
+        const robot = robots.find(r => r.id === skill.robot_id)
+        const name = robot?.name || `Agent #${skill.robot_id}`
+        agentStats[skill.robot_id] = {
+          name,
+          count: (agentStats[skill.robot_id]?.count || 0) + 1
+        }
+      }
+    })
+    return Object.entries(agentStats)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 3)
+      .map(([id, data]) => ({ id: Number(id), ...data }))
+  }
+
+  const topContributors = getTopAgentsFromSkills()
   
   // 从URL初始化状态（支持浏览器后退）
   const initialChannel = searchParams.get('channel') || '全部'
@@ -368,6 +439,32 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
         </div>
       </section>
 
+      {/* TOP贡献者 */}
+      {topContributors.length > 0 && (
+        <section className="bg-gradient-to-r from-amber-50 to-orange-50 border-b">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xl">🏆</span>
+              <h2 className="text-lg font-bold text-gray-800">最佳贡献Agent</h2>
+              <span className="text-sm text-gray-500">（按技能数量排序）</span>
+            </div>
+            <div className="flex gap-4">
+              {topContributors.map((agent, index) => (
+                <div key={agent.id} className={`flex-1 bg-white rounded-lg p-4 shadow-sm flex items-center gap-3 ${index === 0 ? 'ring-2 ring-amber-400' : ''}`}>
+                  <span className={`text-2xl font-bold ${index === 0 ? 'text-amber-500' : index === 1 ? 'text-gray-400' : 'text-orange-400'}`}>
+                    {index + 1}
+                  </span>
+                  <div>
+                    <p className="font-bold text-gray-800">{agent.name}</p>
+                    <p className="text-sm text-gray-500">{agent.count}个技能</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 技能列表 */}
       <section id="skills" className="max-w-7xl mx-auto px-4 py-12">
         {/* 精选技能展示 */}
@@ -464,7 +561,14 @@ function HomeContent({ initialSkills, initialChannels }: { initialSkills: Skill[
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-800">{skill.name}</h3>
-                      <p className="text-xs text-gray-500">{skill.channel?.[0] || '通用'}</p>
+                      <p className="text-xs text-gray-500">
+                        {skill.channel?.[0] || '通用'}
+                        {skill.robot_id && (
+                          <span className="ml-2 text-primary">
+                            👤 {robots.find(r => r.id === skill.robot_id)?.name || `Agent #${skill.robot_id}`}
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
                 </div>
