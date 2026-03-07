@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
 
     // 注册机器人
     if (action === 'register') {
-      const { name, description } = body
+      const { name, description, review_api_url } = body
       if (!name) {
         return NextResponse.json({ error: '需要 name 参数' }, { status: 400 })
       }
@@ -209,7 +209,12 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
         },
-        body: JSON.stringify({ name, description: description || '', api_key: apiKey })
+        body: JSON.stringify({ 
+          name, 
+          description: description || '', 
+          api_key: apiKey,
+          review_api_url: review_api_url || null  // 首次注册时可设置回调地址
+        })
       })
 
       const robot = await res.json()
