@@ -195,6 +195,11 @@ export async function POST(
           body: JSON.stringify({ downloads: (skill.downloads || 0) + 1 })
         }
       )
+      
+      // 触发一轮评价（让其他Agent评价这个技能）
+      // 注意：这是异步的，不会影响下载响应
+      triggerReviewForSkill(skillId, skill).catch(console.error)
+      
       return NextResponse.json({ success: true, downloads: (skill.downloads || 0) + 1 })
     }
     
@@ -243,5 +248,117 @@ export async function POST(
     
   } catch (error) {
     return NextResponse.json({ error: '操作失败' }, { status: 500 })
+  }
+}
+
+// 触发评价指定技能
+async function triggerReviewForSkill(skillId: string, skill: any) {
+  try {
+    // 获取已注册回调的机器人
+    const robotsRes = await fetch(
+      `${supabaseUrl}/rest/v1/robots?select=id,name,review_api_url&review_api_url=not.is.null`,
+      {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`
+        }
+      }
+    )
+    const robots = await robotsRes.json()
+    
+    if (!robots || robots.length === 0) return
+    
+    // 随机选一个Agent来评价（排除技能作者）
+    const eligibleRobots = robots.filter((r: any) => r.id !== skill.robot_id)
+    if (eligibleRobots.length === 0) return
+    
+    const reviewer = eligibleRobots[Math.floor(Math.random() * eligibleRobots.length)]
+    
+    try {
+      const reviewReq = await fetch(reviewer.review_api_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          skill_id: skill.id,
+          skill_name: skill.name,
+          skill_description: skill.description,
+          skill_github: skill.github,
+          action: 'review',
+          trigger: 'download' // 触发来源
+        }),
+        signal: AbortSignal.timeout(10000)
+      })
+      
+      if (reviewReq.ok) {
+        const reviewData = await reviewReq.json()
+        
+        if (reviewData.rating && reviewData.comment) {
+          // 写入评价
+          await fetch(
+            `${supabaseUrl}/rest/v1/reviews`,
+            {
+              method: 'POST',
+              headers: {
+                'apikey': supabaseKey,
+                'Authorization': `Bearer ${supabaseKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                skill_id: skill.id,
+                robot_id: reviewer.id,
+                rating: reviewData.rating,
+                content: reviewData.comment
+              })
+            }
+          )
+          
+          // 通知技能作者有人评价了他的技能
+          notifySkillAuthor(skill, reviewer, reviewData).catch(console.error)
+        }
+      }
+    } catch (err) {
+      console.error('Review trigger failed:', err)
+    }
+  } catch (err) {
+    console.error('Failed to trigger review:', err)
+  }
+}
+
+// 通知技能作者有新评论
+async function notifySkillAuthor(skill: any, reviewer: any, reviewData: any) {
+  // 获取技能作者的回调地址
+  if (!skill.robot_id) return
+  
+  const authorRes = await fetch(
+    `${supabaseUrl}/rest/v1/robots?id=eq.${skill.robot_id}&select=id,name,review_api_url`,
+    {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
+    }
+  )
+  const authors = await authorRes.json()
+  const author = authors?.[0]
+  
+  if (!author?.review_api_url) return
+  
+  try {
+    await fetch(author.review_api_url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        skill_id: skill.id,
+        skill_name: skill.name,
+        action: 'notification',
+        notification_type: 'new_review',
+        reviewer: reviewer.name,
+        rating: reviewData.rating,
+        comment: reviewData.comment
+      }),
+      signal: AbortSignal.timeout(5000)
+    })
+  } catch (err) {
+    console.error('Notification failed:', err)
   }
 }
