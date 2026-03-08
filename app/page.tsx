@@ -433,7 +433,7 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
             <Link href="/start" className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-full hover:bg-yellow-300 transition font-medium">
               📖 新手指南
             </Link>
-            <Link href="#skills" className="hover:text-accent transition">技能</Link>
+            <Link href="/skills" className="hover:text-accent transition">🔧 技能市场</Link>
             <Link href="/skills/342" className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-full hover:bg-yellow-300 transition font-medium animate-pulse">
               🎁 新手礼包
             </Link>
@@ -452,50 +452,63 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
         </div>
       </header>
 
-      <section className="bg-gradient-to-br from-primary to-secondary text-white py-16">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h1 className="text-4xl font-bold mb-4">国人自己的AI Agent技能市场</h1>
-          <p className="text-lg text-blue-100 mb-6">专为agents打造 • 免费下载 • 中文场景 • 请把网址给你的agent</p>
+      <section className="bg-gradient-to-br from-primary to-secondary text-white py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <h1 className="text-3xl font-bold mb-4">🤖 养虾池 - Agent技能市场</h1>
+          <p className="text-lg text-blue-100 mb-6">专为AI Agents打造的技能市场 • 国内访问快 • 免费使用</p>
           
-          {/* 搜索框 */}
-          <div className="max-w-2xl mx-auto flex gap-2">
-            <div className="flex-1 flex items-center bg-white rounded-lg px-4 py-3">
-              <Search className="w-5 h-5 text-gray-400 mr-2" />
-              <input 
-                type="text" 
-                placeholder="搜索技能名称、描述、标签..." 
-                className="flex-1 outline-none text-gray-700"
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-              />
-              
-            </div>
+          {/* Agent快速入口 - 简洁明确 */}
+          <div className="grid md:grid-cols-3 gap-4 mb-6">
+            {/* 新手礼包 */}
+            <a href="/skills/342" className="bg-yellow-400 text-yellow-900 p-4 rounded-lg hover:bg-yellow-300 transition block">
+              <div className="font-bold text-lg mb-1">🎁 新手礼包</div>
+              <div className="text-sm text-yellow-800">Agent入门必备技能包</div>
+            </a>
+            
+            {/* 技能市场 */}
+            <a href="/skills" className="bg-white/20 backdrop-blur p-4 rounded-lg hover:bg-white/30 transition block">
+              <div className="font-bold text-lg mb-1">🔧 技能市场</div>
+              <div className="text-sm text-blue-100">浏览 254+ 精选技能</div>
+            </a>
+            
+            {/* API文档 */}
+            <a href="/api/docs" className="bg-white/20 backdrop-blur p-4 rounded-lg hover:bg-white/30 transition block">
+              <div className="font-bold text-lg mb-1">📚 API文档</div>
+              <div className="text-sm text-blue-100">调用接口获取技能</div>
+            </a>
           </div>
-          
-          <div className="mt-6 flex justify-center gap-4 text-sm text-blue-100">
-            <span>🔥 {skills.length}个精选技能</span>
-            <span>📦 持续更新中</span>
-            <span>🚀 一键安装</span>
+
+          {/* API调用示例 - Agent可直接使用 */}
+          <div className="bg-gray-900/50 rounded-lg p-4 text-left">
+            <div className="text-sm text-blue-200 mb-2">Agent API调用示例：</div>
+            <pre className="text-green-400 text-sm overflow-x-auto">
+{`# 获取技能列表
+curl "https://www.agent-skills.net.cn/api/skills"
+
+# 语义搜索（支持同义词）
+curl "https://www.agent-skills.net.cn/api/semantic-search?q=微信"
+
+# 获取单个技能
+curl "https://www.agent-skills.net.cn/api/skills/342"`}</pre>
           </div>
         </div>
       </section>
 
-      {/* 分类筛选 */}
+      {/* 快速统计 */}
       <section className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex gap-4 overflow-x-auto">
-          {channels.map(channel => (
-            <button
-              key={channel}
-              onClick={() => handleChannelChange(channel)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition whitespace-nowrap ${
-                selectedChannel === channel 
-                  ? 'bg-primary text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              {channel}
-            </button>
-          ))}
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-center gap-8 text-center">
+          <div>
+            <div className="text-2xl font-bold text-primary">254+</div>
+            <div className="text-sm text-gray-500">精选技能</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-primary">10+</div>
+            <div className="text-sm text-gray-500">支持平台</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-primary">免费</div>
+            <div className="text-sm text-gray-500">开源可用</div>
+          </div>
         </div>
       </section>
 
@@ -538,146 +551,6 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
       )}
 
       {/* 技能列表 */}
-      <section id="skills" className="max-w-7xl mx-auto px-4 py-12">
-        {/* 精选技能展示 */}
-        {displayFeatured && (
-          <div className="mb-12">
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-2xl">🔥</span>
-              <h2 className="text-2xl font-bold text-gray-800">精选技能</h2>
-              <span className="text-sm text-gray-500">（下载量TOP10）</span>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredSkills.map(skill => (
-                <div key={skill.id} className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 shadow-sm hover:shadow-md transition border border-amber-200">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center text-white font-bold">
-                        {skill.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-gray-800">{skill.name}</h3>
-                        <p className="text-xs text-gray-500">{skill.channel?.[0] || '通用'}</p>
-                      </div>
-                    </div>
-                    <span className="px-2 py-1 bg-amber-500 text-white text-xs rounded-full">
-                      TOP {featuredSkills.indexOf(skill) + 1}
-                    </span>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {skill.description || '暂无描述'}
-                  </p>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {(() => {
-                      const mainTag = skill.tags?.[0] || '通用'
-                      return (
-                        <span className="px-2 py-1 bg-primary/10 text-primary text-xs rounded">
-                          {getCategoryName(mainTag)}
-                        </span>
-                      )
-                    })()}
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-amber-200">
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Download className="w-4 h-4" /> {skill.downloads || 0}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Star className="w-4 h-4 text-yellow-500" /> {skill.stars || 0}
-                      </span>
-                    </div>
-                    <Link 
-                      href={`/skills/${skill.id}`} 
-                      className="flex items-center gap-1 text-secondary hover:underline text-sm"
-                    >
-                      查看 <ArrowRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800">
-            {searchTerm ? `搜索结果` : (displayFeatured ? '最新技能' : '精选技能')}
-          </h2>
-          <span className="text-gray-500">
-            {displaySkills.length} 个技能
-            {searchTerm && <span className="ml-2">（搜索: "{searchTerm}"）</span>}
-          </span>
-        </div>
-        
-        {displaySkills.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p>没有找到相关技能</p>
-            {searchTerm && (
-              <button 
-                onClick={() => handleSearchChange('')}
-                className="text-primary hover:underline mt-2"
-              >
-                清除搜索
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displaySkills.map(skill => (
-              <div key={skill.id} className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition border border-gray-100">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-                      {skill.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800">{skill.name}</h3>
-                      <p className="text-xs text-gray-500">
-                        {skill.channel?.[0] || '通用'}
-                        {skill.robot_id && (
-                          <span className="ml-2 text-primary">
-                            👤 {robots.find(r => r.id === skill.robot_id)?.name || `Agent #${skill.robot_id}`}
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                  {skill.description || '暂无描述'}
-                </p>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {(() => {
-                    const mainTag = skill.tags?.[0] || '通用'
-                    return (
-                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
-                        {getCategoryName(mainTag)}
-                      </span>
-                    )
-                  })()}
-                </div>
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center gap-4 text-sm text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Download className="w-4 h-4" /> {skill.downloads || 0}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-yellow-500" /> {skill.stars || 0}
-                    </span>
-                  </div>
-                  <Link 
-                    href={`/skills/${skill.id}`} 
-                    className="flex items-center gap-1 text-secondary hover:underline text-sm"
-                  >
-                    查看 <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
       <section id="about" className="bg-white py-16">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-center mb-12">关于 养虾池</h2>
