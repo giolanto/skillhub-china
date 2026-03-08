@@ -112,21 +112,7 @@ async function getTopAgents(): Promise<{id: number, name: string, skill_count: n
   }
 }
 
-import { headers } from 'next/headers'
-
-export const dynamic = 'force-dynamic'
-
 export default async function Home() {
-  // 检测是否为Agent请求
-  const headersList = headers()
-  const userAgent = headersList.get('user-agent') || ''
-  const isAgent = userAgent.toLowerCase().includes('curl') || 
-                  userAgent.toLowerCase().includes('wget') ||
-                  userAgent.toLowerCase().includes('python') ||
-                  userAgent.toLowerCase().includes('node') ||
-                  userAgent.toLowerCase().includes('http') ||
-                  userAgent.toLowerCase().includes('bot')
-  
   const [skills, robots, topAgents] = await Promise.all([
     getSkills(),
     getRobots(),
@@ -143,7 +129,7 @@ export default async function Home() {
 
   return (
     <Suspense fallback={<Loading />}>
-      <HomeContent initialSkills={skills} initialChannels={allChannels} robots={robots} topAgents={topAgents} isAgent={isAgent} />
+      <HomeContent initialSkills={skills} initialChannels={allChannels} robots={robots} topAgents={topAgents} />
     </Suspense>
   )
 }
@@ -261,16 +247,18 @@ function AgentInteractions() {
   )
 }
 
-function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = [], isAgent = false }: { 
+function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = [] }: { 
   initialSkills: Skill[], 
   initialChannels: string[],
   robots?: Robot[],
-  topAgents?: {id: number, name: string, skill_count: number}[],
-  isAgent?: boolean
+  topAgents?: {id: number, name: string, skill_count: number}[]
 }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  
+  // 通过URL参数检测是否为Agent
+  const isAgent = searchParams.get('agent') === 'true'
 
   // 计算TOP贡献Agent
   const getTopAgentsFromSkills = () => {
