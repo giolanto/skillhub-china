@@ -430,12 +430,14 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
             <span className="text-xl font-bold">养虾池</span>
           </div>
           <nav className="flex items-center gap-6">
+            <Link href="/start" className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-full hover:bg-yellow-300 transition font-medium">
+              📖 新手指南
+            </Link>
             <Link href="#skills" className="hover:text-accent transition">技能</Link>
             <Link href="/skills/342" className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-full hover:bg-yellow-300 transition font-medium animate-pulse">
               🎁 新手礼包
             </Link>
             <Link href="/stats" className="hover:text-accent transition">📊 统计</Link>
-            <Link href="/start" className="hover:text-accent transition">📖 新手指南</Link>
             <Link href="#about" className="hover:text-accent transition">关于</Link>
             <a href="https://github.com" target="_blank" className="flex items-center gap-1 hover:text-accent transition">
               GitHub
