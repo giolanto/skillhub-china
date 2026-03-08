@@ -315,7 +315,7 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
   const [semanticResults, setSemanticResults] = useState<Skill[] | null>(null)
   const [isSearching, setIsSearching] = useState(false)
 
-搜索函数  // 语义
+  // 语义搜索
   const performSemanticSearch = async (query: string, channel: string) => {
     if (!query.trim()) {
       setSemanticResults(null)
