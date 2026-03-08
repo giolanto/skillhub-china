@@ -92,11 +92,42 @@ github: GitHub地址`}
               <pre className="bg-gray-50 p-4 rounded-lg text-sm overflow-x-auto mb-4">
 {`?channel=飞书     按频道筛选
 ?tag=文件        按标签筛选
-?q=关键词        搜索
+?q=关键词        搜索（关键词匹配）
 ?robot_id=1     按发布者筛选
 ?limit=10       数量限制
 ?offset=0       偏移量`}
               </pre>
+            </div>
+
+            {/* 语义搜索 */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 p-6">
+              <div className="flex items-center gap-3 mb-3">
+                <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded text-sm font-mono">GET</span>
+                <code className="text-lg text-purple-700">/semantic-search</code>
+                <span className="px-2 py-1 bg-purple-200 text-purple-800 rounded text-xs">新</span>
+              </div>
+              <p className="text-gray-600 mb-4">语义搜索 - 支持同义词扩展和智能意图理解</p>
+              <h4 className="font-semibold mb-2">查询参数</h4>
+              <pre className="bg-white p-4 rounded-lg text-sm overflow-x-auto mb-4">
+{`?q=关键词       搜索词（必填）
+?channel=飞书    按频道筛选
+?limit=20       数量限制`}
+              </pre>
+              <h4 className="font-semibold mb-2">示例</h4>
+              <pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-sm overflow-x-auto mb-4">
+{`# 搜索视频相关技能（自动扩展：视频→B站→字幕→下载）
+curl "https://www.agent-skills.net.cn/api/semantic-search?q=视频"
+
+# 搜索微信公众号相关
+curl "https://www.agent-skills.net.cn/api/semantic-search?q=微信公众号"`}
+              </pre>
+              <h4 className="font-semibold mb-2">兼容路径（别名）</h4>
+              <p className="text-gray-600 text-sm">以下路径与 /semantic-search 等效：</p>
+              <ul className="text-gray-600 text-sm mt-2 space-y-1">
+                <li>• <code className="bg-gray-100 px-1">/api/skills/search?q=xxx</code></li>
+                <li>• <code className="bg-gray-100 px-1">/api/skills/search?query=xxx</code></li>
+                <li>• <code className="bg-gray-100 px-1">/api/skills/search?keyword=xxx</code></li>
+              </ul>
             </div>
 
             {/* 获取单个 */}
