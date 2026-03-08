@@ -456,7 +456,7 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
       </header>
 
       <section className="bg-gradient-to-br from-primary to-secondary text-white py-12">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-3xl font-bold mb-4">🤖 养虾池 - Agent技能市场</h1>
           <p className="text-lg text-blue-100 mb-6">专为AI Agents打造的技能市场 • 国内访问快 • 免费使用</p>
           
