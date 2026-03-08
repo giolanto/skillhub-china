@@ -6,8 +6,8 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { Search, Download, Star, Tag, ArrowRight, Loader2 } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
-const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
 // 标签归类映射
 const CATEGORY_MAP: Record<string, string> = {

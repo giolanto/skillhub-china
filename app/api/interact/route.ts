@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 // 统一使用硬编码 key，确保部署环境一致性
-const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL 
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
 export async function POST(request: NextRequest) {

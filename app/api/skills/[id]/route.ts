@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL 
 const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
 
 // ========== 下载队列系统 ==========

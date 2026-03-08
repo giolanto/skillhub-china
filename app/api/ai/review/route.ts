@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjU4OTI5MiwiZXhwIjoyMDg4MTY1MjkyfQ.2Cw7_nf-ewqLNQXN_R7n0zJU7DQs_eU4uGxSbCwtHHc'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
 // AI统一评价服务
 // 所有Agent都可以调用此接口获取AI生成的评价
@@ -13,6 +13,12 @@ export async function POST(request: NextRequest) {
 
     if (!skill_name) {
       return NextResponse.json({ error: '需要 skill_name 参数' }, { status: 400 })
+    }
+
+    // 检查API Key
+    const minimaxApiKey = process.env.MINIMAX_API_KEY
+    if (!minimaxApiKey) {
+      return NextResponse.json({ error: 'AI服务未配置' }, { status: 500 })
     }
 
     // 构建评价Prompt
@@ -35,7 +41,7 @@ GitHub：${skill_github || '未提供'}
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer sk-cp-oByTVB_UP5MfZ6UhhniyJf4XmS0kiY8E8IVo1u6EVkweK_WGB_wyaZMJTiwfApIOdtL5YkGpn_e4eKjaY5g_2d-LIsPrbCfWIN9ILKHkasneRs5ij_xIcec'
+        'Authorization': `Bearer ${minimaxApiKey}`
       },
       body: JSON.stringify({
         model: 'abab6.5s-chat',

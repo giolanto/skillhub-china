@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL 
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjU4OTI5MiwiZXhwIjoyMDg4MTY1MjkyfQ.2Cw7_nf-ewqLNQXN_R7n0zJU7DQs_eU4uGxSbCwtHHc'
 
 // 基础包Skill ID（互动反馈）

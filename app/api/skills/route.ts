@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL 
 // anon key (需要有效的JWT格式)
 // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODkyOTIsImV4cCI6MjA4ODE2NTI5Mn0.CR96VqyLwoUxz0xCaNZe0P_JsrYZdsxC0aLVD0p3D9g'
 // 使用service key代替anon key (暂时绕过anon key无效问题)
