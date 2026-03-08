@@ -89,11 +89,8 @@ export async function GET(request: NextRequest) {
     const expandedTerms = expandSearchTerms(query)
     const intents = understandIntent(query)
     
-    // 2. 构建多条件搜索查询
-    let orConditions = expandedTerms.map(term => `(name.ilike.*${term}*,description.ilike.*${term}*,tags.cs.{${term}*})`).join(',')
-    
-    // 3. 执行搜索
-    let queryUrl = `${supabaseUrl}/rest/v1/skills?select=*&or=(${orConditions})&order=downloads.desc&limit=${limit}`
+    // 2. 先获取所有技能，然后在代码中过滤（避免PostgREST复杂嵌套问题）
+    let queryUrl = `${supabaseUrl}/rest/v1/skills?select=*&order=downloads.desc&limit=100`
     
     if (channel) {
       queryUrl += `&channel=cs.{${channel}}`
@@ -102,36 +99,49 @@ export async function GET(request: NextRequest) {
     const res = await fetch(queryUrl, {
       headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
     })
-    let skills = await res.json()
+    let allSkills = await res.json()
 
-    // 4. 智能排序（相关度）
-    if (skills && skills.length > 0) {
-      skills = skills.map((skill: any) => {
-        let score = skill.downloads || 0
-        
-        // 精确匹配加分
-        const lowerQuery = query.toLowerCase()
-        if (skill.name?.toLowerCase().includes(lowerQuery)) score += 100
-        if (skill.description?.toLowerCase().includes(lowerQuery)) score += 50
-        
-        // 同义词匹配加分
-        for (const term of expandedTerms) {
-          if (skill.name?.toLowerCase().includes(term.toLowerCase())) score += 30
-          if (skill.tags?.some((t: string) => t.toLowerCase().includes(term.toLowerCase()))) score += 20
-        }
-        
-        // 意图匹配加分
-        for (const intent of intents) {
-          if (skill.name?.toLowerCase().includes(intent)) score += 15
-          if (skill.description?.toLowerCase().includes(intent)) score += 10
-        }
-        
-        return { ...skill, _relevanceScore: score }
-      })
+    // 3. 在代码中进行语义过滤
+    const lowerQuery = query.toLowerCase()
+    const searchTokens = [...expandedTerms, ...intents]
+    
+    let skills = (allSkills || []).filter((skill: any) => {
+      const searchText = [
+        skill.name || '',
+        skill.description || '',
+        ...(skill.tags || [])
+      ].join(' ').toLowerCase()
       
-      // 按相关度排序
-      skills.sort((a: any, b: any) => b._relevanceScore - a._relevanceScore)
-    }
+      // 检查是否匹配任何搜索词
+      return searchTokens.some(token => 
+        searchText.includes(token.toLowerCase())
+      )
+    }).map((skill: any) => {
+      let score = skill.downloads || 0
+      
+      // 精确匹配加分
+      if (skill.name?.toLowerCase().includes(lowerQuery)) score += 100
+      if (skill.description?.toLowerCase().includes(lowerQuery)) score += 50
+      
+      // 同义词匹配加分
+      for (const term of expandedTerms) {
+        if (skill.name?.toLowerCase().includes(term.toLowerCase())) score += 30
+        if (skill.tags?.some((t: string) => t.toLowerCase().includes(term.toLowerCase()))) score += 20
+      }
+      
+      // 意图匹配加分
+      for (const intent of intents) {
+        if (skill.name?.toLowerCase().includes(intent)) score += 15
+        if (skill.description?.toLowerCase().includes(intent)) score += 10
+      }
+      
+      return { ...skill, _relevanceScore: score }
+    })
+    
+    // 按相关度排序并限制数量
+    skills = skills
+      .sort((a: any, b: any) => b._relevanceScore - a._relevanceScore)
+      .slice(0, Number(limit))
 
     return NextResponse.json({
       skills: skills || [],
