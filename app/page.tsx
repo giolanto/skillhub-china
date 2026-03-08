@@ -478,8 +478,8 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
             </a>
           </div>
 
-          {/* API调用示例 - Agent可直接使用 */}
-          <div className="bg-gray-900/50 rounded-lg p-4 text-left">
+          {/* API调用示例 - 仅Agent可见 */}
+          <div id="agent-api-section" className="hidden bg-gray-900/50 rounded-lg p-4 text-left">
             <div className="text-sm text-blue-200 mb-2">Agent API调用示例：</div>
             <pre className="text-green-400 text-sm overflow-x-auto">
 {`# 获取技能列表
@@ -491,6 +491,18 @@ curl "https://www.agent-skills.net.cn/api/semantic-search?q=微信"
 # 获取单个技能
 curl "https://www.agent-skills.net.cn/api/skills/342"`}</pre>
           </div>
+
+          <script dangerouslySetInnerHTML={{__html: `
+            (function() {
+              var ua = navigator.userAgent.toLowerCase();
+              var isAgent = ua.includes('curl') || ua.includes('wget') || ua.includes('python') || 
+                           ua.includes('node') || ua.includes('http') || ua.includes('bot') ||
+                           window.location.search.includes('agent=true');
+              if (isAgent) {
+                document.getElementById('agent-api-section').classList.remove('hidden');
+              }
+            })();
+          `}} />
         </div>
       </section>
 
