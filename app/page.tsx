@@ -311,10 +311,46 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
     router.push(newUrl)
   }
 
+  // 语义搜索状态
+  const [semanticResults, setSemanticResults] = useState<Skill[] | null>(null)
+  const [isSearching, setIsSearching] = useState(false)
+
+搜索函数  // 语义
+  const performSemanticSearch = async (query: string, channel: string) => {
+    if (!query.trim()) {
+      setSemanticResults(null)
+      setIsSearching(false)
+      return
+    }
+    
+    setIsSearching(true)
+    try {
+      const params = new URLSearchParams({ q: query })
+      if (channel && channel !== '全部') params.set('channel', channel)
+      
+      const res = await fetch(`/api/semantic-search?${params}`)
+      const data = await res.json()
+      
+      if (data.skills) {
+        setSemanticResults(data.skills)
+      }
+    } catch (e) {
+      console.error('语义搜索失败', e)
+    }
+    setIsSearching(false)
+  }
+
   // 搜索处理
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
     updateUrl(selectedChannel, value)
+    
+    // 触发语义搜索
+    if (value.trim()) {
+      performSemanticSearch(value, selectedChannel)
+    } else {
+      setSemanticResults(null)
+    }
   }
 
   // 频道筛选处理
@@ -360,7 +396,7 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
     }
   }
 
-  const filteredSkills = (skills || []).filter(skill => {
+  const filteredSkills = (semanticResults || skills || []).filter(skill => {
     const matchesSearch = !searchTerm || 
       (skill.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
       (skill.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
