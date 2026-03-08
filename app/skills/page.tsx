@@ -53,6 +53,14 @@ export default function SkillsPage() {
     return matchChannel && matchSearch
   })
 
+  // 精选技能（下载量前10）
+  const featuredSkills = [...skills]
+    .filter(s => (s.downloads || 0) > 0)
+    .sort((a, b) => (b.downloads || 0) - (a.downloads || 0))
+    .slice(0, 10)
+
+  const showFeatured = featuredSkills.length > 0 && !searchTerm && selectedChannel === '全部'
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary text-white">
@@ -101,6 +109,38 @@ export default function SkillsPage() {
             </button>
           ))}
         </div>
+
+        {/* 精选技能 - 下载量前10 */}
+        {showFeatured && (
+          <section className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xl">🔥</span>
+              <h2 className="text-xl font-bold text-gray-800">热门下载 TOP 10</h2>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {featuredSkills.map((skill, index) => (
+                <Link 
+                  key={skill.id}
+                  href={`/skills/${skill.id}`}
+                  className="bg-white rounded-lg border p-4 hover:shadow-md transition hover:border-primary"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-lg font-bold ${index < 3 ? 'text-orange-500' : 'text-gray-400'}`}>
+                      {index + 1}
+                    </span>
+                    <h3 className="font-bold text-gray-800 truncate">{skill.name}</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 line-clamp-2 mb-2">{skill.description}</p>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Download className="w-4 h-4" /> {skill.downloads || 0}
+                    </span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 技能列表 */}
         {loading ? (
