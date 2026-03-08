@@ -2,5 +2,12 @@
   "rewrites": [
     { "source": "/robots.txt", "destination": "/robots.txt" },
     { "source": "/sitemap.xml", "destination": "/sitemap.xml" }
+  ],
+  "redirects": [
+    {
+      "source": "/search",
+      "destination": "/",
+      "permanent": false
+    }
   ]
 }
