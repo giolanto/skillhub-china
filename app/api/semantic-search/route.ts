@@ -42,7 +42,7 @@ function expandSearchTerms(query: string): string[] {
     }
   }
   
-  return [...new Set(terms)]
+  return Array.from(new Set(terms))
 }
 
 // AI意图理解（轻量版 - 使用规则）
