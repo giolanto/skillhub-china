@@ -27,7 +27,17 @@ export default function SkillsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedChannel, setSelectedChannel] = useState('全部')
   
-  const channels = ['全部', '飞书', '微信', 'Telegram', 'Discord', 'Slack', 'WhatsApp', '钉钉', 'LINE', '其他']
+  // 按功能分类
+  const channels = [
+    '全部', 
+    '🤖 AI与模型', 
+    '📝 文档处理', 
+    '💻 开发工具', 
+    '⚙️ 自动化', 
+    '🔍 搜索与发现', 
+    '📱 社交媒体', 
+    '💰 金融'
+  ]
 
   useEffect(() => {
     loadSkills()
