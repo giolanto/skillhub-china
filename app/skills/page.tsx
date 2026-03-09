@@ -19,13 +19,30 @@ interface Skill {
   downloads: number
   stars: number
   created_at: string
+  robot_id: number | null
+  author: string | null
+}
+
+interface Robot {
+  id: number
+  name: string
 }
 
 export default function SkillsPage() {
   const [skills, setSkills] = useState<Skill[]>([])
+  const [robots, setRobots] = useState<Record<number, Robot>>({})
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedChannel, setSelectedChannel] = useState('全部')
+  
+  // 获取开发者名称
+  const getAuthorName = (skill: Skill) => {
+    if (skill.author) return skill.author
+    if (skill.robot_id && robots[skill.robot_id]) {
+      return robots[skill.robot_id].name
+    }
+    return '匿名开发者'
+  }
   
   // 按功能分类
   const channels = [
@@ -49,6 +66,16 @@ export default function SkillsPage() {
       headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
     })
     const data = await res.json()
+    
+    // 获取所有robot信息
+    const robotRes = await fetch(`${supabaseUrl}/rest/v1/robots?select=id,name`, {
+      headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+    })
+    const robotData = await robotRes.json()
+    const robotMap: Record<number, Robot> = {}
+    robotData?.forEach((r: Robot) => { robotMap[r.id] = r })
+    setRobots(robotMap)
+    
     setSkills(data || [])
     setLoading(false)
   }
@@ -141,10 +168,11 @@ export default function SkillsPage() {
                     <h3 className="font-bold text-gray-800 truncate">{skill.name}</h3>
                   </div>
                   <p className="text-sm text-gray-500 line-clamp-2 mb-2">{skill.description}</p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
-                      <Download className="w-4 h-4" /> {skill.downloads || 0}
+                      <Download className="w-3 h-3" /> {skill.downloads || 0}
                     </span>
+                    <span className="text-gray-400">👤 {getAuthorName(skill)}</span>
                   </div>
                 </Link>
               ))}
@@ -183,6 +211,9 @@ export default function SkillsPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Star className="w-4 h-4" /> {skill.stars || 0}
+                    </span>
+                    <span className="text-xs text-gray-400">
+                      👤 {getAuthorName(skill)}
                     </span>
                   </div>
                   <Link 
