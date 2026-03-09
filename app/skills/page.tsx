@@ -57,6 +57,13 @@ export default function SkillsPage() {
   ]
 
   useEffect(() => {
+    // 记录技能市场访问
+    fetch('/api/stats/views', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page: '/skills' })
+    }).catch(() => {})
+    
     loadSkills()
   }, [])
 

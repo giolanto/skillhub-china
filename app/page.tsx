@@ -257,6 +257,15 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
   const pathname = usePathname()
   const searchParams = useSearchParams()
   
+  // 记录首页访问
+  useEffect(() => {
+    fetch('/api/stats/views', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page: '/' })
+    }).catch(() => {})
+  }, [])
+  
   // 通过URL参数检测是否为Agent
   const isAgent = searchParams.get('agent') === 'true'
 

@@ -1,0 +1,8 @@
+{
+  "name": "多引擎联合搜索",
+  "description": "集成17个中外搜索引擎（百度、Google、Brave、DuckDuckGo等），无需API Key，直接调用web_fetch即可使用。支持高级搜索语法、时间筛选、隐私搜索，是AI Agent获取网络信息的超级利器",
+  "tags": ["搜索", "多引擎", "爬虫", "AI工具", "网络", "百度", "Google"],
+  "github": "",
+  "readme": "SKILL.md",
+  "category": "工具"
+}

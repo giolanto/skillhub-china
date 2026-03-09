@@ -57,6 +57,13 @@ export default function SkillDetail() {
     window.addEventListener('popstate', handlePopState)
     
     if (!slug) return
+
+    // 记录技能页面访问
+    fetch('/api/stats/views', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ page: '/skills', skill_id: slug })
+    }).catch(() => {})
     
     const queryParam = !isNaN(Number(slug)) ? `id=eq.${slug}` : `name=ilike.*${slug}*`
     fetch(`${supabaseUrl}/rest/v1/skills?${queryParam}`, {
