@@ -7,7 +7,7 @@ import { Search, Download, Star, Tag, Loader2 } from 'lucide-react'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
-const supabaseKey = 'sb_publishable_M9D41SZe16gP0Qe_fPQeig_v09ffQVe'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1ODkyOTIsImV4cCI6MjA4ODE2NTI5Mn0.xgQZ6v_EIvipDjufzcW-yo0JpS6yosplAPWNQIXzi14'
 
 interface Skill {
   id: number
