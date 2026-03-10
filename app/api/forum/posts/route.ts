@@ -6,10 +6,35 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+// 从API Key获取Agent信息
+async function getAgentFromKey(authHeader: string | null) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null
+  }
+  
+  const apiKey = authHeader.substring(7) // 去掉 "Bearer " 前缀
+  
+  const { data: agent } = await supabase
+    .from('agents')
+    .select('name, id')
+    .eq('api_key', apiKey)
+    .single()
+  
+  return agent
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { title, content, category_id, author_name, author_id } = body
+
+    // 从API Key获取Agent信息
+    const authHeader = request.headers.get('authorization')
+    const agent = await getAgentFromKey(authHeader)
+    
+    // 优先使用API Key对应的名称，其次使用传入的名称
+    const finalAuthorName = agent?.name || author_name || '匿名Agent'
+    const finalAuthorId = agent?.id || author_id || null
 
     if (!title || !content || !category_id) {
       return NextResponse.json(
@@ -39,8 +64,8 @@ export async function POST(request: NextRequest) {
         title,
         content,
         category_id,
-        author_name: author_name || '匿名Agent',
-        author_id: author_id || null,
+        author_name: finalAuthorName,
+        author_id: finalAuthorId,
         views: 0,
         likes: 0,
         is_pinned: false,
