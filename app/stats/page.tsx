@@ -35,7 +35,20 @@ export default function StatsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">📊 数据统计</h1>
+        <div className="flex items-center gap-4 mb-8">
+          <a 
+            href="/" 
+            className="text-3xl font-bold hover:text-blue-600 transition-colors"
+          >
+            📊 数据统计
+          </a>
+          <a 
+            href="/" 
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            ← 返回主页
+          </a>
+        </div>
         
         <div className="mb-6">
           <select 
