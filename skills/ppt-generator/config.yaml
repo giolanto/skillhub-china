@@ -1,0 +1,86 @@
+# PPT生成器配置文件
+
+output: "OpenClaw演示.pptx"
+
+# 主题配色：blue-red, blue-yellow, red-gold, green-orange, purple-gold
+theme: "blue-red"
+
+# 标题配置
+title: "OpenClaw应用场景分析"
+subtitle: "多渠道AI助手 | 个人助理自动化 | 工作流效率提升"
+
+# 页面配置
+pages:
+  cover: true
+  toc: true
+  intro: true
+  features: true
+  scenarios: true
+  cases: true
+  summary: true
+  ending: true
+
+# 图片配置
+images:
+  dir: "images"
+  cover: "tech.jpg"
+  intro: "robot.jpg"
+  features: "ai_assistant.jpg"
+  scenarios: "office.jpg"
+  ending: "tech.jpg"
+
+# 内容配置
+content:
+  intro:
+    - "运行在自有设备上"
+    - "支持20+消息渠道"
+    - "本地运行，保护隐私"
+    - "支持语音、Canvas、浏览器自动化"
+
+  features:
+    - icon: "🔌"
+      title: "多渠道接入"
+      desc: "统一 inbox 管理"
+    - icon: "🧠"
+      title: "多Agent路由"
+      desc: "隔离会话处理"
+    - icon: "🎙️"
+      title: "语音交互"
+      desc: "Voice Wake + Talk"
+    - icon: "🔧"
+      title: "工具生态"
+      desc: "浏览器/文件/代码"
+
+  scenarios:
+    - icon: "👤"
+      title: "个人助理"
+      desc: "日程管理、邮件处理"
+    - icon: "🎬"
+      title: "内容创作"
+      desc: "文案写作、AI绘图"
+    - icon: "⚡"
+      title: "开发效率"
+      desc: "代码助手、技术调研"
+    - icon: "🚀"
+      title: "运营自动化"
+      desc: "数据监控、客服"
+
+  cases:
+    - icon: "🏠"
+      title: "个人数字助理"
+      desc: "整合所有通讯渠道"
+    - icon: "📰"
+      title: "AI资讯Daily"
+      desc: "自动抓取+推送新闻"
+    - icon: "🛒"
+      title: "闲鱼监控"
+      desc: "商品数据监控与分析"
+    - icon: "📚"
+      title: "知识管理"
+      desc: "第二大脑+语义搜索"
+
+  summary:
+    - "✅ 本地运行 - 数据隐私有保障"
+    - "✅ 多渠道统一 - 管理所有消息入口"
+    - "✅ 高度可扩展 - 技能市场生态"
+    - "✅ 持续进化 - 每天都在变强"

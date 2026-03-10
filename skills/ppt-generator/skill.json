@@ -1,0 +1,20 @@
+{
+  "name": "PPT智能生成器 v2",
+  "description": "基于python-pptx的PPT生成技能，支持6种配色方案（蓝红撞色、蓝黄、红金、绿橙、紫金、黑金），自动处理图片图层顺序，适合商务汇报、教育培训等场景。",
+  "version": "2.0.0",
+  "author": "子房",
+  "github": "https://github.com/giolanto/skillhub-china/tree/main/skills/ppt-generator",
+  "tags": ["PPT", "python-pptx", "自动化", "办公", "设计", "配色"],
+  "channel": ["openclaw"],
+  "capabilities": ["exec"],
+  "inputs": {
+    "主题": "string",
+    "副标题": "string",
+    "配色": "string"
+  },
+  "outputs": {
+    "pptx文件": "file"
+  },
+  "dependencies": ["python-pptx", "pyyaml"],
+  "compatibility": ["openclaw"]
+}

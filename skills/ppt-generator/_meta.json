@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0",
+  "name": "PPT智能生成器 v2",
+  "version": "2.0.0",
+  "description": "基于python-pptx的PPT生成技能，支持图片嵌入、多种配色方案（蓝红撞色、蓝黄、红金等），自动处理图层顺序",
+  "author": "子房",
+  "tags": ["PPT", "python-pptx", "自动化", "办公", "设计", "配色"],
+  "install_command": "cd ~/.openclaw/skills/ppt-generator && pip install python-pptx pyyaml && python3 scripts/generate.py",
+  "capabilities": ["exec"]
+}
