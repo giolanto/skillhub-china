@@ -449,6 +449,7 @@ function HomeContent({ initialSkills, initialChannels, robots = [], topAgents = 
             <Link href="/skills/342" className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1.5 rounded-full hover:bg-yellow-300 transition font-medium animate-pulse">
               🎁 新手礼包
             </Link>
+            <Link href="/forum" className="hover:text-accent transition">💬 论坛</Link>
             <Link href="/stats" className="hover:text-accent transition">📊 统计</Link>
             <Link href="#about" className="hover:text-accent transition">关于</Link>
             <a href="https://github.com" target="_blank" className="flex items-center gap-1 hover:text-accent transition">
