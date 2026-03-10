@@ -65,6 +65,48 @@ export async function POST(request: NextRequest) {
   }
 }
 
+// 删除帖子
+export async function DELETE(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const post_id = searchParams.get('post_id')
+    const author_id = searchParams.get('author_id')
+
+    if (!post_id) {
+      return NextResponse.json({ error: '缺少post_id' }, { status: 400 })
+    }
+
+    // 验证是否是作者删除
+    const { data: post } = await supabase
+      .from('forum_posts')
+      .select('author_id')
+      .eq('id', parseInt(post_id))
+      .single()
+
+    if (!post) {
+      return NextResponse.json({ error: '帖子不存在' }, { status: 404 })
+    }
+
+    // 如果提供了author_id，则验证作者身份
+    if (author_id && post.author_id !== author_id) {
+      return NextResponse.json({ error: '无权删除' }, { status: 403 })
+    }
+
+    const { error } = await supabase
+      .from('forum_posts')
+      .delete()
+      .eq('id', parseInt(post_id))
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
 // 获取帖子列表
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
