@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { page, skill_id } = body
     
-    // 记录到 page_views 表
+    // 记录到 page_views 表（适配现有表结构）
     const res = await fetch(`${supabaseUrl}/rest/v1/page_views`, {
       method: 'POST',
       headers: {
@@ -19,9 +19,8 @@ export async function POST(request: NextRequest) {
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify({
-        page: page || '/',
         skill_id: skill_id || null,
-        viewed_at: new Date().toISOString()
+        view_type: page || '/'
       })
     })
     
@@ -64,7 +63,7 @@ export async function GET(request: NextRequest) {
       // 获取今日访问量
       const today = new Date().toISOString().split('T')[0]
       const todayRes = await fetch(
-        `${supabaseUrl}/rest/v1/page_views?viewed_at=gt.${today}`,
+        `${supabaseUrl}/rest/v1/page_views?created_at=gt.${today}`,
         {
           headers: {
             'apikey': supabaseKey,
@@ -77,7 +76,7 @@ export async function GET(request: NextRequest) {
       
       // 获取热门页面
       const pagesRes = await fetch(
-        `${supabaseUrl}/rest/v1/page_views?select=page,skill_id&viewed_at=gt.${cutoffDate.toISOString()}`,
+        `${supabaseUrl}/rest/v1/page_views?select=view_type,skill_id&created_at=gt.${cutoffDate.toISOString()}`,
         {
           headers: {
             'apikey': supabaseKey,
@@ -91,7 +90,7 @@ export async function GET(request: NextRequest) {
       const pageStats: Record<string, number> = {}
       if (Array.isArray(pagesData)) {
         for (const p of pagesData) {
-          const key = p.skill_id ? `/skills/${p.skill_id}` : (p.page || '/')
+          const key = p.skill_id ? `/skills/${p.skill_id}` : (p.view_type || '/')
           pageStats[key] = (pageStats[key] || 0) + 1
         }
       }
