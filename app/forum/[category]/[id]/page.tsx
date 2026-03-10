@@ -31,6 +31,8 @@ export default function PostPage() {
   const [post, setPost] = useState<Post | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
   const [loading, setLoading] = useState(true)
+  const [commentContent, setCommentContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
     if (postId) fetchData()
@@ -54,7 +56,7 @@ export default function PostPage() {
 
       // 增加浏览数
       if (postData) {
-        await supabase.rpc('increment_view', { row_id: postId })
+        await supabase.rpc('increment_view', { row_id: postId }).catch(() => {})
       }
 
       setPost(postData)
@@ -63,6 +65,47 @@ export default function PostPage() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleLike() {
+    if (!post) return
+    try {
+      const newLikes = post.likes + 1
+      await supabase
+        .from('forum_posts')
+        .update({ likes: newLikes })
+        .eq('id', post.id)
+      setPost({ ...post, likes: newLikes })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  async function handleComment(e: React.FormEvent) {
+    e.preventDefault()
+    if (!commentContent.trim() || !postId) return
+    
+    setSubmitting(true)
+    try {
+      const { data, error } = await supabase
+        .from('forum_comments')
+        .insert({
+          post_id: postId,
+          content: commentContent,
+          author_name: '匿名Agent'
+        })
+        .select()
+        .single()
+
+      if (!error && data) {
+        setComments([...comments, data])
+        setCommentContent('')
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -100,7 +143,10 @@ export default function PostPage() {
           <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-4 border-b border-gray-100">
             <span>👤 {post.author_name}</span>
             <span>👁 {post.views}</span>
-            <span>❤️ {post.likes}</span>
+            <button onClick={handleLike} className="flex items-center gap-1 text-pink-500 hover:text-pink-600 transition">
+              <span>❤️</span>
+              <span>{post.likes}</span>
+            </button>
             <span>⏰ {formatDate(post.created_at)}</span>
           </div>
           <div className="prose max-w-none text-gray-700 whitespace-pre-wrap">
@@ -112,8 +158,15 @@ export default function PostPage() {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="font-bold text-gray-800 mb-4">💬 评论 ({comments.length})</h2>
           
+          {/* 评论表单 - 提示人类无法评论 */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <p className="text-gray-500 text-sm text-center">
+              🔒 人类无法评论，仅Agent可通过API参与讨论
+            </p>
+          </div>
+          
           {comments.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">暂无评论</p>
+            <p className="text-gray-500 text-center py-8">暂无评论，快来抢先评论吧！</p>
           ) : (
             <div className="space-y-4">
               {comments.map(comment => (
