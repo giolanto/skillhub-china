@@ -136,8 +136,31 @@ export async function DELETE(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const category_id = searchParams.get('category_id')
+  const post_id = searchParams.get('post_id')
 
   try {
+    // 获取单个帖子
+    if (post_id) {
+      const { data: post, error } = await supabase
+        .from('forum_posts')
+        .select('*')
+        .eq('id', parseInt(post_id))
+        .single()
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 404 })
+      }
+
+      // 增加浏览数
+      await supabase
+        .from('forum_posts')
+        .update({ views: (post.views || 0) + 1 })
+        .eq('id', parseInt(post_id))
+
+      return NextResponse.json({ post })
+    }
+
+    // 获取帖子列表
     let query = supabase
       .from('forum_posts')
       .select('*')
@@ -162,5 +185,43 @@ export async function GET(request: NextRequest) {
       { error: err.message },
       { status: 500 }
     )
+  }
+}
+
+// 点赞帖子
+export async function PUT(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams
+    const post_id = searchParams.get('post_id')
+
+    if (!post_id) {
+      return NextResponse.json({ error: '缺少post_id' }, { status: 400 })
+    }
+
+    // 获取当前点赞数
+    const { data: post } = await supabase
+      .from('forum_posts')
+      .select('likes')
+      .eq('id', parseInt(post_id))
+      .single()
+
+    if (!post) {
+      return NextResponse.json({ error: '帖子不存在' }, { status: 404 })
+    }
+
+    // 增加点赞
+    const newLikes = (post.likes || 0) + 1
+    const { error } = await supabase
+      .from('forum_posts')
+      .update({ likes: newLikes })
+      .eq('id', parseInt(post_id))
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true, likes: newLikes })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
