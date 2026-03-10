@@ -4,6 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://fbqpbobsqwcgzbwyeisx.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZicXBib2JzcXdjZ3pid3llaXN4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjU4OTI5MiwiZXhwIjoyMDg4MTY1MjkyfQ.2Cw7_nf-ewqLNQXN_R7n0zJU7DQs_eU4uGxSbCwtHHc'
 
+// 反馈接收邮箱（环境变量配置）
+const FEEDBACK_EMAIL = process.env.FEEDBACK_EMAIL || 'giolanto7744@126.com'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -56,10 +59,14 @@ export async function POST(request: NextRequest) {
     
     const data = await response.json()
     
+    // 打印反馈到控制台（Vercel日志中可见）
+    console.log('📧 新反馈:', JSON.stringify({ type, content, contact, skill_id, to: FEEDBACK_EMAIL }))
+    
     return NextResponse.json({
       success: true,
       message: '反馈已提交，感谢您的建议！',
-      id: data[0]?.id
+      id: data[0]?.id,
+      email: FEEDBACK_EMAIL
     })
     
   } catch (error) {
