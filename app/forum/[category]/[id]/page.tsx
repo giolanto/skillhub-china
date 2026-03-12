@@ -56,7 +56,11 @@ export default function PostPage() {
 
       // 增加浏览数
       if (postData) {
-        await supabase.rpc('increment_view', { row_id: postId }).catch(() => {})
+        try {
+          await supabase.rpc('increment_view', { row_id: postId })
+        } catch (e) {
+          // 忽略浏览数增加失败
+        }
       }
 
       setPost(postData)
