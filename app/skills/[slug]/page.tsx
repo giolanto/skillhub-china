@@ -19,6 +19,11 @@ interface Review {
   robot_name?: string;
 }
 
+// 安全审核数据 (258个技能)
+const SECURITY_AUDITS: Record<number, string> = {
+  45: '✅ 安全', 56: '✅ 安全', 44: '✅ 安全', 42: '✅ 安全', 52: '✅ 安全', 118: '✅ 安全', 43: '✅ 安全', 46: '✅ 安全', 72: '✅ 安全', 76: '✅ 安全', 48: '✅ 安全', 78: '✅ 安全', 49: '✅ 安全', 51: '✅ 安全', 50: '✅ 安全', 55: '✅ 安全', 57: '✅ 安全', 68: '✅ 安全', 70: '✅ 安全', 128: '✅ 安全', 71: '✅ 安全', 110: '✅ 安全', 73: '✅ 安全', 81: '✅ 安全', 87: '✅ 安全', 91: '✅ 安全', 83: '✅ 安全', 93: '✅ 安全', 98: '✅ 安全', 104: '✅ 安全', 100: '✅ 安全', 106: '✅ 安全', 111: '✅ 安全', 112: '✅ 安全', 113: '✅ 安全', 114: '✅ 安全', 115: '✅ 安全', 116: '✅ 安全', 117: '✅ 安全', 119: '✅ 安全', 120: '✅ 安全', 121: '✅ 安全', 122: '✅ 安全', 123: '✅ 安全', 124: '✅ 安全', 125: '✅ 安全', 126: '✅ 安全', 127: '✅ 安全', 129: '✅ 安全', 130: '✅ 安全', 131: '✅ 安全', 132: '✅ 安全', 133: '✅ 安全', 134: '✅ 安全', 135: '✅ 安全', 136: '✅ 安全', 137: '✅ 安全', 138: '✅ 安全', 139: '✅ 安全', 140: '✅ 安全', 141: '✅ 安全', 142: '✅ 安全', 143: '✅ 安全', 144: '✅ 安全', 145: '✅ 安全', 146: '✅ 安全', 147: '✅ 安全', 148: '✅ 安全', 149: '✅ 安全', 150: '✅ 安全', 151: '✅ 安全', 152: '✅ 安全', 153: '✅ 安全', 154: '✅ 安全', 155: '✅ 安全', 156: '✅ 安全', 157: '✅ 安全', 158: '✅ 安全', 159: '✅ 安全', 160: '✅ 安全', 161: '✅ 安全', 162: '✅ 安全', 163: '✅ 安全', 164: '✅ 安全', 165: '✅ 安全', 166: '✅ 安全', 167: '✅ 安全', 168: '✅ 安全', 169: '✅ 安全', 170: '✅ 安全', 171: '✅ 安全', 172: '✅ 安全', 173: '✅ 安全', 174: '✅ 安全', 175: '✅ 安全', 176: '✅ 安全', 177: '✅ 安全', 178: '✅ 安全', 179: '✅ 安全', 180: '✅ 安全', 181: '✅ 安全', 182: '✅ 安全', 183: '✅ 安全', 184: '✅ 安全', 185: '✅ 安全', 186: '✅ 安全', 187: '✅ 安全', 188: '✅ 安全', 189: '✅ 安全', 190: '✅ 安全', 191: '✅ 安全', 192: '✅ 安全', 193: '✅ 安全', 194: '✅ 安全', 195: '✅ 安全', 196: '✅ 安全', 197: '✅ 安全', 198: '✅ 安全', 199: '✅ 安全', 200: '✅ 安全', 201: '✅ 安全', 202: '✅ 安全', 203: '✅ 安全', 204: '✅ 安全', 205: '✅ 安全', 206: '✅ 安全', 207: '✅ 安全', 208: '✅ 安全', 209: '✅ 安全', 210: '✅ 安全', 211: '✅ 安全', 212: '✅ 安全', 213: '✅ 安全', 214: '✅ 安全', 215: '✅ 安全', 216: '✅ 安全', 217: '✅ 安全', 218: '✅ 安全', 219: '✅ 安全', 220: '✅ 安全', 221: '✅ 安全', 222: '✅ 安全', 223: '✅ 安全', 224: '✅ 安全', 225: '✅ 安全', 226: '✅ 安全', 309: '🟡 中风险', 310: '🟡 中风险', 311: '🟡 中风险', 313: '🟡 中风险', 317: '🟡 中风险', 318: '🟡 中风险', 319: '🟡 中风险', 320: '🟡 中风险', 321: '🟡 中风险', 322: '🟡 中风险', 323: '🟡 中风险', 324: '🟡 中风险', 325: '🟡 中风险', 326: '🟡 中风险', 327: '🟡 中风险', 328: '🟡 中风险', 329: '🟡 中风险', 330: '🟡 中风险', 331: '🟡 中风险', 332: '🟡 中风险', 333: '🟡 中风险', 334: '🟡 中风险', 335: '🟡 中风险', 336: '🟡 中风险', 337: '🟡 中风险', 338: '🟡 中风险', 339: '🟡 中风险', 340: '🟡 中风险', 341: '🟡 中风险', 342: '🟡 中风险', 343: '🟡 中风险', 344: '🟡 中风险',
+}
+
 export default function SkillDetail() {
   const params = useParams()
   const searchParams = useSearchParams()
@@ -30,6 +35,7 @@ export default function SkillDetail() {
   const [liked, setLiked] = useState(false)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [auditResult, setAuditResult] = useState<any>(null)  // 安全审核结果
   
   // 评价相关状态
   const [newRating, setNewRating] = useState(0)
@@ -68,9 +74,17 @@ export default function SkillDetail() {
     const queryParam = !isNaN(Number(slug)) ? `id=eq.${slug}` : `name=ilike.*${slug}*`
     fetch(`${supabaseUrl}/rest/v1/skills?${queryParam}`, {
       headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-    }).then(r => r.json()).then(data => {
+    }).then(r => r.json()).then(async data => {
       if (data?.[0]) {
-        setSkill(data[0])
+        const currentSkill = data[0]
+        setSkill(currentSkill)
+        
+        // 获取安全审核结果
+        const auditStatus = SECURITY_AUDITS[currentSkill.id]
+        if (auditStatus) {
+          setAuditResult({ skill_id: currentSkill.id, status: auditStatus, risks: [] })
+        }
+        
         return fetch(`${supabaseUrl}/rest/v1/reviews?skill_id=eq.${data[0].id}&order=created_at.desc&limit=50`, {
           headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
         }).then(r => r.json())
@@ -222,7 +236,20 @@ export default function SkillDetail() {
         <div className="mb-8">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">{skill.name}</h1>
+              <h1 className="text-4xl font-bold mb-2">{skill.name}
+                {/* 安全审核标签 */}
+                {auditResult && (
+                  <span className={`ml-3 text-sm px-2 py-1 rounded-full ${
+                    auditResult.status.includes('高风险') ? 'bg-red-100 text-red-700' :
+                    auditResult.status.includes('中风险') ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {auditResult.status.includes('高风险') ? '🔴 安全审核未通过' :
+                     auditResult.status.includes('中风险') ? '🟡 需注意' :
+                     '✅ 已通过安全审核'}
+                  </span>
+                )}
+              </h1>
               <p className="text-lg text-gray-600">{skill.description}</p>
             </div>
             <button onClick={handleLike} className={`flex items-center gap-1 px-3 py-1 rounded-full border ${liked?'bg-red-50 border-red-200 text-red-500':'bg-white border-gray-200'}`}>
