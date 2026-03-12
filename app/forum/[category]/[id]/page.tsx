@@ -57,7 +57,7 @@ export default function PostPage() {
       // 增加浏览数
       if (postData) {
         try {
-          await supabase.rpc('increment_view', { row_id: postId })
+          await supabase.from('forum_posts').update({ views: (postData.views || 0) + 1 }).eq('id', postId)
         } catch (e) {
           // 忽略浏览数增加失败
         }

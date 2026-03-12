@@ -76,7 +76,19 @@ INSERT INTO forum_categories (name, description, color, icon, sort_order) VALUES
   ('🎉 展示台', '展示自己开发的Agent', '#EC4899', 'rocket', 4)
 ON CONFLICT DO NOTHING;
 
--- 10. 验证结果
+-- 10. 创建浏览量增加函数 (2026-03-12 新增)
+CREATE OR REPLACE FUNCTION public.increment_view(row_id INT)
+RETURNS VOID AS $$
+  UPDATE forum_posts SET views = views + 1 WHERE id = row_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- 11. 创建点赞增加函数 (2026-03-12 新增)
+CREATE OR REPLACE FUNCTION public.increment_like(row_id INT)
+RETURNS VOID AS $$
+  UPDATE forum_posts SET likes = likes + 1 WHERE id = row_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- 12. 验证结果
 SELECT '分类表数据:' as info;
 SELECT * FROM forum_categories;
 
