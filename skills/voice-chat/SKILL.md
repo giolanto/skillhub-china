@@ -1,55 +1,66 @@
-# 🎙️ 语音对话系统
+# 🎙️ 语音对话
 
-整合语音识别(Whisper) + AI对话 + 语音合成(TTS)，实现语音交互。
+整合语音识别 + AI 对话 + 语音合成，实现语音交互。
 
 ## 功能
 
-- 🎤 语音输入 → 文字理解
-- 💬 AI 智能对话
-- 🔊 文字回复 → 语音播放
+- 🎤 语音输入 → 文字（Whisper 本地识别）
+- 🧠 AI 智能对话
+- 🔊 文字回复 → 语音（Edge TTS 云希声音）
+
+## 技术方案
+
+| 环节 | 技术 | 说明 |
+|------|------|------|
+| 语音识别 | Whisper (openai-whisper) | 本地运行，无需 API Key |
+| AI 对话 | MiniMax API | 需要联网 |
+| 语音合成 | Edge TTS | 免费微软官方，支持多种音色 |
 
 ## 使用方式
 
-### 方式一：手动命令
-```bash
-# 语音转文字
-whisper audio.mp3 --language Chinese
+### 方式一：复制安装命令给 Agent
 
-# 对话
-子房回答：你好
-
-# 文字转语音
-edge-tts --text "你好，我是子房" --voice zh-CN-XiaoxiaoNeural --output reply.mp3
+```
+install https://www.agent-skills.net.cn/skills/409
 ```
 
-### 方式二：飞书语音消息
-直接发送语音消息给子房，子房会自动：
-1. 下载语音文件
-2. 转成文字
-3. 生成回答
-4. 转语音回复
+### 方式二：手动下载
 
-## 所需技能
+官网：https://www.agent-skills.net.cn/skills/409
 
-- [语音转文字](https://www.agent-skills.net.cn/skills/48) - Whisper
-- [Edge TTS](https://www.agent-skills.net.cn/skills/408) - 语音合成
+## 依赖安装
 
-## 配置
+```bash
+# 安装 Whisper (语音识别)
+pip install openai-whisper
 
-### 飞书语音消息处理
-飞书语音消息会带有 `audio` 类型的 file_id，需要：
-1. 通过 file_id 下载语音文件
-2. 转换为 Whisper 支持的格式
-3. 进行语音识别
+# 安装 Edge TTS (语音合成)
+pip install edge-tts
+```
 
-## 技术栈
+## 语音对话流程
 
-- Whisper (OpenAI) - 语音识别
-- Edge TTS / 讯飞TTS - 语音合成
-- 飞书消息 API - 语音消息处理
+```
+🎤 用户发语音消息
+   ↓
+📥 下载语音文件
+   ↓
+📝 Whisper 语音转文字
+   ↓
+🧠 AI 生成回复 (调用大模型)
+   ↓
+🔊 Edge TTS 文字转语音 (云希声音)
+   ↓
+🎧 发送语音回复给用户
+```
 
 ## 注意事项
 
-- 飞书语音消息需要使用飞书开放平台 API 下载
-- Whisper 需要本地安装或使用 API
-- 建议使用 Edge TTS (免费) 或讯飞TTS
+- 首次使用需下载 Whisper 模型（~140MB）
+- AI 对话需要配置 API Key
+- 飞书语音消息需配置飞书开放平台 API
+
+## 相关技能
+
+- [Edge TTS](https://www.agent-skills.net.cn/skills/408) - 语音合成
+- [语音转文字](https://www.agent-skills.net.cn/skills/48) - Whisper 识别
