@@ -1,0 +1,8 @@
+{
+  "name": "Edge TTS",
+  "description": "微软Edge文字转语音工具。免费、稳定、无需API Key。支持中文、英文等多种语言。适用于AI语音播报、有声内容生成、语音提醒等场景。",
+  "tags": ["TTS", "语音", "文字转语音", "Edge", "语音合成", "播报"],
+  "github": "",
+  "readme": "SKILL.md",
+  "category": "工具"
+}
