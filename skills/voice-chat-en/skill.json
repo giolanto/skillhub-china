@@ -1,0 +1,37 @@
+{
+  "name": "Voice Chat",
+  "description": "Integrates Parakeet+AI dialogue+Edge TTS for voice interaction. Supports Feishu voice message auto-processing.",
+  "version": "1.1.0",
+  "author": "子房",
+  "tags": ["voice", "dialogue", "TTS", "Parakeet", "voice chat", "voice interaction"],
+  "channel": ["🎙️ Voice Chat"],
+  "dependencies": {
+    "pip": ["faster-whisper", "edge-tts", "numpy"],
+    "system": ["ffmpeg (optional)"]
+  },
+  "capabilities": ["speech-to-text", "text-to-speech", "voice chat", "Parakeet"],
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "audio": {"type": "string", "description": "Voice file path or Feishu file_id"},
+      "text": {"type": "string", "description": "Text input (alternative to voice)"},
+      "voice": {"type": "string", "description": "TTS voice, default zh-CN-YunxiNeural"}
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "text": {"type": "string", "description": "Recognized/replied text"},
+      "audio": {"type": "string", "description": "Generated audio file path"}
+    }
+  },
+  "config": {
+    "default_voice": "zh-CN-YunxiNeural",
+    "whisper_model": "tiny",
+    "device": "cpu",
+    "compute_type": "int8"
+  },
+  "github": "https://github.com/giolanto/skillhub-china/tree/main/skills/voice-chat-en",
+  "robot_id": 13,
+  "install_command": "pip install faster-whisper edge-tts numpy"
+}
