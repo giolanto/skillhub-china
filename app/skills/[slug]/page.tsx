@@ -19,8 +19,8 @@ interface Review {
   robot_name?: string;
 }
 
-const SECURITY_AUDITS: Record<number, string> = {
-// 安全审核数据
+// Fallback安全审核数据 (当API不可用时使用)
+const SECURITY_AUDITS_FALLBACK: Record<number, string> = {
   42: '✅ 安全',
   43: '✅ 安全',
   44: '✅ 安全',
@@ -336,11 +336,31 @@ export default function SkillDetail() {
         const currentSkill = data[0]
         setSkill(currentSkill)
         
-        // 获取安全审核结果
-        const auditStatus = SECURITY_AUDITS[currentSkill.id]
-        if (auditStatus) {
-          setAuditResult({ skill_id: currentSkill.id, status: auditStatus, risks: [] })
-        }
+        // 获取安全审核结果 - 优先从API获取
+        fetch(`/api/security-audit/${currentSkill.id}`)
+          .then(res => res.json())
+          .then(auditData => {
+            if (auditData.status) {
+              setAuditResult({ 
+                skill_id: currentSkill.id, 
+                status: auditData.status, 
+                risks: auditData.risks || [] 
+              })
+            } else {
+              // Fallback到本地数据
+              const fallbackStatus = SECURITY_AUDITS_FALLBACK[currentSkill.id]
+              if (fallbackStatus) {
+                setAuditResult({ skill_id: currentSkill.id, status: fallbackStatus, risks: [] })
+              }
+            }
+          })
+          .catch(() => {
+            // API失败时使用fallback
+            const fallbackStatus = SECURITY_AUDITS_FALLBACK[currentSkill.id]
+            if (fallbackStatus) {
+              setAuditResult({ skill_id: currentSkill.id, status: fallbackStatus, risks: [] })
+            }
+          })
         
         return fetch(`${supabaseUrl}/rest/v1/reviews?skill_id=eq.${data[0].id}&order=created_at.desc&limit=50`, {
           headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
@@ -486,7 +506,9 @@ export default function SkillDetail() {
       <header className="bg-white/80 border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-gray-600"><ArrowLeft className="w-5 h-5"/>返回</Link>
+          {/* GitHub链接已隐藏 - 避免其他Agent爬取
           {skill.github && <a href={skill.github} target="_blank" className="flex items-center gap-2"><Github className="w-5 h-5"/>GitHub</a>}
+          */}
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-8">
@@ -519,7 +541,9 @@ export default function SkillDetail() {
           </div>
           <div className="flex gap-3">
             {skill.download_url && <a href={`/api/skills/${skill.id}?action=download`} target="_blank" className="px-6 py-3 bg-primary text-white rounded-lg flex items-center gap-2"><Download className="w-5 h-5"/>下载技能</a>}
+            {/* GitHub按钮已隐藏 - 避免其他Agent爬取
             {skill.github && <a href={skill.github} target="_blank" className="px-6 py-3 bg-gray-900 text-white rounded-lg flex items-center gap-2"><Github className="w-5 h-5"/>GitHub</a>}
+            */}
           </div>
         </div>
         {skill.download_url && <div className="bg-gray-900 rounded-xl p-6 mb-8">
