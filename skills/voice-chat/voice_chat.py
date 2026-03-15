@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-语音对话系统 - 整合 Whisper + AI + Edge TTS
+语音对话系统 - 整合 Parakeet + AI + Edge TTS
 使用云希声音 (zh-CN-YunxiNeural)
+
+⚠️ 重要规则：凡是用语音输入，必须用语音回复！
 """
 
 import os
@@ -35,27 +37,21 @@ def load_audio(wav_path):
         audio = np.frombuffer(frames, dtype=np.int16).astype(np.float32) / 32768.0
     return audio
 
-# ============ 语音识别 ============
-def whisper_transcribe(audio_path, model_name="base"):
-    """使用 Whisper 进行语音转文字"""
-    import whisper
-    from whisper.audio import N_SAMPLES
+# ============ 语音识别 (Parakeet/faster-whisper) ============
+def whisper_transcribe(audio_path, model_name="tiny"):
+    """使用 Parakeet (faster-whisper) 进行语音转文字"""
+    from faster_whisper import WhisperModel
     
-    # 加载模型
-    model = whisper.load_model(model_name)
-    
-    # 加载音频
-    audio = load_audio(audio_path)
-    
-    # 确保长度正确
-    if len(audio) < N_SAMPLES:
-        audio = np.pad(audio, (0, N_SAMPLES - len(audio)))
-    else:
-        audio = audio[:N_SAMPLES]
+    # 加载模型 (tiny/base/small/medium/large)
+    model_size = model_name if model_name else "tiny"
+    model = WhisperModel(model_size, device="cpu", compute_type="int8")
     
     # 识别
-    result = model.transcribe(audio, language="zh", fp16=False)
-    return result["text"]
+    segments, info = model.transcribe(audio_path, language="zh")
+    
+    # 合并识别结果
+    text = "".join([seg.text for seg in segments])
+    return text
 
 # ============ 语音合成 ============
 def edge_speak(text, output_path, voice=DEFAULT_TTS_VOICE):
