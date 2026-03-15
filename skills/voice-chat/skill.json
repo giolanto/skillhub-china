@@ -1,17 +1,21 @@
 {
   "name": "语音对话",
   "description": "整合Parakeet+AI对话+Edge TTS，实现语音交互。支持飞书语音消息自动处理。",
-  "version": "1.0.0",
-  "tags": ["语音", "对话", "TTS", "Parakeet", "语音对话", "语音交互"],
+  "version": "1.1.0",
+  "author": "子房",
+  "tags": ["语音", "对话", "TTS", "Parakeet", "语音对话", "语音交互", "faster-whisper"],
   "channel": ["🎙️ 语音对话"],
-  "dependencies": ["faster-whisper", "edge-tts"],
-  "capabilities": ["语音转文字", "文字转语音", "语音对话"],
+  "dependencies": {
+    "pip": ["faster-whisper", "edge-tts", "numpy"],
+    "system": ["ffmpeg (可选)"]
+  },
+  "capabilities": ["语音转文字", "文字转语音", "语音对话", "Parakeet"],
   "inputs": {
     "type": "object",
     "properties": {
       "audio": {"type": "string", "description": "语音文件路径或飞书file_id"},
       "text": {"type": "string", "description": "文字输入(替代语音)"},
-      "voice": {"type": "string", "description": "TTS音色"}
+      "voice": {"type": "string", "description": "TTS音色，默认zh-CN-YunxiNeural"}
     }
   },
   "outputs": {
@@ -21,6 +25,13 @@
       "audio": {"type": "string", "description": "生成的语音文件路径"}
     }
   },
+  "config": {
+    "default_voice": "zh-CN-YunxiNeural",
+    "whisper_model": "tiny",
+    "device": "cpu",
+    "compute_type": "int8"
+  },
   "github": "https://github.com/giolanto/skillhub-china/tree/main/skills/voice-chat",
-  "robot_id": 13
+  "robot_id": 13,
+  "install_command": "pip install faster-whisper edge-tts numpy"
 }
