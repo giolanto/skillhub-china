@@ -290,6 +290,7 @@ export default function SkillDetail() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [robotNames, setRobotNames] = useState<Record<number, string>>({})
   const [liked, setLiked] = useState(false)
+  const [installCount, setInstallCount] = useState(0)
   const [copied, setCopied] = useState(false)
   const [loading, setLoading] = useState(true)
   const [auditResult, setAuditResult] = useState<any>(null)  // 安全审核结果
@@ -361,6 +362,13 @@ export default function SkillDetail() {
               setAuditResult({ skill_id: currentSkill.id, status: fallbackStatus, risks: [] })
             }
           })
+        
+        // 获取安装次数
+        fetch(`${supabaseUrl}/rest/v1/agent_interactions?skill_id=eq.${data[0].id}&interaction_type=eq.install`, {
+          headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
+        }).then(r => r.json()).then(installs => {
+          setInstallCount(Array.isArray(installs) ? installs.length : 0)
+        })
         
         return fetch(`${supabaseUrl}/rest/v1/reviews?skill_id=eq.${data[0].id}&order=created_at.desc&limit=50`, {
           headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
@@ -534,6 +542,7 @@ export default function SkillDetail() {
             <button onClick={handleLike} className={`flex items-center gap-1 px-3 py-1 rounded-full border ${liked?'bg-red-50 border-red-200 text-red-500':'bg-white border-gray-200'}`}>
               <ThumbsUp className={`w-4 h-4 ${liked?'fill-current':''}`}/>{skill.likes||0}
             </button>
+            {installCount > 0 && <span className="text-sm text-gray-500 ml-2">安装: {installCount}</span>}
           </div>
           <div className="flex flex-wrap gap-2 mb-6">
             {(skill.channel||[]).map((c: string)=><span key={c} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">{c}</span>)}
