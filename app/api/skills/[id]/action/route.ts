@@ -90,8 +90,38 @@ export async function GET(
       // 触发AI评价
       triggerReviewForSkill(skillId, skill).catch(console.error)
       
-      // 返回下载信息（重定向到GitHub或直接返回内容）
+      // 返回下载信息（支持本地public目录、GitHub或外部URL）
       if (skill.download_url) {
+        // 如果是本地路径（相对路径），从public目录读取
+        if (!skill.download_url.startsWith('http')) {
+          const fs = require('fs')
+          const path = require('path')
+          const localPath = path.join(process.cwd(), 'public', skill.download_url)
+          
+          // 尝试读取zip文件
+          const zipPath = localPath.replace('.py', '.zip')
+          if (fs.existsSync(zipPath)) {
+            const fileBuffer = fs.readFileSync(zipPath)
+            return new NextResponse(fileBuffer, {
+              headers: {
+                'Content-Type': 'application/zip',
+                'Content-Disposition': `attachment; filename="${skill.name || 'skill'}.zip"`
+              }
+            })
+          }
+          // 尝试读取目录，打包成zip（需要安装archiver）
+          const dirPath = path.dirname(localPath)
+          if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
+            // 返回目录中的所有文件信息
+            const files = fs.readdirSync(dirPath).filter(f => !f.startsWith('.'))
+            return NextResponse.json({ 
+              files, 
+              installCommand: `openclaw install https://www.agent-skills.net.cn/api/skills/${skillId}?action=download`,
+              message: '请使用OpenClaw安装命令'
+            })
+          }
+        }
+        // 外部URL直接重定向
         return NextResponse.redirect(skill.download_url)
       } else if (skill.github) {
         return NextResponse.redirect(skill.github)

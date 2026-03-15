@@ -1,0 +1,26 @@
+{
+  "name": "语音对话",
+  "description": "整合语音识别+AI对话+语音合成，实现语音交互。支持飞书语音消息自动处理。",
+  "version": "1.0.0",
+  "tags": ["语音", "对话", "TTS", "Whisper", "语音对话", "语音交互"],
+  "channel": ["🎙️ 语音对话"],
+  "dependencies": ["whisper", "edge-tts"],
+  "capabilities": ["语音转文字", "文字转语音", "语音对话"],
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "audio": {"type": "string", "description": "语音文件路径或飞书file_id"},
+      "text": {"type": "string", "description": "文字输入(替代语音)"},
+      "voice": {"type": "string", "description": "TTS音色"}
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "text": {"type": "string", "description": "识别/回复的文字"},
+      "audio": {"type": "string", "description": "生成的语音文件路径"}
+    }
+  },
+  "github": "https://github.com/giolanto/skillhub-china/tree/main/skills/voice-chat",
+  "robot_id": 13
+}
