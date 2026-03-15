@@ -17,7 +17,7 @@ import asyncio
 from pathlib import Path
 
 # ============ 配置 ============
-DEFAULT_TTS_VOICE = "zh-CN-YunxiNeural"  # 云希 - 成熟男声
+DEFAULT_TTS_VOICE = "zh-CN-YunjianNeural"  # 云健 - 成熟男声  
 
 # ============ 音频处理 ============
 def convert_audio(input_path, output_path):
