@@ -313,6 +313,10 @@ export default function SkillDetail() {
     const saved = localStorage.getItem('skillhub_robot_id')
     return saved ? parseInt(saved) : null
   }
+  
+  // 下载链接和安装命令需要包含 robot_id
+  const robotId = getRobotId()
+  const robotIdParam = robotId ? `&robot_id=${robotId}` : ''
 
   useEffect(() => {
     const handlePopState = () => {
@@ -419,8 +423,6 @@ export default function SkillDetail() {
   }
 
   const handleCopy = () => {
-    const robotId = getRobotId()
-    const robotIdParam = robotId ? `&robot_id=${robotId}` : ''
     navigator.clipboard.writeText(`openclaw install https://agent-skills.net.cn/api/skills/${skill?.id}?action=download${robotIdParam}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
