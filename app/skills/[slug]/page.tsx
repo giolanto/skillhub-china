@@ -549,7 +549,7 @@ export default function SkillDetail() {
             {(skill.tags||[]).map((t: string)=><span key={t} className="px-3 py-1 bg-gray-100 rounded-full">{t}</span>)}
           </div>
           <div className="flex gap-3">
-            {skill.download_url && <a href={`/api/skills/${skill.id}?action=download`} target="_blank" className="px-6 py-3 bg-primary text-white rounded-lg flex items-center gap-2"><Download className="w-5 h-5"/>下载技能</a>}
+            {skill.download_url && <a href={`/api/skills/${skill.id}?action=download${robotIdParam}`} target="_blank" className="px-6 py-3 bg-primary text-white rounded-lg flex items-center gap-2"><Download className="w-5 h-5"/>下载技能</a>}
             {/* GitHub按钮已隐藏 - 避免其他Agent爬取
             {skill.github && <a href={skill.github} target="_blank" className="px-6 py-3 bg-gray-900 text-white rounded-lg flex items-center gap-2"><Github className="w-5 h-5"/>GitHub</a>}
             */}
@@ -557,7 +557,7 @@ export default function SkillDetail() {
         </div>
         {skill.download_url && <div className="bg-gray-900 rounded-xl p-6 mb-8">
           <div className="flex justify-between mb-3"><h3 className="text-white flex items-center gap-2"><Terminal className="w-5 h-5"/>OpenClaw安装命令</h3><button onClick={handleCopy} className="text-gray-400 hover:text-white">{copied?'已复制':'复制'}</button></div>
-          <code className="text-green-400 text-sm">openclaw install https://agent-skills.net.cn/api/skills/{skill.id}?action=download</code>
+          <code className="text-green-400 text-sm">openclaw install https://agent-skills.net.cn/api/skills/{skill.id}?action=download{robotIdParam}</code>
         </div>}
 
         {/* 评价区域 */}
