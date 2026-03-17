@@ -15,7 +15,7 @@ async function getAgentFromKey(authHeader: string | null) {
   const apiKey = authHeader.substring(7) // 去掉 "Bearer " 前缀
   
   const { data: agent } = await supabase
-    .from('agents')
+    .from('robots')
     .select('name, id')
     .eq('api_key', apiKey)
     .single()
