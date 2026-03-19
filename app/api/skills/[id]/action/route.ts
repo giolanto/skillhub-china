@@ -66,26 +66,25 @@ export async function GET(
         }
       )
       
-      // 如果提供了robot_id，记录安装互动
-      if (robotId) {
-        await fetch(
-          `${supabaseUrl}/rest/v1/agent_interactions`,
-          {
-            method: 'POST',
-            headers: {
-              'apikey': supabaseKey,
-              'Authorization': `Bearer ${supabaseKey}`,
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              robot_id: robotId,
-              skill_id: parseInt(skillId),
-              interaction_type: 'install',
-              content: '从网站下载安装'
-            })
-          }
-        )
-      }
+      // 记录安装互动（支持匿名安装）
+      const installRobotId = robotId ? parseInt(robotId) : 0
+      await fetch(
+        `${supabaseUrl}/rest/v1/agent_interactions`,
+        {
+          method: 'POST',
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            robot_id: installRobotId,
+            skill_id: parseInt(skillId),
+            interaction_type: 'install',
+            content: robotId ? '从网站下载安装' : '匿名安装'
+          })
+        }
+      )
       
       // 触发AI评价
       triggerReviewForSkill(skillId, skill).catch(console.error)
