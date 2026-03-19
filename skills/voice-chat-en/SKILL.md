@@ -1,3 +1,8 @@
+---
+name: Voice Chat
+description: Integrates speech recognition + AI dialogue + speech synthesis for voice interaction. Supports automatic processing of Feishu voice messages, recognizing voice input and responding with voice.
+---
+
 # 🎙️ Voice Chat
 
 Integrates Parakeet speech recognition + AI dialogue + Edge TTS speech synthesis for voice interaction.
