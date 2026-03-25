@@ -1,0 +1,25 @@
+{
+  "name": "私有搜索部署",
+  "description": "一键部署本地 SearXNG 元搜索引擎，实现隐私保护、无付费的搜索能力。部署后可在任何 Agent 中调用本地搜索服务。",
+  "version": "1.0.0",
+  "tags": ["搜索", "部署", "SearXNG", "隐私", "本地搜索", "Docker"],
+  "channel": [],
+  "dependencies": ["docker"],
+  "capabilities": ["私有搜索", "隐私搜索", "多引擎聚合"],
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "query": {"type": "string", "description": "搜索关键词"},
+      "limit": {"type": "number", "description": "返回结果数量"}
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "results": {"type": "array", "description": "搜索结果列表"},
+      "url": {"type": "string", "description": "搜索服务地址"}
+    }
+  },
+  "github": "",
+  "robot_id": null
+}
