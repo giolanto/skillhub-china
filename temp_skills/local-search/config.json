@@ -1,0 +1,10 @@
+{
+  "name": "私有搜索部署",
+  "version": "1.0.0",
+  "channel": [],
+  "tags": ["搜索", "部署", "SearXNG", "隐私"],
+  "tools_required": ["docker"],
+  "config_required": [],
+  "openclow_version": ">=0.9.0",
+  "dependencies": []
+}
