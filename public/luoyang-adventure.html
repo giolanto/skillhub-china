@@ -3,108 +3,234 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>洛阳副本 · 千年佛光之旅</title>
+<title>洛阳副本 · 伊阙佛光</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background:#0a0a1a; color:#e8dcc4; min-height:100vh; overflow-x:hidden; }
-.cover { height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:linear-gradient(180deg,#0a0a1a 0%,#1a0a2e 50%,#0a1a3a 100%); text-align:center; position:relative; overflow:hidden; }
-.cover::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 30%,rgba(180,140,60,0.12) 0%,transparent 60%); pointer-events:none; }
-.glow { width:130px; height:130px; border-radius:50%; background:radial-gradient(circle,rgba(212,175,55,0.35) 0%,transparent 70%); margin-bottom:32px; animation:pulse 3s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.4);opacity:1} }
-.cover h1 { font-size:3em; color:#d4af37; text-shadow:0 0 40px rgba(212,175,55,0.5); letter-spacing:0.12em; margin-bottom:12px; }
-.cover .sub { font-size:1.05em; color:#a08040; letter-spacing:0.25em; margin-bottom:55px; }
-.start-btn { padding:16px 55px; font-size:1.15em; background:linear-gradient(135deg,#d4af37,#b8860b); color:#1a0a00; border:none; border-radius:50px; cursor:pointer; font-weight:bold; letter-spacing:0.1em; box-shadow:0 0 30px rgba(212,175,55,0.35); transition:all .3s; }
-.start-btn:hover { transform:scale(1.06); box-shadow:0 0 55px rgba(212,175,55,0.6); }
-.pb { position:fixed; top:0; left:0; right:0; height:4px; background:rgba(212,175,55,0.15); z-index:100; }
-.pf { height:100%; background:linear-gradient(90deg,#d4af37,#ff8c00); width:0%; transition:width 1.2s ease; }
-.game { display:none; max-width:600px; margin:0 auto; padding:24px 16px; }
-.node { display:none; padding:24px 0; animation:fadeUp .7s ease; }
-@keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-.chapter { display:inline-block; padding:4px 18px; background:rgba(212,175,55,0.12); border:1px solid rgba(212,175,55,0.28); border-radius:20px; color:#d4af37; font-size:0.82em; margin-bottom:14px; letter-spacing:0.05em; }
-.node h2 { color:#d4af37; font-size:1.7em; margin-bottom:16px; text-shadow:0 0 25px rgba(212,175,55,0.35); }
-.story { background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.12); border-radius:16px; padding:26px 22px; margin:18px 0; font-size:1.06em; line-height:1.95; color:#d4c4a0; position:relative; }
-.story::before { content:'"'; position:absolute; top:6px; left:14px; font-size:3.2em; color:rgba(212,175,55,0.18); font-family:serif; line-height:1; }
-.pic { width:100%; border-radius:14px; aspect-ratio:16/9; object-fit:cover; box-shadow:0 12px 45px rgba(0,0,0,0.6); margin:16px 0; }
-.addr { font-size:0.84em; color:#7a6a4a; margin-bottom:20px; display:flex; align-items:center; gap:5px; }
-.reward { display:inline-flex; align-items:center; gap:6px; padding:5px 14px; background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.25); border-radius:20px; font-size:0.84em; color:#d4af37; margin-bottom:20px; }
-.book { display:block; width:100%; padding:16px; background:linear-gradient(135deg,#d4af37,#b8860b); color:#1a0a00; border:none; border-radius:14px; font-size:1.08em; font-weight:bold; cursor:pointer; text-decoration:none; text-align:center; transition:all .3s; margin-top:10px; }
-.book:hover { box-shadow:0 0 35px rgba(212,175,55,0.5); transform:translateY(-2px); }
-.next { display:block; width:100%; padding:14px; background:transparent; color:#d4af37; border:2px solid rgba(212,175,55,0.38); border-radius:14px; font-size:1em; cursor:pointer; transition:all .3s; margin-top:10px; }
+body { font-family:'PingFang SC','Microsoft YaHei',sans-serif; background:#0a0a1a; color:#e8dcc4; min-height:100vh; overflow-x:hidden; }
+
+/* 封面 */
+.cover { height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:linear-gradient(180deg,#0a0a1a 0%,#1a0a2e 50%,#0a1a3a 100%);
+  text-align:center; position:relative; overflow:hidden; }
+.cover::before { content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse at 50% 30%,rgba(180,140,60,0.12) 0%,transparent 60%); pointer-events:none; }
+.cover::after { content:''; position:absolute; bottom:0; left:0; right:0; height:200px;
+  background:linear-gradient(to top,rgba(10,10,26,0.9),transparent); }
+.glow { width:140px; height:140px; border-radius:50%;
+  background:radial-gradient(circle,rgba(212,175,55,0.35) 0%,transparent 70%);
+  margin-bottom:36px; animation:pulse 3s ease-in-out infinite; position:relative; z-index:1; }
+@keyframes pulse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.5);opacity:1} }
+.cover h1 { font-size:3.2em; color:#d4af37; text-shadow:0 0 40px rgba(212,175,55,0.5);
+  letter-spacing:0.15em; margin-bottom:14px; position:relative; z-index:1; }
+.cover .sub { font-size:1.08em; color:#a08040; letter-spacing:0.28em; margin-bottom:60px; position:relative; z-index:1; }
+.start-btn { padding:17px 60px; font-size:1.18em; background:linear-gradient(135deg,#d4af37,#b8860b);
+  color:#1a0a00; border:none; border-radius:50px; cursor:pointer; font-weight:bold;
+  letter-spacing:0.1em; box-shadow:0 0 35px rgba(212,175,55,0.35); transition:all .3s;
+  position:relative; z-index:1; }
+.start-btn:hover { transform:scale(1.07); box-shadow:0 0 60px rgba(212,175,55,0.6); }
+
+/* 进度条 */
+.pb { position:fixed; top:0; left:0; right:0; height:5px; background:rgba(212,175,55,0.12); z-index:100;
+  border-radius:0 0 3px 3px; overflow:hidden; }
+.pf { height:100%; background:linear-gradient(90deg,#d4af37,#ff8c00,#d4af37);
+  width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1);
+  background-size:200% 100%; animation:shimmer 2s linear infinite; }
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* 游戏主体 */
+.game { display:none; max-width:640px; margin:0 auto; padding:28px 18px 100px; }
+.node { display:none; padding:20px 0; animation:fadeUp .75s cubic-bezier(0.22,1,0.36,1); }
+@keyframes fadeUp { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+
+/* 节点标题区 */
+.node-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.chapter { display:inline-block; padding:5px 18px; background:rgba(212,175,55,0.1);
+  border:1px solid rgba(212,175,55,0.28); border-radius:20px; color:#d4af37;
+  font-size:0.8em; letter-spacing:0.05em; white-space:nowrap; }
+.node-num { font-size:0.75em; color:#6a5a3a; }
+.node h2 { color:#d4af37; font-size:1.75em; margin-bottom:12px;
+  text-shadow:0 0 25px rgba(212,175,55,0.3); }
+
+/* 故事卡片 */
+.story { background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.1);
+  border-radius:18px; padding:28px 22px; margin:16px 0; font-size:1.07em;
+  line-height:2; color:#d4c4a0; position:relative; }
+.story::before { content:'"'; position:absolute; top:4px; left:14px;
+  font-size:3.5em; color:rgba(212,175,55,0.16); font-family:serif; line-height:1; }
+
+/* 图片 */
+.pic { width:100%; border-radius:16px; aspect-ratio:16/9; object-fit:cover;
+  box-shadow:0 14px 50px rgba(0,0,0,0.65); margin:16px 0 12px; }
+
+/* 打卡点列表 */
+.checklist { background:rgba(212,175,55,0.05); border:1px solid rgba(212,175,55,0.15);
+  border-radius:14px; padding:16px 18px; margin:14px 0; }
+.checklist-title { font-size:0.82em; color:#8a7a5a; margin-bottom:10px; letter-spacing:0.05em; }
+.check-item { display:flex; align-items:flex-start; gap:8px; padding:7px 0;
+  border-bottom:1px solid rgba(212,175,55,0.08); font-size:0.95em; color:#c4b48a; }
+.check-item:last-child { border-bottom:none; }
+.check-icon { color:#d4af37; font-size:1.1em; flex-shrink:0; margin-top:1px; }
+
+/* 地址+奖励 */
+.meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0; }
+.addr { font-size:0.83em; color:#7a6a4a; display:flex; align-items:center; gap:4px; }
+.reward { display:inline-flex; align-items:center; gap:5px; padding:4px 12px;
+  background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.22);
+  border-radius:20px; font-size:0.82em; color:#d4af37; }
+
+/* 按钮 */
+.book { display:block; width:100%; padding:17px; background:linear-gradient(135deg,#d4af37,#b8860b);
+  color:#1a0a00; border:none; border-radius:15px; font-size:1.1em; font-weight:bold;
+  cursor:pointer; text-decoration:none; text-align:center; transition:all .3s; margin-top:12px; }
+.book:hover { box-shadow:0 0 38px rgba(212,175,55,0.5); transform:translateY(-2px); }
+.next { display:block; width:100%; padding:15px; background:transparent; color:#d4af37;
+  border:2px solid rgba(212,175,55,0.38); border-radius:15px; font-size:1em;
+  cursor:pointer; transition:all .3s; margin-top:10px; }
 .next:hover { background:rgba(212,175,55,0.08); }
-.finale { display:none; text-align:center; padding:70px 20px; }
-.finale h2 { color:#d4af37; font-size:2.2em; margin-bottom:22px; text-shadow:0 0 35px rgba(212,175,55,0.5); }
-.trophy { font-size:5em; margin:20px 0; display:block; animation:bounce 1.2s ease infinite; }
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
-.stats { display:flex; justify-content:center; gap:40px; margin:35px 0; }
+
+/* 终章 */
+.finale { display:none; text-align:center; padding:80px 20px; }
+.trophy { font-size:5em; display:block; margin:20px 0;
+  animation:bounce 1.2s ease infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+.finale h2 { color:#d4af37; font-size:2.4em; margin-bottom:22px;
+  text-shadow:0 0 40px rgba(212,175,55,0.5); }
+.finale p { color:#7a6a4a; line-height:2.2; margin-bottom:35px; font-size:1.05em; }
+.stats { display:flex; justify-content:center; gap:44px; margin:30px 0; }
 .stat { text-align:center; }
-.stat .n { font-size:2.2em; color:#d4af37; font-weight:bold; }
-.stat .l { font-size:0.84em; color:#7a6a4a; margin-top:4px; }
+.stat .n { font-size:2.4em; color:#d4af37; font-weight:bold; }
+.stat .l { font-size:0.83em; color:#7a6a4a; margin-top:5px; }
 </style>
 </head>
 <body>
 
+<!-- 封面 -->
 <div class="cover" id="cover">
   <div class="glow"></div>
   <h1>洛阳</h1>
-  <div class="sub">龙门石窟 · 千年佛光之旅</div>
+  <div class="sub">伊阙佛光 · 四章剧情副本</div>
   <button class="start-btn" onclick="startGame()">踏入伊阙</button>
 </div>
 
+<!-- 进度条 -->
 <div class="pb"><div class="pf" id="pf"></div></div>
+
+<!-- 游戏主体 -->
 <div class="game" id="game">
 
+  <!-- ====== 节点1：龙门石窟 ====== -->
   <div class="node" id="node1">
-    <span class="chapter">第一章 · 文化探索</span>
-    <h2>🗿 龙门石窟</h2>
-    <div class="story">你站在伊阙峡谷入口，伊河水从脚下穿流而过。晨雾还未散尽，十万尊佛像在崖壁上静默伫立。最高的那尊卢舍那大佛，嘴角似笑非笑，目光穿越千年。守门的老伯递来一把电子讲解器，低声说："年轻人，卢舍那的眼睛，无论站在哪个角度看，她都在看着你。"</div>
+    <div class="node-header">
+      <span class="chapter">第一章</span>
+      <span class="node-num">1/4</span>
+    </div>
+    <h2>🗿 龙门石窟 · 伊阙万佛</h2>
+    <div class="story">
+      你乘坐景区交通车沿伊河行进，左边是香山，右边是龙门山——这便是隋炀帝口中的"伊阙"。还未登阶，奉先寺崖壁已映入眼帘。卢舍那大佛端坐其上，面容祥和，目光俯视众生，无论你移动到哪个方位，都感觉她在温柔地注视着你。讲解器里说："相传这尊佛像是武则天用自己的面容与脂粉钱主持雕凿的。"
+    </div>
     <img class="pic" src="https://img.alicdn.com/imgextra/i4/O1CN014RfXHw21KTU1tmkCq_!!0-alitrip.jpg" alt="龙门石窟">
-    <div class="addr">📍 洛阳市洛龙区238省道</div>
-    <div class="reward">🎫 获得：古都探索券</div>
+    <div class="checklist">
+      <div class="checklist-title">📋 本章打卡清单</div>
+      <div class="check-item"><span class="check-icon">☐</span> 西山石窟（精华区）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 奉先寺（九尊大像）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 卢舍那大佛（最佳机位：左侧仰拍）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 伊河礼佛台（拍卢舍那倒影绝佳）</div>
+    </div>
+    <div class="meta">
+      <span class="addr">📍 洛阳市洛龙区238省道</span>
+      <span class="reward">🎫 古都探索券</span>
+    </div>
     <a class="book" href="https://a.feizhu.com/15U5i7" target="_blank">立即预订 · 龙门石窟门票</a>
-    <button class="next" onclick="goNode(2)">解锁第二章 →</button>
+    <button class="next" onclick="goNode(2)">解锁第二章 → 应天门大朝会</button>
   </div>
 
+  <!-- ====== 节点2：应天门大朝会 ====== -->
   <div class="node" id="node2">
-    <span class="chapter">第二章 · 特色体验</span>
-    <h2>🎭 武则天实景演出</h2>
-    <div class="story">夜幕降临，你走进实景剧场。鼓声骤然响起，武则天的登基大典在眼前重现——万象神宫，万国来朝。舞台忽而化为卢舍那前的朝圣之路，忽而又变成洛阳城的万家灯火。谢幕后，你久久不愿起身……"公子，下次再来，我们还有《河图洛书》。"剧场小哥笑着说。</div>
-    <img class="pic" src="https://img.alicdn.com/bao/uploaded/i4/6000000001728/O1CN01GmpQ5c1OdTXQcP31d_!!6000000001728-0-itemdesc.jpg" alt="武则天实景演出">
-    <div class="addr">📍 洛阳市应天门遗址附近</div>
-    <div class="reward">🎪 获得：穿越探秘券</div>
-    <a class="book" href="https://a.feizhu.com/3LKzCx" target="_blank">立即预订 · 武则天实景演出</a>
-    <button class="next" onclick="goNode(3)">解锁终章 →</button>
+    <div class="node-header">
+      <span class="chapter">第二章</span>
+      <span class="node-num">2/4</span>
+    </div>
+    <h2>🏯 应天门 · 大朝会</h2>
+    <div class="story">
+      夜幕降临，你身着唐装，步入应天门。阙楼巍峨，檐角铁马叮当。忽然鼓乐齐鸣——大朝会开始了！百官列队，武皇升殿，万国使节朝拜。"宣！"内侍高唱，你随人群进入万象神宫，演出以一场盛大的宫廷舞蹈重现了神都辉煌。演出结束后，你登上阙楼凭栏远眺，洛阳城的灯火尽收眼底。
+    </div>
+    <img class="pic" src="https://img.alicdn.com/bao/uploaded/i1/6000000000448/O1CN01Uteoz71FBEZ7o91fj_!!6000000000448-0-itemdesc.jpg" alt="应天门大朝会">
+    <div class="checklist">
+      <div class="checklist-title">📋 本章打卡清单</div>
+      <div class="check-item"><span class="check-icon">☐</span> 观看《唐宫乐宴》演出</div>
+      <div class="check-item"><span class="check-icon">☐</span> 凭演出票登应天门阙楼（俯瞰神都夜景）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 领取唐茶唐点，换装汉服</div>
+    </div>
+    <div class="meta">
+      <span class="addr">📍 洛阳市老城区中州中路 应天门遗址</span>
+      <span class="reward">🎪 穿越探秘券</span>
+    </div>
+    <a class="book" href="https://a.feizhu.com/0RayBd" target="_blank">立即预订 · 唐宫乐宴+应天门阙楼票</a>
+    <button class="next" onclick="goNode(3)">解锁第三章 → 夜景打卡</button>
   </div>
 
+  <!-- ====== 节点3：夜景打卡 ====== -->
   <div class="node" id="node3">
-    <span class="chapter">终章 · 美食收官</span>
-    <h2>🏮 洛邑古城夜市</h2>
-    <div class="story">洛邑古城的红灯笼映红了你的脸。十字街的青石板路泛着微光，空气中飘来不翻汤的酸香、水席的鲜辣。你在一家水席摊前坐下，夜市摊主端上一碗热腾腾的汤："外头来的？来洛阳，不喝碗不翻汤，等于没来。"你笑着接过，一口下去，满是十三朝古都的滋味。</div>
-    <img class="pic" src="https://img.alicdn.com/imgextra/i4/6000000006870/O1CN01m2WSa" alt="洛邑古城">
-    <div class="addr">📍 洛阳市老城区洛邑古城</div>
-    <div class="reward">🏅 获得：河洛美食家徽章</div>
-    <button class="book" onclick="showFinale()">完成副本 · 领取成就</button>
+    <div class="node-header">
+      <span class="chapter">第三章</span>
+      <span class="node-num">3/4</span>
+    </div>
+    <h2>🌙 应天门夜景 · 四大机位</h2>
+    <div class="story">
+      夜风微凉，应天门的金色灯光亮起，整座城楼如从盛唐穿越而来。你举起手机——这就是洛阳最出片的时刻。阙楼三层飞檐在夜色中勾勒出雄浑轮廓，红墙在暖黄灯光下透着历史厚重感。你不由得屏住呼吸，原来大唐盛世，真的可以被定格在一张照片里。
+    </div>
+    <img class="pic" src="https://img.alicdn.com/bao/uploaded/i4/6000000004905/O1CN01J9sp611m6Xl3XzUGu_!!6000000004905-0-itemdesc.jpg" alt="应天门夜景">
+    <div class="checklist">
+      <div class="checklist-title">📋 四大打卡机位（按出片率排序）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 📸 应天门正前方广场（全景对称构图，夜间最佳）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 📸 应天门二层汉白玉栏杆（飞檐+城墙组合）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 📸 应天门阙楼转角（45°侧拍，纵深感最强）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 📸 应天门两侧红墙（人像/汉服最佳背景）</div>
+    </div>
+    <div class="meta">
+      <span class="addr">📍 应天门遗址广场（免费开放）</span>
+      <span class="reward">📷 神都摄影师徽章</span>
+    </div>
+    <a class="book" href="https://a.feizhu.com/3RsSaD" target="_blank">预约跟拍 · 应天门汉服旅拍</a>
+    <button class="next" onclick="goNode(4)">解锁终章 → 十字街夜市</button>
   </div>
 
-  <div class="node" id="node2_alt">
-    <span class="chapter">第二章 · 剧情反转</span>
-    <h2>🎭 意外发现</h2>
-    <div class="story">唐宫乐宴的热门场次已售罄，节假日期间一票难求……然而 FlyAI 正在为你重新搜索——发现了《河图洛书》演出！这是洛阳最新口碑爆棚的沉浸式演出，比唐宫乐宴更新更震撼，而且还有余票！</div>
-    <img class="pic" src="https://img.alicdn.com/bao/uploaded/i2/6000000007754/O1CN01g/O1CN01g" alt="河图洛书" onerror="this.style.display='none'">
-    <div class="reward">🎭 剧情反转补偿券 · 已激活</div>
-    <a class="book" href="https://a.feizhu.com/3rjD9R" target="_blank">立即预订 · 河图洛书演出票</a>
-    <button class="next" onclick="goNode(3)">解锁终章 →</button>
+  <!-- ====== 节点4：十字街夜市 ====== -->
+  <div class="node" id="node4">
+    <div class="node-header">
+      <span class="chapter">终章</span>
+      <span class="node-num">4/4</span>
+    </div>
+    <h2>🍜 十字街夜市 · 河洛滋味</h2>
+    <div class="story">
+      老城十字街的灯笼亮成一片红海。你走在青石板路上，不翻汤的酸香、水席的热气、烤串的滋滋声扑面而来。在一家水席摊前坐下，老板娘利落地端上两碗不翻汤和一盘锅贴。"来洛阳不吃不翻汤等于没来，"她笑着说，"这汤传说当年乾隆皇帝喝了都赞不绝口。"你一口下去，酸辣鲜香，满是十三朝古都的市井滋味。
+    </div>
+    <img class="pic" src="https://img.alicdn.com/tfscom/TB14Z0Vd63z9KJjy0FmSutiwXXa" alt="十字街夜市">
+    <div class="checklist">
+      <div class="checklist-title">📋 必吃清单（本地人推荐）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 🥣 不翻汤（十字街老店，酸辣开胃）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 🥟 洛阳水席（牡丹燕菜、假海参等）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 🍢 烤面筋+烤串（夜市标配）</div>
+      <div class="check-item"><span class="check-icon">☐</span> 🫓 锅贴（香脆多汁，配汤绝了）</div>
+    </div>
+    <div class="meta">
+      <span class="addr">📍 洛阳市老城区西大街与北大街交叉口</span>
+      <span class="reward">🏅 河洛美食家徽章</span>
+    </div>
+    <button class="book" onclick="showFinale()">🏆 完成副本 · 领取成就</button>
   </div>
 
+  <!-- 终章 -->
   <div class="finale" id="finale">
     <span class="trophy">🏆</span>
     <h2>副本完成！</h2>
-    <p style="color:#7a6a4a;line-height:2;margin-bottom:30px">千年帝都，千年佛光<br>你的洛阳故事，从伊阙开始</p>
+    <p>伊阙佛光，大唐盛世<br>你的洛阳故事，从这一刻开始</p>
     <div class="stats">
-      <div class="stat"><div class="n">3</div><div class="l">已解锁节点</div></div>
-      <div class="stat"><div class="n">3</div><div class="l">获得奖励</div></div>
-      <div class="stat"><div class="n">1</div><div class="l">解锁成就</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">解锁节点</div></div>
+      <div class="stat"><div class="n">4</div><div class="l">打卡清单</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">获得徽章</div></div>
     </div>
-    <button class="next" onclick="location.reload()">再玩一次</button>
+    <button class="book" onclick="location.reload()" style="margin-top:20px;background:linear-gradient(135deg,#d4af37,#b8860b);">🔄 再玩一次</button>
   </div>
 
 </div>
@@ -116,19 +242,13 @@ function startGame(){
   goNode(1);
 }
 function goNode(n){
-  // 30%概率触发意外引擎（节点2）
-  if(n===2&&Math.random()<0.3&&document.getElementById('node2_alt')){
-    document.querySelectorAll('.node').forEach(e=>e.style.display='none');
-    document.getElementById('node2_alt').style.display='block';
-    updatePF(1); return;
-  }
   document.querySelectorAll('.node').forEach(e=>e.style.display='none');
   document.getElementById('node'+n).style.display='block';
-  updatePF(n-1);
+  updatePF(n);
   window.scrollTo({top:0,behavior:'smooth'});
 }
 function updatePF(n){
-  document.getElementById('pf').style.width=(n/3*100)+'%';
+  document.getElementById('pf').style.width=(n/4*100)+'%';
 }
 function showFinale(){
   document.querySelectorAll('.node').forEach(e=>e.style.display='none');
