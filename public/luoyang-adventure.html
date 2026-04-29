@@ -768,7 +768,11 @@
         link.download = `${safeName}-洛阳打卡${filenameSuffix}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-        status.textContent = "图片已保存";
+        // iPhone Safari 兜底：打开新标签页供长按保存
+        setTimeout(() => {
+          if (document.visibilityState === 'visible') window.open(dataUrl, '_blank');
+        }, 180);
+        status.textContent = '图片已保存';
       } catch (_error) {
         status.textContent = "保存失败，请重试";
         status.classList.add("warn");
