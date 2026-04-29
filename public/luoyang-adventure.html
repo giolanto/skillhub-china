@@ -69,20 +69,114 @@
     .status.warn { color: var(--danger); }
     .preview { display: none; width: 100%; max-width: 300px; max-height: 220px; object-fit: cover; border: 1px solid var(--line); border-radius: 10px; margin-top: 8px; }
     .tip { color: #9ac2ff; font-size: 12px; margin-top: 6px; }
+    .task-grid { display: grid; gap: 10px; margin-top: 10px; }
+    .task-item { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: rgba(255,255,255,.03); }
+    .task-head { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .task-title { font-size: 14px; font-weight: 700; color: #dbe7ff; }
+    .task-note {
+      width: 100%; margin-top: 8px; border-radius: 8px; border: 1px solid var(--line);
+      background: rgba(7, 14, 32, .65); color: var(--text); padding: 8px 10px; resize: vertical; min-height: 56px;
+    }
+    .btn-save { color: #062116; background: linear-gradient(90deg,#99ffd1,#63e4b2); }
     .ach-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 10px; max-height: min(52vh,500px); overflow: auto; }
     .ach-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: rgba(255,255,255,.03); }
     .ach-card h4 { margin: 0 0 6px; color: #ffe3ab; font-size: 15px; }
     .ach-card p { margin: 0 0 6px; font-size: 13px; color: #d8e5ff; }
     .ach-card img { width: 100%; border-radius: 8px; border: 1px solid var(--line); max-height: 180px; object-fit: cover; }
+    .cover-card {
+      background:
+        radial-gradient(circle at 20% 20%, rgba(124, 199, 255, .22), transparent 45%),
+        radial-gradient(circle at 80% 75%, rgba(255, 171, 126, .2), transparent 42%),
+        linear-gradient(150deg, rgba(20, 34, 72, .88), rgba(8, 14, 32, .92));
+    }
+    .cover-title { margin: 0; font-size: clamp(30px, 6vw, 62px); letter-spacing: 1px; }
+    .cover-subtitle { margin: 0; color: #c7d9ff; font-size: clamp(14px, 2.2vw, 20px); }
+    .cover-glow {
+      border: 1px solid rgba(137, 188, 255, .5);
+      border-radius: 14px;
+      padding: 12px;
+      background: linear-gradient(100deg, rgba(66, 117, 205, .22), rgba(24, 205, 204, .16));
+      box-shadow: 0 0 30px rgba(102, 168, 255, .18);
+      color: #def0ff;
+    }
+    .badge-photo { width: 100%; height: 240px; object-fit: cover; border-radius: 10px; border: 1px solid var(--line); }
+    .img-source { margin-top: 8px; font-size: 12px; color: #9cb4e6; line-height: 1.45; }
+    .img-source a { color: #9fdcff; text-decoration: none; }
+    .img-source a:hover { text-decoration: underline; }
+    .cover-cinematic { overflow: hidden; position: relative; }
+    .cover-cinematic::before {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background: linear-gradient(120deg, transparent 36%, rgba(170, 217, 255, .28) 50%, transparent 64%);
+      transform: translateX(-130%) skewX(-14deg);
+      animation: sweep 4.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .cover-cinematic .cover-title,
+    .cover-cinematic .cover-subtitle,
+    .cover-cinematic .cover-glow,
+    .cover-cinematic .actions {
+      opacity: 0;
+      transform: translateY(16px);
+      animation: riseIn .9s cubic-bezier(.2,.75,.18,1) forwards;
+    }
+    .cover-cinematic .cover-title {
+      animation-delay: .08s;
+      text-shadow: 0 0 18px rgba(140, 207, 255, .35), 0 0 38px rgba(88, 139, 255, .22);
+    }
+    .cover-cinematic .cover-subtitle { animation-delay: .26s; }
+    .cover-cinematic .cover-glow { animation-delay: .42s; }
+    .cover-cinematic .actions { animation-delay: .56s; }
+    .btn-start {
+      color: #071324;
+      background: linear-gradient(90deg,#96f2ff,#8ec1ff);
+      box-shadow: 0 0 0 rgba(127, 222, 255, 0);
+      animation: breathe 2.2s ease-in-out infinite;
+    }
+    @keyframes riseIn { to { opacity: 1; transform: translateY(0); } }
+    @keyframes breathe {
+      0%,100% { transform: translateY(0); box-shadow: 0 0 0 rgba(127, 222, 255, 0); }
+      50% { transform: translateY(-2px); box-shadow: 0 0 24px rgba(127, 222, 255, .45); }
+    }
+    @keyframes sweep {
+      0%, 22% { transform: translateX(-130%) skewX(-14deg); opacity: 0; }
+      30%, 56% { transform: translateX(130%) skewX(-14deg); opacity: 1; }
+      100% { transform: translateX(130%) skewX(-14deg); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cover-cinematic::before,
+      .cover-cinematic .cover-title,
+      .cover-cinematic .cover-subtitle,
+      .cover-cinematic .cover-glow,
+      .cover-cinematic .actions,
+      .btn-start { animation: none; opacity: 1; transform: none; }
+    }
     @media (max-width: 760px) { .content { grid-template-columns: 1fr; } .card { min-height: 90vh; } .img-wrap { min-height: 170px; } }
   </style>
 </head>
 <body>
   <div class="bg"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div><div class="orb d"></div></div>
   <main class="deck">
-    <section class="page active" data-id="longmen">
+    <section class="page active" data-id="cover">
+      <article class="card cover-card cover-cinematic">
+        <div class="row"><span class="badge">洛阳剧情副本 · 沉浸版</span><span class="progress">第 1 / 6 页</span></div>
+        <h1 class="cover-title">神都洛阳 · 时空漫游</h1>
+        <p class="cover-subtitle">白天看石窟，入夜登阙楼，最后在十字街收集烟火人间。</p>
+        <section class="cover-glow">
+          四章主线任务 + 多小节拍照打卡 + 章节存档续玩。<br />
+          建议戴上耳机，准备好相机，开启你的洛阳探索。
+        </section>
+        <div class="actions">
+          <button class="btn-next btn-start" data-next="1">开始探索</button>
+          <span class="status ok">支持断点续玩</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="page" data-id="longmen">
       <article class="card">
-        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 1 / 5 页</span></div>
+        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 2 / 6 页</span></div>
         <h1 class="title">第一章 🗿 龙门石窟·伊阙万佛</h1>
         <p class="subtitle">打卡：西山石窟、奉先寺、卢舍那大佛（最佳机位）、伊河礼佛台</p>
         <div class="content">
@@ -93,17 +187,42 @@
               <div>📍 洛阳市洛龙区238省道</div><div>⏰ 推荐时段：上午柔光/傍晚金色时刻</div><div>📸 机位建议：中轴偏右 15°</div>
             </div>
             <div class="actions">
-              <button class="btn-photo" data-target="longmen-input">拍照打卡</button>
-              <button class="btn-next" data-next="1" disabled>解锁下一章</button>
-              <span class="status" id="longmen-status">未上传照片</span>
+              <button class="btn-save" data-save="longmen">保存本章进度</button>
+              <button class="btn-next" data-next="2" disabled>解锁下一章</button>
+              <span class="status" id="longmen-status">请先完成四个小节任务</span>
             </div>
-            <input id="longmen-input" type="file" accept="image/*" capture="environment" hidden />
-            <img id="longmen-preview" class="preview" alt="龙门石窟照片预览" />
+            <div class="task-grid" data-chapter="longmen">
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节1：西山石窟</span><button class="btn-photo" data-target="longmen-west-input">拍照打卡</button></div>
+                <input id="longmen-west-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="longmen-west-preview" class="preview" alt="西山石窟照片预览" />
+                <textarea class="task-note" id="longmen-west-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节2：奉先寺</span><button class="btn-photo" data-target="longmen-fx-input">拍照打卡</button></div>
+                <input id="longmen-fx-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="longmen-fx-preview" class="preview" alt="奉先寺照片预览" />
+                <textarea class="task-note" id="longmen-fx-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节3：卢舍那大佛（最佳机位）</span><button class="btn-photo" data-target="longmen-buddha-input">拍照打卡</button></div>
+                <input id="longmen-buddha-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="longmen-buddha-preview" class="preview" alt="卢舍那大佛照片预览" />
+                <textarea class="task-note" id="longmen-buddha-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节4：伊河礼佛台</span><button class="btn-photo" data-target="longmen-river-input">拍照打卡</button></div>
+                <input id="longmen-river-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="longmen-river-preview" class="preview" alt="伊河礼佛台照片预览" />
+                <textarea class="task-note" id="longmen-river-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+            </div>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
           <section class="panel">
             <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-img" alt="龙门石窟标志" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='300'><rect width='420' height='300' rx='24' fill='%23111c38'/><path d='M66 224L128 86l42 78 35-52 58 112' stroke='%236bc7ff' stroke-width='14' fill='none' stroke-linecap='round'/><circle cx='296' cy='124' r='40' fill='none' stroke='%23ffd07d' stroke-width='12'/><text x='30' y='272' fill='%23d7e8ff' font-size='30'>龙门石窟</text></svg>" /></div>
+            <div class="img-wrap"><img class="badge-photo" alt="龙门石窟实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Ancient_Buddhist_Grottoes_at_Longmen-_Middle_Binyang_Cave_Main_Buddha_Image.jpg/960px-Ancient_Buddhist_Grottoes_at_Longmen-_Middle_Binyang_Cave_Main_Buddha_Image.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:Ancient_Buddhist_Grottoes_at_Longmen-_Middle_Binyang_Cave_Main_Buddha_Image.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Longmen Grottoes）</a></div>
           </section>
         </div>
       </article>
@@ -111,7 +230,7 @@
 
     <section class="page" data-id="yingtian-day">
       <article class="card">
-        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 2 / 5 页</span></div>
+        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 3 / 6 页</span></div>
         <h2 class="title">第二章 🏯 应天门·大朝会</h2>
         <p class="subtitle">观看《唐宫乐宴》+ 登阙楼俯瞰神都夜景；还有唐茶唐点、汉服换装</p>
         <div class="content">
@@ -123,16 +242,19 @@
             </div>
             <div class="actions">
               <button class="btn-photo" data-target="yingtian-day-input">拍照打卡</button>
-              <button class="btn-next" data-next="2" disabled>解锁下一章</button>
+              <button class="btn-save" data-save="yingtian-day">保存本章进度</button>
+              <button class="btn-next" data-next="3" disabled>解锁下一章</button>
               <span class="status" id="yingtian-day-status">未上传照片</span>
             </div>
             <input id="yingtian-day-input" type="file" accept="image/*" capture="environment" hidden />
             <img id="yingtian-day-preview" class="preview" alt="应天门大朝会照片预览" />
+            <textarea class="task-note" id="yingtian-day-note" placeholder="可选：记录这张照片的文字"></textarea>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
           <section class="panel">
             <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-img" alt="应天门标志" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='300'><rect width='420' height='300' rx='24' fill='%23191d38'/><path d='M72 214h276M96 214V130h228v84M126 130V90h168v40' stroke='%23ffcf77' stroke-width='12' fill='none' stroke-linecap='round'/><circle cx='210' cy='162' r='20' fill='none' stroke='%23ffd485' stroke-width='10'/><text x='40' y='272' fill='%23ffe8be' font-size='30'>应天门</text></svg>" /></div>
+            <div class="img-wrap"><img class="badge-photo" alt="应天门实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Yingtian_Gate%2CLuoyang.jpg/1280px-Yingtian_Gate%2CLuoyang.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:Yingtian_Gate,Luoyang.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Yingtian Gate）</a></div>
           </section>
         </div>
       </article>
@@ -140,7 +262,7 @@
 
     <section class="page" data-id="yingtian-night">
       <article class="card">
-        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 3 / 5 页</span></div>
+        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 4 / 6 页</span></div>
         <h2 class="title">第三章 🌙 应天门夜景·四大打卡机位</h2>
         <p class="subtitle">正前方广场（全景对称）、二层汉白玉栏杆、阙楼转角、两侧红墙</p>
         <div class="content">
@@ -151,17 +273,42 @@
               <div>🕗 最佳时间：日落后 20~50 分钟</div><div>🎞 构图顺序：全景→半身→细节</div><div>💡 建议开夜景模式</div>
             </div>
             <div class="actions">
-              <button class="btn-photo" data-target="yingtian-night-input">拍照打卡</button>
-              <button class="btn-next" data-next="3" disabled>解锁下一章</button>
-              <span class="status" id="yingtian-night-status">未上传照片</span>
+              <button class="btn-save" data-save="yingtian-night">保存本章进度</button>
+              <button class="btn-next" data-next="4" disabled>解锁下一章</button>
+              <span class="status" id="yingtian-night-status">请先完成四个小节任务</span>
             </div>
-            <input id="yingtian-night-input" type="file" accept="image/*" capture="environment" hidden />
-            <img id="yingtian-night-preview" class="preview" alt="应天门夜景照片预览" />
+            <div class="task-grid" data-chapter="yingtian-night">
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节1：正前方广场</span><button class="btn-photo" data-target="yingtian-night-front-input">拍照打卡</button></div>
+                <input id="yingtian-night-front-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="yingtian-night-front-preview" class="preview" alt="正前方广场照片预览" />
+                <textarea class="task-note" id="yingtian-night-front-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节2：二层汉白玉栏杆</span><button class="btn-photo" data-target="yingtian-night-rail-input">拍照打卡</button></div>
+                <input id="yingtian-night-rail-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="yingtian-night-rail-preview" class="preview" alt="二层汉白玉栏杆照片预览" />
+                <textarea class="task-note" id="yingtian-night-rail-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节3：阙楼转角</span><button class="btn-photo" data-target="yingtian-night-corner-input">拍照打卡</button></div>
+                <input id="yingtian-night-corner-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="yingtian-night-corner-preview" class="preview" alt="阙楼转角照片预览" />
+                <textarea class="task-note" id="yingtian-night-corner-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节4：两侧红墙</span><button class="btn-photo" data-target="yingtian-night-wall-input">拍照打卡</button></div>
+                <input id="yingtian-night-wall-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="yingtian-night-wall-preview" class="preview" alt="两侧红墙照片预览" />
+                <textarea class="task-note" id="yingtian-night-wall-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+            </div>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
           <section class="panel">
             <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-img" alt="应天门夜景标志" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='300'><rect width='420' height='300' rx='24' fill='%230f1733'/><circle cx='326' cy='82' r='34' fill='none' stroke='%23ffe08f' stroke-width='10'/><path d='M70 220h280M102 220V142h216v78M132 142V108h156v34M205 220v-44' stroke='%237ad3ff' stroke-width='10' fill='none' stroke-linecap='round'/><text x='28' y='272' fill='%23d9e6ff' font-size='28'>应天门夜景</text></svg>" /></div>
+            <div class="img-wrap"><img class="badge-photo" alt="应天门夜景实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/20230124_Yingtian_Gate_at_Night_06.jpg/1280px-20230124_Yingtian_Gate_at_Night_06.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:20230124_Yingtian_Gate_at_Night_06.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Yingtian Gate at Night）</a></div>
           </section>
         </div>
       </article>
@@ -169,7 +316,7 @@
 
     <section class="page" data-id="shizijie">
       <article class="card">
-        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 4 / 5 页</span></div>
+        <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 5 / 6 页</span></div>
         <h2 class="title">第四章 🍜 十字街夜市·河洛滋味</h2>
         <p class="subtitle">不翻汤、水席、烤串、锅贴（乾隆皇帝同款）</p>
         <div class="content">
@@ -180,17 +327,42 @@
               <div>📍 洛阳市老城区十字街夜市</div><div>🍽 推荐顺序：不翻汤→水席→锅贴→烤串</div><div>📸 夜市人像建议靠红墙拍摄</div>
             </div>
             <div class="actions">
-              <button class="btn-photo" data-target="shizijie-input">拍照打卡</button>
-              <button class="btn-next" data-next="4" disabled>解锁下一章</button>
-              <span class="status" id="shizijie-status">未上传照片</span>
+              <button class="btn-save" data-save="shizijie">保存本章进度</button>
+              <button class="btn-next" data-next="5" disabled>解锁下一章</button>
+              <span class="status" id="shizijie-status">请先完成四个小节任务</span>
             </div>
-            <input id="shizijie-input" type="file" accept="image/*" capture="environment" hidden />
-            <img id="shizijie-preview" class="preview" alt="十字街夜市照片预览" />
+            <div class="task-grid" data-chapter="shizijie">
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节1：美食1</span><button class="btn-photo" data-target="shizijie-food1-input">拍照打卡</button></div>
+                <input id="shizijie-food1-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="shizijie-food1-preview" class="preview" alt="美食1照片预览" />
+                <textarea class="task-note" id="shizijie-food1-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节2：美食2</span><button class="btn-photo" data-target="shizijie-food2-input">拍照打卡</button></div>
+                <input id="shizijie-food2-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="shizijie-food2-preview" class="preview" alt="美食2照片预览" />
+                <textarea class="task-note" id="shizijie-food2-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节3：美食3</span><button class="btn-photo" data-target="shizijie-food3-input">拍照打卡</button></div>
+                <input id="shizijie-food3-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="shizijie-food3-preview" class="preview" alt="美食3照片预览" />
+                <textarea class="task-note" id="shizijie-food3-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+              <article class="task-item">
+                <div class="task-head"><span class="task-title">小节4：美食4</span><button class="btn-photo" data-target="shizijie-food4-input">拍照打卡</button></div>
+                <input id="shizijie-food4-input" type="file" accept="image/*" capture="environment" hidden />
+                <img id="shizijie-food4-preview" class="preview" alt="美食4照片预览" />
+                <textarea class="task-note" id="shizijie-food4-note" placeholder="可选：记录这张照片的文字"></textarea>
+              </article>
+            </div>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
           <section class="panel">
             <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-img" alt="十字街夜市标志" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='420' height='300'><rect width='420' height='300' rx='24' fill='%23201831'/><path d='M76 96h268M108 96v52h204V96M138 148h144v76H138z' stroke='%23ffcf70' stroke-width='10' fill='none' stroke-linecap='round'/><circle cx='176' cy='196' r='16' fill='none' stroke='%23ffd28a' stroke-width='8'/><circle cx='246' cy='196' r='16' fill='none' stroke='%23ffd28a' stroke-width='8'/><text x='36' y='272' fill='%23ffe3b4' font-size='29'>十字街夜市</text></svg>" /></div>
+            <div class="img-wrap"><img class="badge-photo" alt="洛阳夜市实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Luoyang_Nightmarket.jpg/1280px-Luoyang_Nightmarket.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:Luoyang_Nightmarket.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Luoyang Nightmarket）</a></div>
           </section>
         </div>
       </article>
@@ -198,7 +370,7 @@
 
     <section class="page" data-id="achievement">
       <article class="card">
-        <div class="row"><span class="badge">最终页</span><span class="progress">第 5 / 5 页</span></div>
+        <div class="row"><span class="badge">最终页</span><span class="progress">第 6 / 6 页</span></div>
         <h2 class="title">🏆 章节成就 · 河洛探索家</h2>
         <p class="subtitle">四章全部完成后，自动生成景点介绍 + 打卡照片成就墙。</p>
         <section class="panel">
@@ -214,16 +386,59 @@
   </main>
 
   <script>
+    const STORAGE_KEY = "luoyang-adventure-save-v2";
+    const CHAPTER_START_INDEX = 1;
+    const ACHIEVEMENT_PAGE_INDEX = 5;
     const spots = [
-      { id: "longmen", title: "第一章 🗿 龙门石窟·伊阙万佛", intro: "打卡西山石窟、奉先寺、卢舍那大佛（最佳机位）、伊河礼佛台。", inputId: "longmen-input", previewId: "longmen-preview", statusId: "longmen-status" },
-      { id: "yingtian-day", title: "第二章 🏯 应天门·大朝会", intro: "观看《唐宫乐宴》+ 登阙楼夜景，搭配唐茶唐点与汉服换装。", inputId: "yingtian-day-input", previewId: "yingtian-day-preview", statusId: "yingtian-day-status" },
-      { id: "yingtian-night", title: "第三章 🌙 应天门夜景·四大打卡机位", intro: "正前方广场、二层栏杆、阙楼转角、两侧红墙四机位完整打卡。", inputId: "yingtian-night-input", previewId: "yingtian-night-preview", statusId: "yingtian-night-status" },
-      { id: "shizijie", title: "第四章 🍜 十字街夜市·河洛滋味", intro: "不翻汤、水席、烤串、锅贴（乾隆皇帝同款）逐一体验。", inputId: "shizijie-input", previewId: "shizijie-preview", statusId: "shizijie-status" }
+      {
+        id: "longmen",
+        title: "第一章 🗿 龙门石窟·伊阙万佛",
+        intro: "打卡西山石窟、奉先寺、卢舍那大佛（最佳机位）、伊河礼佛台。",
+        statusId: "longmen-status",
+        tasks: [
+          { id: "longmen-west", label: "西山石窟", inputId: "longmen-west-input", previewId: "longmen-west-preview", noteId: "longmen-west-note" },
+          { id: "longmen-fx", label: "奉先寺", inputId: "longmen-fx-input", previewId: "longmen-fx-preview", noteId: "longmen-fx-note" },
+          { id: "longmen-buddha", label: "卢舍那大佛（最佳机位）", inputId: "longmen-buddha-input", previewId: "longmen-buddha-preview", noteId: "longmen-buddha-note" },
+          { id: "longmen-river", label: "伊河礼佛台", inputId: "longmen-river-input", previewId: "longmen-river-preview", noteId: "longmen-river-note" }
+        ]
+      },
+      {
+        id: "yingtian-day",
+        title: "第二章 🏯 应天门·大朝会",
+        intro: "观看《唐宫乐宴》+ 登阙楼夜景，搭配唐茶唐点与汉服换装。",
+        statusId: "yingtian-day-status",
+        tasks: [{ id: "yingtian-day-main", label: "大朝会打卡", inputId: "yingtian-day-input", previewId: "yingtian-day-preview", noteId: "yingtian-day-note" }]
+      },
+      {
+        id: "yingtian-night",
+        title: "第三章 🌙 应天门夜景·四大打卡机位",
+        intro: "正前方广场、二层栏杆、阙楼转角、两侧红墙四机位完整打卡。",
+        statusId: "yingtian-night-status",
+        tasks: [
+          { id: "yingtian-night-front", label: "正前方广场", inputId: "yingtian-night-front-input", previewId: "yingtian-night-front-preview", noteId: "yingtian-night-front-note" },
+          { id: "yingtian-night-rail", label: "二层汉白玉栏杆", inputId: "yingtian-night-rail-input", previewId: "yingtian-night-rail-preview", noteId: "yingtian-night-rail-note" },
+          { id: "yingtian-night-corner", label: "阙楼转角", inputId: "yingtian-night-corner-input", previewId: "yingtian-night-corner-preview", noteId: "yingtian-night-corner-note" },
+          { id: "yingtian-night-wall", label: "两侧红墙", inputId: "yingtian-night-wall-input", previewId: "yingtian-night-wall-preview", noteId: "yingtian-night-wall-note" }
+        ]
+      },
+      {
+        id: "shizijie",
+        title: "第四章 🍜 十字街夜市·河洛滋味",
+        intro: "不翻汤、水席、烤串、锅贴（乾隆皇帝同款）逐一体验。",
+        statusId: "shizijie-status",
+        tasks: [
+          { id: "shizijie-food1", label: "美食1", inputId: "shizijie-food1-input", previewId: "shizijie-food1-preview", noteId: "shizijie-food1-note" },
+          { id: "shizijie-food2", label: "美食2", inputId: "shizijie-food2-input", previewId: "shizijie-food2-preview", noteId: "shizijie-food2-note" },
+          { id: "shizijie-food3", label: "美食3", inputId: "shizijie-food3-input", previewId: "shizijie-food3-preview", noteId: "shizijie-food3-note" },
+          { id: "shizijie-food4", label: "美食4", inputId: "shizijie-food4-input", previewId: "shizijie-food4-preview", noteId: "shizijie-food4-note" }
+        ]
+      }
     ];
 
     const pages = Array.from(document.querySelectorAll(".page"));
     const achGrid = document.getElementById("ach-grid");
     const photos = {};
+    const notes = {};
     let current = 0;
 
     function go(index) {
@@ -233,39 +448,72 @@
       pages[current].classList.add("active");
     }
 
+    function chapterDone(spot) {
+      return spot.tasks.every((task) => Boolean(photos[task.id]));
+    }
+
+    function updateChapterStatus(spot, withSavedMessage = false) {
+      const status = document.getElementById(spot.statusId);
+      const nextBtn = document.querySelector(`.page[data-id="${spot.id}"] .btn-next`);
+      const doneCount = spot.tasks.filter((task) => Boolean(photos[task.id])).length;
+      if (chapterDone(spot)) {
+        status.textContent = withSavedMessage ? "本章已保存，可继续下一章" : "本章任务全部完成，可解锁下一章";
+        status.classList.add("ok");
+        status.classList.remove("warn");
+        nextBtn.disabled = false;
+      } else {
+        status.textContent = `已完成 ${doneCount}/${spot.tasks.length} 个小节任务`;
+        status.classList.remove("ok", "warn");
+        nextBtn.disabled = true;
+      }
+    }
+
     function renderAchievements() {
       achGrid.innerHTML = "";
       spots.forEach((spot, i) => {
-        if (!photos[spot.id]) return;
+        if (!chapterDone(spot)) return;
+        const coverTask = spot.tasks.find((task) => photos[task.id]);
+        const noteText = coverTask && notes[coverTask.id] ? `\n${notes[coverTask.id]}` : "";
         const card = document.createElement("article");
         card.className = "ach-card";
-        card.innerHTML = `<h4>章节成就 · 第${i + 1}章</h4><p>${spot.title}</p><p>${spot.intro}</p><img src="${photos[spot.id]}" alt="${spot.title}照片" />`;
+        card.innerHTML = `<h4>章节成就 · 第${i + 1}章</h4><p>${spot.title}</p><p>${spot.intro}</p><p>已完成 ${spot.tasks.length}/${spot.tasks.length} 小节${noteText}</p><img src="${photos[coverTask.id]}" alt="${spot.title}照片" />`;
         achGrid.appendChild(card);
       });
     }
 
-    function unlock(spotId) {
-      const page = document.querySelector(`.page[data-id="${spotId}"]`);
-      const btn = page.querySelector(".btn-next");
-      btn.disabled = false;
+    function saveProgress(preferredPage = current, markResume = false) {
+      const oldRaw = localStorage.getItem(STORAGE_KEY);
+      let oldResumePage = 0;
+      if (oldRaw) {
+        try {
+          const oldData = JSON.parse(oldRaw);
+          oldResumePage = Number.isInteger(oldData.resumePage) ? oldData.resumePage : 0;
+        } catch (_error) {
+          oldResumePage = 0;
+        }
+      }
+      const saveData = {
+        photos,
+        notes,
+        resumePage: markResume ? preferredPage : oldResumePage,
+        savedAt: Date.now()
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
     }
 
-    function onFile(spot, file) {
+    function onFile(spot, task, file) {
       if (!file || !file.type.startsWith("image/")) return;
       const reader = new FileReader();
       reader.onload = (e) => {
-        photos[spot.id] = e.target.result;
-        const preview = document.getElementById(spot.previewId);
-        const status = document.getElementById(spot.statusId);
-        const btn = document.querySelector(`.btn-photo[data-target="${spot.inputId}"]`);
+        photos[task.id] = e.target.result;
+        const preview = document.getElementById(task.previewId);
+        const btn = document.querySelector(`.btn-photo[data-target="${task.inputId}"]`);
         preview.src = e.target.result;
         preview.style.display = "block";
-        status.textContent = "已完成本章打卡，可解锁下一章";
-        status.classList.add("ok");
-        status.classList.remove("warn");
+        updateChapterStatus(spot);
         btn.classList.add("done");
-        btn.textContent = "重新拍照/换一张";
-        unlock(spot.id);
+        btn.textContent = "重拍/换图";
+        saveProgress(current, false);
         renderAchievements();
       };
       reader.readAsDataURL(file);
@@ -273,17 +521,38 @@
 
     document.querySelectorAll(".btn-photo").forEach((btn) => {
       const input = document.getElementById(btn.dataset.target);
-      const spot = spots.find((s) => s.inputId === btn.dataset.target);
+      const spot = spots.find((s) => s.tasks.some((task) => task.inputId === btn.dataset.target));
+      const task = spot.tasks.find((item) => item.inputId === btn.dataset.target);
       btn.addEventListener("click", () => input.click());
-      input.addEventListener("change", () => onFile(spot, (input.files || [])[0]));
+      input.addEventListener("change", () => onFile(spot, task, (input.files || [])[0]));
+    });
+
+    spots.forEach((spot) => {
+      spot.tasks.forEach((task) => {
+        const noteEl = document.getElementById(task.noteId);
+        if (!noteEl) return;
+        noteEl.addEventListener("input", () => {
+          notes[task.id] = noteEl.value.trim();
+          saveProgress(current, false);
+        });
+      });
+    });
+
+    document.querySelectorAll(".btn-save").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const spot = spots.find((item) => item.id === btn.dataset.save);
+        if (!spot) return;
+        saveProgress(Math.min(ACHIEVEMENT_PAGE_INDEX, spots.findIndex((item) => item.id === spot.id) + CHAPTER_START_INDEX + 1), true);
+        updateChapterStatus(spot, true);
+      });
     });
 
     document.querySelectorAll(".btn-next[data-next]").forEach((btn) => {
       btn.addEventListener("click", () => {
         if (btn.disabled) return;
         const next = Number(btn.dataset.next);
-        if (next === 4) {
-          const allDone = spots.every((s) => Boolean(photos[s.id]));
+        if (next === ACHIEVEMENT_PAGE_INDEX) {
+          const allDone = spots.every((s) => chapterDone(s));
           if (!allDone) {
             const status = pages[current].querySelector(".status");
             status.textContent = "请先完成本章拍照打卡，再解锁下一章";
@@ -292,11 +561,63 @@
           }
           renderAchievements();
         }
+        saveProgress(next, true);
         go(next);
       });
     });
 
-    document.getElementById("restart").addEventListener("click", () => go(0));
+    function restoreProgress() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        Object.assign(photos, data.photos || {});
+        Object.assign(notes, data.notes || {});
+        spots.forEach((spot) => {
+          spot.tasks.forEach((task) => {
+            if (photos[task.id]) {
+              const preview = document.getElementById(task.previewId);
+              const btn = document.querySelector(`.btn-photo[data-target="${task.inputId}"]`);
+              preview.src = photos[task.id];
+              preview.style.display = "block";
+              btn.classList.add("done");
+              btn.textContent = "重拍/换图";
+            }
+            const noteEl = document.getElementById(task.noteId);
+            if (noteEl && notes[task.id]) noteEl.value = notes[task.id];
+          });
+          updateChapterStatus(spot);
+        });
+        renderAchievements();
+        const pageIdx = Number.isInteger(data.resumePage) ? data.resumePage : 0;
+        go(Math.min(Math.max(pageIdx, 0), pages.length - 1));
+        if (pageIdx > 0) {
+          const chapterText = pageIdx >= ACHIEVEMENT_PAGE_INDEX ? "成就页" : `第 ${pageIdx} 章`;
+          setTimeout(() => {
+            alert(`已恢复上次进度，当前继续探索：${chapterText}`);
+          }, 120);
+        }
+      } catch (_error) {
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
+    document.getElementById("restart").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      go(0);
+      window.location.reload();
+    });
+
+    document.querySelectorAll(".badge-photo").forEach((img) => {
+      img.loading = "lazy";
+      img.referrerPolicy = "no-referrer";
+      img.addEventListener("error", () => {
+        img.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='520'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%2316213f'/><stop offset='100%' stop-color='%230b132b'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><circle cx='760' cy='100' r='48' fill='none' stroke='%23ffd27d' stroke-width='8' opacity='0.85'/><path d='M120 380L260 210l90 120 90-140 180 190' stroke='%236fd4ff' stroke-width='12' fill='none' stroke-linecap='round' opacity='0.8'/><text x='54' y='470' fill='%23dceaff' font-size='42'>景点图片加载中，请稍后重试</text></svg>";
+      }, { once: true });
+    });
+
+    spots.forEach((spot) => updateChapterStatus(spot));
+    restoreProgress();
   </script>
 </body>
 </html>
