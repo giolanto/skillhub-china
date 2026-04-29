@@ -568,6 +568,10 @@
       btn.addEventListener("click", () => {
         if (btn.disabled) return;
         const next = Number(btn.dataset.next);
+        if (current === 0 && next === 1) {
+          go(next);
+          return;
+        }
         if (next === ACHIEVEMENT_PAGE_INDEX) {
           const allDone = spots.every((s) => chapterDone(s));
           if (!allDone) {
@@ -606,7 +610,8 @@
           updateChapterStatus(spot);
         });
         renderAchievements();
-        const pageIdx = Number.isInteger(data.resumePage) ? data.resumePage : 0;
+        const rawResume = Number.isInteger(data.resumePage) ? data.resumePage : 0;
+        const pageIdx = rawResume <= 1 ? 0 : rawResume;
         go(Math.min(Math.max(pageIdx, 0), pages.length - 1));
         if (pageIdx > 0) {
           const chapterText = pageIdx >= ACHIEVEMENT_PAGE_INDEX ? "成就页" : `第 ${pageIdx} 章`;
