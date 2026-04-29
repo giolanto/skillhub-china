@@ -767,17 +767,25 @@
           backgroundColor: null,
           useCORS: true,
           onclone: (doc) => {
-            const pagesInClone = doc.querySelectorAll('.page');
-            pagesInClone.forEach((p) => {
-              p.classList.remove('active');
-              p.style.opacity = '0';
-              p.style.pointerEvents = 'none';
+            // 找到 deck（确保滚动归零）
+            const deck = doc.querySelector('.deck');
+            if (deck) { deck.scrollTop = 0; deck.style.overflow = 'hidden'; }
+            // 所有页面先隐藏
+            doc.querySelectorAll('.page').forEach((p) => {
+              p.style.display = 'none';
+              p.style.visibility = 'hidden';
             });
-            const achievementClone = doc.querySelector('.page[data-id="achievement"]');
-            if (achievementClone) {
-              achievementClone.classList.add('active');
-              achievementClone.style.opacity = '1';
-              achievementClone.style.pointerEvents = 'auto';
+            // 只显示成就页
+            const ach = doc.querySelector('.page[data-id="achievement"]');
+            if (ach) {
+              ach.style.display = '';
+              ach.style.visibility = 'visible';
+              ach.classList.add('active');
+            }
+            // 海报模式：给成就卡加 poster-mode class
+            if (posterModeEnabled) {
+              const card = ach ? ach.querySelector('.card') : null;
+              if (card) card.classList.add('poster-mode');
             }
           }
         });
