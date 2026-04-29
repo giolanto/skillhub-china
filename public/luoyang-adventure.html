@@ -1,448 +1,167 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>洛阳副本 · 伊阙佛光</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>洛阳副本 · 穿越神都</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-body { font-family:'PingFang SC','Microsoft YaHei',sans-serif; background:#0a0a1a; color:#e8dcc4; min-height:100vh; overflow-x:hidden; }
-
-.cover { height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  background:linear-gradient(180deg,#0a0a1a 0%,#1a0a2e 50%,#0a1a3a 100%);
-  text-align:center; position:relative; overflow:hidden; }
-.cover::before { content:''; position:absolute; inset:0;
-  background:radial-gradient(ellipse at 50% 30%,rgba(180,140,60,0.12) 0%,transparent 60%); }
-.glow { width:130px; height:130px; border-radius:50%;
-  background:radial-gradient(circle,rgba(212,175,55,0.35) 0%,transparent 70%);
-  margin-bottom:32px; animation:pluse 3s ease-in-out infinite; }
-@keyframes pluse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.5);opacity:1} }
-.cover h1 { font-size:3em; color:#d4af37; text-shadow:0 0 40px rgba(212,175,55,0.5);
-  letter-spacing:0.15em; margin-bottom:12px; position:relative; z-index:1; }
-.cover .sub { font-size:1em; color:#a08040; letter-spacing:0.28em; margin-bottom:55px; position:relative; z-index:1; }
-.start-btn { padding:17px 55px; font-size:1.15em; background:linear-gradient(135deg,#d4af37,#b8860b);
-  color:#1a0a00; border:none; border-radius:50px; cursor:pointer; font-weight:bold;
-  letter-spacing:0.1em; box-shadow:0 0 35px rgba(212,175,55,0.35); transition:all .3s; position:relative; z-index:1; }
-.start-btn:hover { transform:scale(1.07); box-shadow:0 0 60px rgba(212,175,55,0.6); }
-
-.pb { position:fixed; top:0; left:0; right:0; height:5px; background:rgba(212,175,55,0.1); z-index:100; }
-.pf { height:100%; background:linear-gradient(90deg,#d4af37,#ff8c00);
-  width:0%; transition:width 1.2s cubic-bezier(0.4,0,0.2,1); }
-
-.game { display:none; max-width:640px; margin:0 auto; padding:24px 16px 120px; }
-.node { display:none; animation:fadeUp .7s cubic-bezier(0.22,1,0.36,1); }
-@keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
-
-.node-hd { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
-.chapter { display:inline-block; padding:4px 16px; background:rgba(212,175,55,0.1);
-  border:1px solid rgba(212,175,55,0.28); border-radius:20px; color:#d4af37; font-size:0.78em; }
-.node-n { font-size:0.75em; color:#6a5a3a; }
-.node h2 { color:#d4af37; font-size:1.7em; margin-bottom:12px; text-shadow:0 0 22px rgba(212,175,55,0.3); }
-
-.story { background:rgba(255,255,255,0.04); border:1px solid rgba(212,175,55,0.1);
-  border-radius:18px; padding:26px 20px; margin:14px 0; font-size:1.06em; line-height:2; color:#d4c4a0; position:relative; }
-.story::before { content:'"'; position:absolute; top:2px; left:12px; font-size:3.5em; color:rgba(212,175,55,0.16); font-family:serif; line-height:1; }
-
-.spot-card { background:rgba(255,255,255,0.03); border:1px solid rgba(212,175,55,0.12);
-  border-radius:14px; padding:14px 16px; margin:12px 0; }
-.spot-card-title { font-size:0.78em; color:#8a7a5a; margin-bottom:8px; letter-spacing:0.05em; }
-.spot-tags { display:flex; flex-wrap:wrap; gap:6px; }
-.spot-tag { padding:4px 12px; background:rgba(212,175,55,0.08);
-  border:1px solid rgba(212,175,55,0.2); border-radius:20px; font-size:0.82em; color:#c4a860; }
-
-.checklist { background:rgba(212,175,55,0.04); border:1px solid rgba(212,175,55,0.14);
-  border-radius:14px; padding:14px 16px; margin:14px 0; }
-.checklist-t { font-size:0.78em; color:#8a7a5a; margin-bottom:10px; letter-spacing:0.05em; }
-.ci { display:flex; align-items:flex-start; gap:8px; padding:7px 0;
-  border-bottom:1px solid rgba(212,175,55,0.07); font-size:0.95em; color:#c4b48a; }
-.ci:last-child { border-bottom:none; }
-.ci-icon { color:#d4af37; font-size:1.05em; flex-shrink:0; margin-top:1px; }
-
-.photo-zone { margin:16px 0 14px; }
-.photo-hint { font-size:0.83em; color:#7a6a4a; text-align:center; margin-bottom:10px; }
-.photo-btn { display:flex; align-items:center; justify-content:center; gap:8px;
-  width:100%; padding:16px; background:rgba(212,175,55,0.08); border:2px dashed rgba(212,175,55,0.35);
-  border-radius:16px; color:#d4af37; font-size:1.05em; cursor:pointer; transition:all .3s; }
-.photo-btn:hover { background:rgba(212,175,55,0.14); border-color:#d4af37; }
-
-.preview-wrap { position:relative; margin:12px 0; border-radius:14px; overflow:hidden; display:none; }
-.preview-img { width:100%; aspect-ratio:16/9; object-fit:cover; display:block; }
-.preview-retake { position:absolute; bottom:10px; right:10px; padding:7px 14px;
-  background:rgba(0,0,0,0.65); color:#fff; border:none; border-radius:20px;
-  font-size:0.82em; cursor:pointer; backdrop-filter:blur(4px); }
-
-.meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:12px 0; }
-.addr { font-size:0.82em; color:#7a6a4a; display:flex; align-items:center; gap:4px; }
-.reward { display:inline-flex; align-items:center; gap:5px; padding:4px 12px;
-  background:rgba(212,175,55,0.07); border:1px solid rgba(212,175,55,0.22);
-  border-radius:20px; font-size:0.8em; color:#d4af37; }
-
-.next { display:block; width:100%; padding:15px; background:transparent; color:#d4af37;
-  border:2px solid rgba(212,175,55,0.38); border-radius:15px; font-size:1em; cursor:pointer;
-  transition:all .3s; margin-top:10px; }
-.next:hover:not(:disabled) { background:rgba(212,175,55,0.08); }
-.next:disabled { opacity:0.45; cursor:not-allowed; }
-
-.footer-bar { position:fixed; bottom:0; left:0; right:0;
-  background:rgba(10,10,26,0.96); backdrop-filter:blur(12px);
-  border-top:1px solid rgba(212,175,55,0.12); padding:12px 16px; display:none; z-index:90; }
-.footer-bar.show { display:block; }
-.fb-inner { max-width:640px; margin:0 auto; display:flex; align-items:center; gap:12px; }
-.fb-dots { display:flex; gap:8px; }
-.fb-dot { width:11px; height:11px; border-radius:50%; border:2px solid rgba(212,175,55,0.4); transition:all .3s; }
-.fb-dot.done { background:#d4af37; border-color:#d4af37; }
-.fb-label { font-size:0.8em; color:#8a7a5a; flex:1; }
-.gen-btn { padding:9px 20px; background:linear-gradient(135deg,#d4af37,#b8860b);
-  color:#1a0a00; border:none; border-radius:25px; font-size:0.88em; font-weight:bold; cursor:pointer; transition:all .3s; flex-shrink:0; }
-.gen-btn:hover { transform:scale(1.05); box-shadow:0 0 20px rgba(212,175,55,0.4); }
-
-.achievement { display:none; padding:20px 16px 40px; max-width:640px; margin:0 auto; }
-.achievement h2 { color:#d4af37; font-size:1.8em; text-align:center; margin:20px 0 6px; text-shadow:0 0 30px rgba(212,175,55,0.4); }
-.achievement .sub-t { color:#7a6a4a; text-align:center; font-size:0.88em; margin-bottom:24px; }
-
-.achi-card { background:#0d1a2e; border-radius:20px; overflow:hidden;
-  border:2px solid rgba(212,175,55,0.3); margin-bottom:20px; }
-.achi-header { background:linear-gradient(135deg,#1a0a2e,#0a1a3a); padding:24px 20px 20px;
-  text-align:center; border-bottom:1px solid rgba(212,175,55,0.15); }
-.achi-header .trophy { font-size:3em; margin-bottom:8px; display:block; }
-.achi-header h3 { color:#d4af37; font-size:1.5em; margin-bottom:4px; }
-.achi-header .date { color:#7a6a4a; font-size:0.82em; }
-
-.achi-photos { padding:16px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.achi-photo { border-radius:12px; overflow:hidden; aspect-ratio:1; position:relative;
-  background:rgba(255,255,255,0.05); }
-.achi-photo img { width:100%; height:100%; object-fit:cover; display:block; }
-.achi-photo .n-label { position:absolute; bottom:6px; left:6px; background:rgba(0,0,0,0.65);
-  color:#d4af37; font-size:0.7em; padding:3px 8px; border-radius:10px; backdrop-filter:blur(4px); }
-.achi-photo .no-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center;
-  color:#4a3a2a; font-size:2em; }
-
-.achi-spots { padding:16px 20px 20px; border-top:1px solid rgba(212,175,55,0.1); }
-.achi-row { display:flex; align-items:flex-start; gap:10px; padding:10px 0;
-  border-bottom:1px solid rgba(212,175,55,0.07); }
-.achi-row:last-child { border-bottom:none; }
-.achi-icon { font-size:1.2em; flex-shrink:0; margin-top:1px; }
-.achi-sname { color:#d4af37; font-size:0.95em; font-weight:bold; margin-bottom:2px; }
-.achi-sdesc { color:#7a6a4a; font-size:0.8em; line-height:1.6; }
-
-.achi-badges { padding:14px 20px 20px; display:flex; flex-wrap:wrap; gap:8px;
-  justify-content:center; border-top:1px solid rgba(212,175,55,0.1); }
-.achi-badge { padding:5px 14px; background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.3);
-  border-radius:20px; font-size:0.8em; color:#d4af37; }
-
-.save-row { display:flex; gap:10px; margin-top:16px; }
-.save-btn { flex:1; padding:15px; background:linear-gradient(135deg,#d4af37,#b8860b);
-  color:#1a0a00; border:none; border-radius:14px; font-size:1em; font-weight:bold; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:6px; transition:all .3s; }
-.save-btn:hover { box-shadow:0 0 25px rgba(212,175,55,0.4); }
-.share-btn { flex:1; padding:15px; background:transparent; color:#d4af37;
-  border:2px solid rgba(212,175,55,0.4); border-radius:14px; font-size:1em; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; gap:6px; transition:all .3s; }
-.share-btn:hover { background:rgba(212,175,55,0.08); }
-
-input[type=file] { display:none; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0a0a1a;color:#e8dcc4;min-height:100vh;overflow-x:hidden}
+.cover{height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#0a0a1a 0%,#1a0a2e 50%,#0a1a3a 100%);text-align:center;position:relative;overflow:hidden}
+.cover::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(180,140,60,0.12) 0%,transparent 60%)}
+.glow{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,0.35) 0%,transparent 70%);margin-bottom:32px;animation:pluse 3s ease-in-out infinite}
+@keyframes pluse{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.5);opacity:1}}
+.cover h1{font-size:3em;color:#d4af37;text-shadow:0 0 40px rgba(212,175,55,0.5);letter-spacing:0.15em;margin-bottom:12px;position:relative;z-index:1}
+.cover .sub{font-size:1em;color:#a08040;letter-spacing:0.28em;margin-bottom:40px;position:relative;z-index:1}
+.btn-row{display:flex;flex-direction:column;gap:12px;align-items:center;position:relative;z-index:1}
+.start-btn{padding:17px 55px;font-size:1.15em;background:linear-gradient(135deg,#d4af37,#b8860b);color:#1a0a00;border:none;border-radius:50px;cursor:pointer;font-weight:bold;letter-spacing:0.1em;box-shadow:0 0 35px rgba(212,175,55,0.35);transition:all .3s}
+.start-btn:hover{transform:scale(1.07);box-shadow:0 0 60px rgba(212,175,55,0.6)}
+.resume-btn{padding:13px 40px;font-size:0.95em;background:rgba(212,175,55,0.1);color:#d4af37;border:1px solid rgba(212,175,55,0.35);border-radius:50px;cursor:pointer;transition:all .3s;display:none}
+.resume-btn:hover{background:rgba(212,175,55,0.18)}
+.resume-info{font-size:0.82em;color:#7a6a4a;margin-top:8px;display:none}
+.pb{position:fixed;top:0;left:0;right:0;height:5px;background:rgba(212,175,55,0.1);z-index:100}
+.pf{height:100%;background:linear-gradient(90deg,#d4af37,#ff8c00);width:0%;transition:width 1.2s cubic-bezier(0.4,0,0.2,1)}
+.game{display:none;max-width:640px;margin:0 auto;padding:24px 16px 130px}
+.chapter-wrap{display:none;animation:fadeUp .7s cubic-bezier(0.22,1,0.36,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+.chapter-hd{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.chapter-badge{display:inline-block;padding:5px 18px;background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.3);border-radius:20px;color:#d4af37;font-size:0.8em}
+.ch-title{color:#d4af37;font-size:1.85em;margin-bottom:4px;text-shadow:0 0 22px rgba(212,175,55,0.3)}
+.ch-sub{font-size:0.88em;color:#8a7a5a;margin-bottom:16px;line-height:1.7}
+.chapter-progress{display:flex;gap:6px;margin-bottom:18px}
+.prog-dot{flex:1;height:5px;border-radius:5px;background:rgba(212,175,55,0.15);transition:all .4s}
+.prog-dot.done{background:#d4af37}
+.section{background:rgba(255,255,255,0.03);border:1px solid rgba(212,175,55,0.1);border-radius:18px;padding:20px 16px;margin-bottom:14px}
+.section-title{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.section-n{font-size:0.72em;color:#6a5a3a}
+.section-name{font-size:1.08em;color:#d4af37;font-weight:bold}
+.section.done .section-name{color:#9a8a5a;text-decoration:line-through}
+.section-story{font-size:0.95em;color:#c4b48a;line-height:1.85;margin-bottom:12px}
+.spot-row{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(212,175,55,0.07);font-size:0.92em;color:#b4a47a}
+.spot-row:last-of-type{border-bottom:none}
+.spot-check{color:#d4af37;font-size:1em;flex-shrink:0;width:18px}
+.photo-zone{margin:14px 0 10px}
+.photo-hint{font-size:0.8em;color:#7a6a4a;text-align:center;margin-bottom:8px}
+.photo-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;background:rgba(212,175,55,0.07);border:2px dashed rgba(212,175,55,0.3);border-radius:14px;color:#d4af37;font-size:1em;cursor:pointer;transition:all .3s}
+.photo-btn:hover{background:rgba(212,175,55,0.13);border-color:#d4af37}
+.preview-wrap{position:relative;margin:10px 0;border-radius:14px;overflow:hidden;display:none}
+.preview-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.preview-retake{position:absolute;bottom:10px;right:10px;padding:6px 14px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:20px;font-size:0.8em;cursor:pointer;backdrop-filter:blur(4px)}
+.text-overlay-wrap{margin:10px 0}
+.text-overlay-hint{font-size:0.78em;color:#7a6a4a;margin-bottom:6px}
+.text-input{width:100%;padding:10px 14px;background:rgba(255,255,255,0.05);border:1px solid rgba(212,175,55,0.2);border-radius:10px;color:#e8dcc4;font-size:0.92em;resize:none;outline:none;min-height:36px;transition:border .2s}
+.text-input:focus{border-color:#d4af37}
+.text-input::placeholder{color:#5a4a3a}
+.text-preview{font-size:0.78em;color:#8a7a5a;margin-top:4px;min-height:18px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.addr{font-size:0.8em;color:#7a6a4a;display:flex;align-items:center;gap:4px}
+.badge-tag{padding:3px 10px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.25);border-radius:20px;font-size:0.78em;color:#d4af37}
+.chapter-end{display:none;background:rgba(212,175,55,0.05);border:1px solid rgba(212,175,55,0.18);border-radius:18px;padding:24px 20px;margin:20px 0 16px;text-align:center}
+.chapter-end.show{display:block;animation:fadeUp .5s ease}
+.chapter-end h3{color:#d4af37;font-size:1.3em;margin-bottom:8px}
+.chapter-end p{color:#8a7a5a;font-size:0.88em;margin-bottom:18px;line-height:1.7}
+.ch-end-row{display:flex;gap:10px}
+.ch-save-btn,.ch-continue-btn{flex:1;padding:14px;border-radius:14px;font-size:1em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .3s}
+.ch-save-btn{background:linear-gradient(135deg,#d4af37,#b8860b);color:#1a0a00;border:none;font-weight:bold}
+.ch-save-btn:hover{box-shadow:0 0 25px rgba(212,175,55,0.4)}
+.ch-continue-btn{background:transparent;color:#d4af37;border:2px solid rgba(212,175,55,0.4)}
+.ch-continue-btn:hover{background:rgba(212,175,55,0.08)}
+.footer-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,26,0.96);backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.12);padding:12px 16px;display:none;z-index:90}
+.footer-bar.show{display:block}
+.fb-inner{max-width:640px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.fb-chapters{display:flex;gap:6px;flex:1}
+.fb-ch{flex:1;height:6px;border-radius:6px;background:rgba(212,175,55,0.12);overflow:hidden}
+.fb-ch-fill{height:100%;background:#d4af37;width:0%;transition:width .5s ease}
+.fb-label{font-size:0.78em;color:#8a7a5a;flex-shrink:0;white-space:nowrap}
+.achievement{display:none;padding:20px 16px 40px;max-width:640px;margin:0 auto}
+.achievement h2{color:#d4af37;font-size:1.8em;text-align:center;margin:20px 0 6px;text-shadow:0 0 30px rgba(212,175,55,0.4)}
+.achievement .sub-t{color:#7a6a4a;text-align:center;font-size:0.88em;margin-bottom:24px}
+.achi-card{background:#0d1a2e;border-radius:20px;overflow:hidden;border:2px solid rgba(212,175,55,0.3);margin-bottom:20px}
+..achi-header{background:linear-gradient(135deg,#1a0a2e,#0a1a3a);padding:24px 20px 20px;text-align:center;border-bottom:1px solid rgba(212,175,55,0.15)}
+.achi-header .trophy{font-size:3em;margin-bottom:8px;display:block}
+.achi-header h3{color:#d4af37;font-size:1.5em;margin-bottom:4px}
+.achi-header .date{color:#7a6a4a;font-size:0.82em}
+.achi-chapters{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.achi-ch{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:rgba(255,255,255,0.03);border-radius:12px;border:1px solid rgba(212,175,55,0.1)}
+.achi-ch-icon{font-size:1.5em;flex-shrink:0;margin-top:2px}
+.achi-ch-name{color:#d4af37;font-size:0.95em;font-weight:bold;margin-bottom:4px}
+.achi-ch-spots{display:flex;flex-wrap:wrap;gap:5px}
+.achi-ch-spot{padding:3px 10px;background:rgba(212,175,55,0.07);border:1px solid rgba(212,175,55,0.18);border-radius:20px;font-size:0.75em;color:#b4a060}
+.achi-ch-spot.no{opacity:0.35}
+.achi-badges{padding:14px 20px 20px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;border-top:1px solid rgba(212,175,55,0.1)}
+.achi-badge{padding:5px 14px;background:rgba(212,175,55,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:20px;font-size:0.8em;color:#d4af37}
+.save-row{display:flex;gap:10px;margin-top:16px}
+.save-btn,.share-btn{flex:1;padding:15px;border-radius:14px;font-size:1em;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .3s}
+.save-btn{background:linear-gradient(135deg,#d4af37,#b8860b);color:#1a0a00;border:none;font-weight:bold}
+.save-btn:hover{box-shadow:0 0 25px rgba(212,175,55,0.4)}
+.share-btn{background:transparent;color:#d4af37;border:2px solid rgba(212,175,55,0.4)}
+.share-btn:hover{background:rgba(212,175,55,0.08)}
+input[type=file]{display:none}
 </style>
 </head>
 <body>
-
-<div class="cover" id="cover">
-  <div class="glow"></div>
+<div class=pb><div class=pf id=pf></div></div>
+<div class=cover id=cover>
+  <div class=glow></div>
   <h1>洛阳</h1>
-  <div class="sub">伊阙佛光 · 拍照打卡副本</div>
-  <button class="start-btn" onclick="startGame()">开始打卡</button>
-</div>
-
-<div class="pb"><div class="pf" id="pf"></div></div>
-
-<div class="game" id="game">
-
-  <!-- 节点1 -->
-  <div class="node" id="node1">
-    <div class="node-hd"><span class="chapter">第一章</span><span class="node-n">1 / 4</span></div>
-    <h2>🗿 龙门石窟 · 伊阙万佛</h2>
-    <div class="story">你沿伊河前行，香山与龙门山左右对峙，这便是伊阙。卢舍那大佛端坐崖壁，面容祥和，据说这是武则天用自己的面容与脂粉钱主持雕凿的。无论你移动到哪个方位，都感觉她在温柔地注视着你。</div>
-    <div class="spot-card"><div class="spot-card-title">📖 景点介绍</div>
-      <div class="spot-tags">
-        <span class="spot-tag">世界文化遗产</span><span class="spot-tag">中国四大石窟之一</span>
-        <span class="spot-tag">始凿于北魏</span><span class="spot-tag">卢舍那大佛高17.14米</span>
-      </div>
-    </div>
-    <div class="checklist">
-      <div class="checklist-t">📋 打卡清单</div>
-      <div class="ci"><span class="ci-icon">☐</span> 西山石窟（精华区）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 奉先寺（九尊大像）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 卢舍那大佛（最佳机位：左侧仰拍）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 伊河礼佛台（拍大佛倒影绝佳）</div>
-    </div>
-    <div class="photo-zone">
-      <div class="photo-hint" id="hint1">完成打卡了吗？拍张照留念吧</div>
-      <div id="photoBtn1"><button class="photo-btn" onclick="document.getElementById('cam1').click()">📷 拍照打卡</button></div>
-      <input type="file" id="cam1" accept="image/*" capture="environment" onchange="handlePhoto(this,1)">
-      <div class="preview-wrap" id="preview1"><img class="preview-img" id="img1" src=""><button class="preview-retake" onclick="retake(1)">🔄 重拍</button></div>
-    </div>
-    <div class="meta">
-      <span class="addr">📍 洛阳市洛龙区238省道</span>
-      <span class="reward">🎫 古都探索券</span>
-    </div>
-    <button class="next" id="next1" onclick="goNode(2)" disabled>🔒 完成打卡后解锁下一章</button>
-  </div>
-
-  <!-- 节点2 -->
-  <div class="node" id="node2">
-    <div class="node-hd"><span class="chapter">第二章</span><span class="node-n">2 / 4</span></div>
-    <h2>🏯 应天门 · 大朝会</h2>
-    <div class="story">夜幕降临，你身着唐装步入应天门。阙楼巍峨，鼓乐骤起——大朝会开始！百官列队，武皇升殿。演出以盛大的宫廷舞蹈重现神都辉煌。谢幕后再登阙楼凭栏，洛阳城的万家灯火尽收眼底。</div>
-    <div class="spot-card"><div class="spot-card-title">📖 景点介绍</div>
-      <div class="spot-tags">
-        <span class="spot-tag">隋唐洛阳城正门</span><span class="spot-tag">武则天登基之地</span>
-        <span class="spot-tag">高36米</span><span class="spot-tag">《唐宫乐宴》演出</span>
-      </div>
-    </div>
-    <div class="checklist">
-      <div class="checklist-t">📋 打卡清单</div>
-      <div class="ci"><span class="ci-icon">☐</span> 观看《唐宫乐宴》演出</div>
-      <div class="ci"><span class="ci-icon">☐</span> 凭票登应天门阙楼俯瞰夜景</div>
-      <div class="ci"><span class="ci-icon">☐</span> 领唐茶唐点，换装汉服</div>
-    </div>
-    <div class="photo-zone">
-      <div class="photo-hint" id="hint2">大朝会精彩瞬间，拍下来！</div>
-      <div id="photoBtn2"><button class="photo-btn" onclick="document.getElementById('cam2').click()">📷 拍照打卡</button></div>
-      <input type="file" id="cam2" accept="image/*" capture="environment" onchange="handlePhoto(this,2)">
-      <div class="preview-wrap" id="preview2"><img class="preview-img" id="img2" src=""><button class="preview-retake" onclick="retake(2)">🔄 重拍</button></div>
-    </div>
-    <div class="meta">
-      <span class="addr">📍 洛阳市老城区中州中路 应天门遗址</span>
-      <span class="reward">🎪 穿越探秘券</span>
-    </div>
-    <button class="next" id="next2" onclick="goNode(3)" disabled>🔒 完成打卡后解锁下一章</button>
-  </div>
-
-  <!-- 节点3 -->
-  <div class="node" id="node3">
-    <div class="node-hd"><span class="chapter">第三章</span><span class="node-n">3 / 4</span></div>
-    <h2>🌙 应天门夜景 · 四大机位</h2>
-    <div class="story">夜风微凉，应天门的金色灯光亮起，整座城楼如从盛唐穿越而来。阙楼三层飞檐在夜色中勾勒出雄浑轮廓，红墙在暖光下透着历史厚重感。你不由得屏住呼吸——原来大唐盛世，真的可以被定格在一张照片里。</div>
-    <div class="spot-card"><div class="spot-card-title">📖 景点介绍</div>
-      <div class="spot-tags">
-        <span class="spot-tag">建于隋大业元年</span><span class="spot-tag">中国古代门阙之最</span>
-        <span class="spot-tag">灯光秀19:30-21:30</span><span class="spot-tag">汉服拍照圣地</span>
-      </div>
-    </div>
-    <div class="checklist">
-      <div class="checklist-t">📋 四大打卡机位</div>
-      <div class="ci"><span class="ci-icon">☐</span> 📸 正前方广场（全景对称构图，夜间最佳）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 📸 二层汉白玉栏杆（飞檐+城墙组合）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 📸 阙楼转角（45°侧拍，纵深感最强）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 📸 两侧红墙（汉服人像最佳背景）</div>
-    </div>
-    <div class="photo-zone">
-      <div class="photo-hint" id="hint3">夜景最佳出片时刻，拍一张！</div>
-      <div id="photoBtn3"><button class="photo-btn" onclick="document.getElementById('cam3').click()">📷 拍照打卡</button></div>
-      <input type="file" id="cam3" accept="image/*" capture="environment" onchange="handlePhoto(this,3)">
-      <div class="preview-wrap" id="preview3"><img class="preview-img" id="img3" src=""><button class="preview-retake" onclick="retake(3)">🔄 重拍</button></div>
-    </div>
-    <div class="meta">
-      <span class="addr">📍 应天门遗址广场（免费开放）</span>
-      <span class="reward">📷 神都摄影师徽章</span>
-    </div>
-    <button class="next" id="next3" onclick="goNode(4)" disabled>🔒 完成打卡后解锁终章</button>
-  </div>
-
-  <!-- 节点4 -->
-  <div class="node" id="node4">
-    <div class="node-hd"><span class="chapter">终章</span><span class="node-n">4 / 4</span></div>
-    <h2>🍜 十字街夜市 · 河洛滋味</h2>
-    <div class="story">老城十字街的灯笼亮成一片红海。你在一家水席摊前坐下，老板娘端上两碗不翻汤和一盘锅贴。"来洛阳不吃不翻汤等于没来，"她笑着说，"这汤传说乾隆皇帝喝了都赞不绝口。"你一口下去，酸辣鲜香，满是十三朝古都的市井滋味。</div>
-    <div class="spot-card"><div class="spot-card-title">📖 景点介绍</div>
-      <div class="spot-tags">
-        <span class="spot-tag">洛阳最火夜市</span><span class="spot-tag">不翻汤传承百年</span>
-        <span class="spot-tag">烤串水席锅贴</span><span class="spot-tag">22:00前人流量最大</span>
-      </div>
-    </div>
-    <div class="checklist">
-      <div class="checklist-t">📋 必吃清单（本地人推荐）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 🥣 不翻汤（酸辣开胃，乾隆同款）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 🥟 洛阳水席（牡丹燕菜等）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 🍢 烤面筋+烤串（夜市标配）</div>
-      <div class="ci"><span class="ci-icon">☐</span> 🫓 锅贴（香脆多汁）</div>
-    </div>
-    <div class="photo-zone">
-      <div class="photo-hint" id="hint4">美食当前，先拍为敬！</div>
-      <div id="photoBtn4"><button class="photo-btn" onclick="document.getElementById('cam4').click()">📷 拍照打卡</button></div>
-      <input type="file" id="cam4" accept="image/*" capture="environment" onchange="handlePhoto(this,4)">
-      <div class="preview-wrap" id="preview4"><img class="preview-img" id="img4" src=""><button class="preview-retake" onclick="retake(4)">🔄 重拍</button></div>
-    </div>
-    <div class="meta">
-      <span class="addr">📍 洛阳市老城区西大街与北大街交叉口</span>
-      <span class="reward">🏅 河洛美食家徽章</span>
-    </div>
-    <button class="next" id="next4" onclick="showAchievement()" disabled>🔒 完成打卡后生成成就卡</button>
-  </div>
-
-</div>
-
-<!-- 成就卡页面 -->
-<div class="achievement" id="achievement">
-  <h2>🏆 景点成就</h2>
-  <div class="sub-t">洛阳 · 伊阙佛光之旅</div>
-  <div class="achi-card">
-    <div class="achi-header">
-      <span class="trophy">🏆</span>
-      <h3>洛阳打卡成就</h3>
-      <div class="date" id="achiDate"></div>
-    </div>
-    <div class="achi-photos" id="achiPhotos"></div>
-    <div class="achi-spots">
-      <div class="achi-row"><span class="achi-icon">🗿</span><div><div class="achi-sname">龙门石窟 · 伊阙万佛</div><div class="achi-sdesc">中国四大石窟之一，卢舍那大佛高17.14米，始凿于北魏，世界文化遗产</div></div></div>
-      <div class="achi-row"><span class="achi-icon">🏯</span><div><div class="achi-sname">应天门 · 大朝会</div><div class="achi-sdesc">隋唐洛阳城正门，武则天登基之地，高36米，中国古代门阙之最</div></div></div>
-      <div class="achi-row"><span class="achi-icon">🌙</span><div><div class="achi-sname">应天门夜景 · 四大机位</div><div class="achi-sdesc">夜间灯光秀19:30-21:30，正前方广场/汉白玉栏杆/阙楼转角/两侧红墙</div></div></div>
-      <div class="achi-row"><span class="achi-icon">🍜</span><div><div class="achi-sname">十字街夜市 · 河洛滋味</div><div class="achi-sdesc">洛阳最火夜市，不翻汤传承百年，烤串水席锅贴齐全，22:00前人流量最大</div></div></div>
-    </div>
-    <div class="achi-badges">
-      <span class="achi-badge">🎫 古都探索券</span>
-      <span class="achi-badge">🎪 穿越探秘券</span>
-      <span class="achi-badge">📷 神都摄影师</span>
-      <span class="achi-badge">🏅 河洛美食家</span>
-      <span class="achi-badge">🌟 洛阳通成就</span>
-    </div>
-  </div>
-  <div class="save-row">
-    <button class="save-btn" onclick="saveCard()">💾 保存到相册</button>
-    <button class="share-btn" onclick="shareCard()">🔗 分享链接</button>
-  </div>
-  <button class="next" style="margin-top:12px" onclick="location.reload()">🔄 再玩一次</button>
-</div>
-
-<!-- 底部进度条 -->
-<div class="footer-bar" id="footerBar">
-  <div class="fb-inner">
-    <div class="fb-dots">
-      <div class="fb-dot" id="dot1"></div>
-      <div class="fb-dot" id="dot2"></div>
-      <div class="fb-dot" id="dot3"></div>
-      <div class="fb-dot" id="dot4"></div>
-    </div>
-    <div class="fb-label" id="fbLabel">已打卡 0/4</div>
-    <button class="gen-btn" id="genBtn" onclick="showAchievement()" style="display:none">🏆 生成成就卡</button>
+  <p class=sub>🗿 伊阙万佛 · 应天门大朝会 · 十字街夜市</p>
+  <div class=btn-row>
+    <button class=start-btn onclick=startGame(false)>▶ 开始副本</button>
+    <button class=resume-btn id=resumeBtn onclick=startGame(true)>⏮ 继续进度</button>
+    <p class=resume-info id=resumeInfo></p>
   </div>
 </div>
-
+<div class=game id=game>
+<div class=chapter-wrap id=ch1><div class=chapter-hd><span class=chapter-badge>第1章</span><span style="font-size:0.78em;color:#6a5a3a" id=ch1Progress>0/4 小节已完成</span></div><h2 class=ch-title>🗿 龙门石窟 · 伊阙万佛</h2><p class=ch-sub>你沿伊河前行，香山与龙门山左右对峙，这便是伊阙。卢舍那大佛端坐崖壁，面容祥和。</p><div class=chapter-progress id=ch1ProgDots><div class=prog-dot id=ch1pd0></div><div class=prog-dot id=ch1pd1></div><div class=prog-dot id=ch1pd2></div><div class=prog-dot id=ch1pd3></div></div><div class=section id=s1-1><div class=section-title><span class=section-n>1-1 / 4</span><span class=section-name>🗻 西山石窟（精华区）</span></div><div class=section-story>西山石窟是龙门石窟的精华所在，万佛洞里一万五千小佛姿态各异，笑容的菩萨微微含笑。</div><div class=spot-row><span class=spot-check id=sc1-1>☐</span> 西山石窟全景（入口处拍摄）</div><div class=spot-row><span class=spot-check id=sc1-1b>☐</span> 万佛洞外景（小佛队列）</div><div class=photo-zone><div class=photo-hint id=hints1-1>西山石窟 · 拍张照留念</div><div id=photoBtns1-1><button class=photo-btn onclick="document.getElementById('cams1-1').click()">📷 拍照打卡</button></div><input type=file id=cams1-1 accept=image/* capture=environment onchange="handlePhoto(this,'s1-1')"><div class=preview-wrap id=previews1-1><img class=preview-img id=imgs1-1 src=""><button class=preview-retake onclick=retake('s1-1')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts1-1 rows=1 placeholder="伊阙归来不看佛" maxlength=20 oninput="updateTextPreview('s1-1')"></textarea><div class=text-preview id=txtPrevs1-1></div></div><div class=meta><span class=addr>📍 洛阳市洛龙区238省道 龙门石窟景区</span></div></div><div class=section id=s1-2><div class=section-title><span class=section-n>1-2 / 4</span><span class=section-name>🙏 奉先寺（九尊大像）</span></div><div class=section-story>奉先寺是龙门石窟规模最大的露天摩崖造像群，九尊大像以卢舍那佛为中心。阳光从洞窟顶泻下，大佛眉间的白毫相光仿佛佛刚刚亮起。</div><div class=spot-row><span class=spot-check id=sc1-2>☐</span> 奉先寺全景（九尊大像同框）</div><div class=spot-row><span class=spot-check id=sc1-2b>☐</span> 侧叶像（左侧持杖老僧）</div><div class=photo-zone><div class=photo-hint id=hints1-2>奉先寺 · 拍张照留念</div><div id=photoBtns1-2><button class=photo-btn onclick="document.getElementById('cams1-2').click()">📷 拍照打卡</button></div><input type=file id=cams1-2 accept=image/* capture=environment onchange="handlePhoto(this,'s1-2')"><div class=preview-wrap id=previews1-2><img class=preview-img id=imgs1-2 src=""><button class=preview-retake onclick=retake('s1-2')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts1-2 rows=1 placeholder="九尊大佛，千年守望" maxlength=20 oninput="updateTextPreview('s1-2')"></textarea><div class=text-preview id=txtPrevs1-2></div></div><div class=meta><span class=addr>📍 龙门石窟奉先寺区域（西山中部）</span></div></div><div class=section id=s1-3><div class=section-title><span class=section-n>1-3 / 4</span><span class=section-name>📷 卢舍那大佛（最佳机位）</span></div><div class=section-story>卢舍那大佛高17.14米，面容丰润，眉目间的白毫相光仿若佛刚刚亮起。最佳拍摄机位在左侧斜前方305度，正好与大佛双眼相接。</div><div class=spot-row><span class=spot-check id=sc1-3>☐</span> 左侧侧拍（全佛正脸，最佳机位）</div><div class=spot-row><span class=spot-check id=sc1-3b>☐</span> 与大佛对视合照</div><div class=photo-zone><div class=photo-hint id=hints1-3>卢舍那大佛 · 最佳机位打卡！</div><div id=photoBtns1-3><button class=photo-btn onclick="document.getElementById('cams1-3').click()">📷 拍照打卡</button></div><input type=file id=cams1-3 accept=image/* capture=environment onchange="handlePhoto(this,'s1-3')"><div class=preview-wrap id=previews1-3><img class=preview-img id=imgs1-3 src=""><button class=preview-retake onclick=retake('s1-3')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts1-3 rows=1 placeholder="与武帝对视这一刻" maxlength=20 oninput="updateTextPreview('s1-3')"></textarea><div class=text-preview id=txtPrevs1-3></div></div><div class=meta><span class=addr>📍 奉先寺正壁左侧 · 最佳拍摄点</span><span class=badge-tag>⭐ 推荐机位</span></div></div><div class=section id=s1-4><div class=section-title><span class=section-n>1-4 / 4</span><span class=section-name>🌊 伊河礼佛台（拍大佛倒影）</span></div><div class=section-story>走过漫水桥来到伊河对岸的礼佛台。回首领首望，卢舍那大佛倒映在平静的伊河水面上，正与天空中的真佛相对。</div><div class=spot-row><span class=spot-check id=sc1-4>☐</span> 伊河倒影（漫水桥上拍摄）</div><div class=spot-row><span class=spot-check id=sc1-4b>☐</span> 礼佛台石碑处留影</div><div class=photo-zone><div class=photo-hint id=hints1-4>伊河礼佛台 · 拍张倒影留念！</div><div id=photoBtns1-4><button class=photo-btn onclick="document.getElementById('cams1-4').click()">📷 拍照打卡</button></div><input type=file id=cams1-4 accept=image/* capture=environment onchange="handlePhoto(this,'s1-4')"><div class=preview-wrap id=previews1-4><img class=preview-img id=imgs1-4 src=""><button class=preview-retake onclick=retake('s1-4')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts1-4 rows=1 placeholder="伊阙归来，我是归人" maxlength=20 oninput="updateTextPreview('s1-4')"></textarea><div class=text-preview id=txtPrevs1-4></div></div><div class=meta><span class=addr>📍 伊河漫水桥 · 礼佛台（对岸）</span><span class=badge-tag>🏅 古都探索券</span></div></div><div class=chapter-end id=ch1End><h3>🏅 第一章完成！</h3><p>已解锁全章4处绝佳机位，古都探索券入手！保存进度后，继续探索应天门的盛世风采。</p><div class=ch-end-row><button class=ch-save-btn onclick=saveChapter(1)>💾 保存进度</button><button class=ch-continue-btn onclick=goChapter(2)>➡️ 继续第2章</button></div></div></div><div class=chapter-wrap id=ch2><div class=chapter-hd><span class=chapter-badge>第2章</span><span style="font-size:0.78em;color:#6a5a3a" id=ch2Progress>0/3 小节已完成</span></div><h2 class=ch-title>🏛️ 应天门 · 大朝会</h2><p class=ch-sub>夜幕降临，你身着唐装步入应天门。阙楼巍峨，鼓乐声起——大朝会开始！百官列队，武帝升殿。</p><div class=chapter-progress id=ch2ProgDots><div class=prog-dot id=ch2pd0></div><div class=prog-dot id=ch2pd1></div><div class=prog-dot id=ch2pd2></div><div class=prog-dot id=ch2pd3></div></div><div class=section id=s2-1><div class=section-title><span class=section-n>2-1 / 4</span><span class=section-name>🎭 观看《唐宫乐宴》演出</span></div><div class=section-story>鼓乐齐鸣，身着华服的舞伎从两侧鱼贯而出。霓裳羽衣曲响起，仿佛佛回了那个万国来朝的大唐盛世。</div><div class=spot-row><span class=spot-check id=sc2-1>☐</span> 阙楼演出全景（最佳观赏位置）</div><div class=spot-row><span class=spot-check id=sc2-1b>☐</span> 演员谢幕合照</div><div class=photo-zone><div class=photo-hint id=hints2-1>大唐会精彩瞬间，拍下来！</div><div id=photoBtns2-1><button class=photo-btn onclick="document.getElementById('cams2-1').click()">📷 拍照打卡</button></div><input type=file id=cams2-1 accept=image/* capture=environment onchange="handlePhoto(this,'s2-1')"><div class=preview-wrap id=previews2-1><img class=preview-img id=imgs2-1 src=""><button class=preview-retake onclick=retake('s2-1')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts2-1 rows=1 placeholder="神都夜宴，歌舞升平" maxlength=20 oninput="updateTextPreview('s2-1')"></textarea><div class=text-preview id=txtPrevs2-1></div></div><div class=meta><span class=addr>📍 应天门阙楼内 · 《唐宫乐宴》演出厅</span></div></div><div class=section id=s2-2><div class=section-title><span class=section-n>2-2 / 4</span><span class=section-name>🌃 凭票登应天门阙楼俯瞰夜景</span></div><div class=section-story>你凭眺远望，洛阳市的夜景在脚下铺展开来。隋唐遗址公园的中轴线灯火通明，远处的天堂明堂在夜色中熠熠生辉。</div><div class=spot-row><span class=spot-check id=sc2-2>☐</span> 阙楼俯瞰夜景（最佳观看角度）</div><div class=spot-row><span class=spot-check id=sc2-2b>☐</span> 凭眺远眺留影</div><div class=photo-zone><div class=photo-hint id=hints2-2>阙楼夜景 · 拍下来！</div><div id=photoBtns2-2><button class=photo-btn onclick="document.getElementById('cams2-2').click()">📷 拍照打卡</button></div><input type=file id=cams2-2 accept=image/* capture=environment onchange="handlePhoto(this,'s2-2')"><div class=preview-wrap id=previews2-2><img class=preview-img id=imgs2-2 src=""><button class=preview-retake onclick=retake('s2-2')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts2-2 rows=1 placeholder="武帝临朝，俯瞰神都" maxlength=20 oninput="updateTextPreview('s2-2')"></textarea><div class=text-preview id=txtPrevs2-2></div></div><div class=meta><span class=addr>📍 应天门阙楼（需演出票登楼）</span></div></div><div class=section id=s2-3><div class=section-title><span class=section-n>2-3 / 4</span><span class=section-name>👘 领唐茶唐点，换装汉服</span></div><div class=section-story>演出结束后你在应天门内的汉服馆换上一身唐装。铜镜前的你衣袂飘飘，仿佛真的成了从大唐走来的诗人。</div><div class=spot-row><span class=spot-check id=sc2-3>☐</span> 换装唐装造型照</div><div class=spot-row><span class=spot-check id=sc2-3b>☐</span> 领取唐茶唐点留影</div><div class=photo-zone><div class=photo-hint id=hints2-3>换装汉服 · 留下最美的瞬间！</div><div id=photoBtns2-3><button class=photo-btn onclick="document.getElementById('cams2-3').click()">📷 拍照打卡</button></div><input type=file id=cams2-3 accept=image/* capture=environment onchange="handlePhoto(this,'s2-3')"><div class=preview-wrap id=previews2-3><img class=preview-img id=imgs2-3 src=""><button class=preview-retake onclick=retake('s2-3')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts2-3 rows=1 placeholder="着我唐装，梦回大唐" maxlength=20 oninput="updateTextPreview('s2-3')"></textarea><div class=text-preview id=txtPrevs2-3></div></div><div class=meta><span class=addr>📍 应天门汉服体验馆</span><span class=badge-tag>🏅 穿越探秘券</span></div></div><div class=chapter-end id=ch2End><h3>🏅 第二章完成！</h3><p>穿越探秘券入手！保存进度后，前往应天门拍摄四大夜景机位。</p><div class=ch-end-row><button class=ch-save-btn onclick=saveChapter(2)>💾 保存进度</button><button class=ch-continue-btn onclick=goChapter(3)>➡️ 继续第3章</button></div></div></div><div class=chapter-wrap id=ch3><div class=chapter-hd><span class=chapter-badge>第3章</span><span style="font-size:0.78em;color:#6a5a3a" id=ch3Progress>0/4 小节已完成</span></div><h2 class=ch-title>🌙 应天门夜景 · 四大机位</h2><p class=ch-sub>夜风微凉，应天门的金色灯光亮起，整座城楼如从盛唐穿越而来。</p><div class=chapter-progress id=ch3ProgDots><div class=prog-dot id=ch3pd0></div><div class=prog-dot id=ch3pd1></div><div class=prog-dot id=ch3pd2></div><div class=prog-dot id=ch3pd3></div></div><div class=section id=s3-1><div class=section-title><span class=section-n>3-1 / 4</span><span class=section-name>📷 正前方广场</span></div><div class=section-story>应天门正前方是拍摄全景的最佳位置。以广场地面为引导线，两侧阙楼形成完美对称，加上夜间金色灯光，是出片率最高的机位。</div><div class=spot-row><span class=spot-check id=sc3-1>☐</span> 正前方全景（对称构图最佳）</div><div class=spot-row><span class=spot-check id=sc3-1b>☐</span> 中轴线侧拍（含地面引导线）</div><div class=photo-zone><div class=photo-hint id=hints3-1>正前方广场 · 全景打卡！</div><div id=photoBtns3-1><button class=photo-btn onclick="document.getElementById('cams3-1').click()">📷 拍照打卡</button></div><input type=file id=cams3-1 accept=image/* capture=environment onchange="handlePhoto(this,'s3-1')"><div class=preview-wrap id=previews3-1><img class=preview-img id=imgs3-1 src=""><button class=preview-retake onclick=retake('s3-1')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts3-1 rows=1 placeholder="神都之门，一眼万年" maxlength=20 oninput="updateTextPreview('s3-1')"></textarea><div class=text-preview id=txtPrevs3-1></div></div><div class=meta><span class=addr>📍 应天门遗址广场中央（免费）</span></div></div><div class=section id=s3-2><div class=section-title><span class=section-n>3-2 / 4</span><span class=section-name>🏺 二层汉白玉栏杆</span></div><div class=section-story>凭演出票或门票可登上应天门二层。站在汉白玉栏杆前，以城墙和飞廊为背景，是最经典的唐朝风照片。</div><div class=spot-row><span class=spot-check id=sc3-2>☐</span> 二层栏杆处（飞廊+城墙组合）</div><div class=spot-row><span class=spot-check id=sc3-2b>☐</span> 凭栏杆远眺半身照</div><div class=photo-zone><div class=photo-hint id=hints3-2>二层汉白玉栏杆 · 飞廊打卡！</div><div id=photoBtns3-2><button class=photo-btn onclick="document.getElementById('cams3-2').click()">📷 拍照打卡</button></div><input type=file id=cams3-2 accept=image/* capture=environment onchange="handlePhoto(this,'s3-2')"><div class=preview-wrap id=previews3-2><img class=preview-img id=imgs3-2 src=""><button class=preview-retake onclick=retake('s3-2')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts3-2 rows=1 placeholder="凭栏处，又是唐潮" maxlength=20 oninput="updateTextPreview('s3-2')"></textarea><div class=text-preview id=txtPrevs3-2></div></div><div class=meta><span class=addr>📍 应天门二层阙楼（需登楼票）</span></div></div><div class=section id=s3-3><div class=section-title><span class=section-n>3-3 / 4</span><span class=section-name>🗺️ 阙楼转角</span></div><div class=section-story>阙楼两旁的转角处是摄影师最爱的机位。45度侧拍可以同时捕捉到两层飞廊的层叠感，加上红墙暖光，质感极强。</div><div class=spot-row><span class=spot-check id=sc3-3>☐</span> 阙楼转角侧拍（纵深效果最佳）</div><div class=spot-row><span class=spot-check id=sc3-3b>☐</span> 两侧红墙延伸线构图</div><div class=photo-zone><div class=photo-hint id=hints3-3>阙楼转角 · 侧拍打卡！</div><div id=photoBtns3-3><button class=photo-btn onclick="document.getElementById('cams3-3').click()">📷 拍照打卡</button></div><input type=file id=cams3-3 accept=image/* capture=environment onchange="handlePhoto(this,'s3-3')"><div class=preview-wrap id=previews3-3><img class=preview-img id=imgs3-3 src=""><button class=preview-retake onclick=retake('s3-3')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts3-3 rows=1 placeholder="转角遇见盛唐" maxlength=20 oninput="updateTextPreview('s3-3')"></textarea><div class=text-preview id=txtPrevs3-3></div></div><div class=meta><span class=addr>📍 应天门阙楼两侧转角处</span></div></div><div class=section id=s3-4><div class=section-title><span class=section-n>3-4 / 4</span><span class=section-name>🏯 两侧红墙</span></div><div class=section-story>应天门两侧的红墙在夜间灯光下呈现出温暖的历史质感。穿上汉服往红墙前一站，无需太多修饰就是一张古装大片。</div><div class=spot-row><span class=spot-check id=sc3-4>☐</span> 红墙汉服人像（最佳背景）</div><div class=spot-row><span class=spot-check id=sc3-4b>☐</span> 红墙与阙楼同框</div><div class=photo-zone><div class=photo-hint id=hints3-4>两侧红墙 · 汉服打卡！</div><div id=photoBtns3-4><button class=photo-btn onclick="document.getElementById('cams3-4').click()">📷 拍照打卡</button></div><input type=file id=cams3-4 accept=image/* capture=environment onchange="handlePhoto(this,'s3-4')"><div class=preview-wrap id=previews3-4><img class=preview-img id=imgs3-4 src=""><button class=preview-retake onclick=retake('s3-4')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts3-4 rows=1 placeholder="着我华服，归于盛唐" maxlength=20 oninput="updateTextPreview('s3-4')"></textarea><div class=text-preview id=txtPrevs3-4></div></div><div class=meta><span class=addr>📍 应天门两侧红墙区域</span><span class=badge-tag>🏅 神都摄影师</span></div></div><div class=chapter-end id=ch3End><h3>🏅 第三章完成！</h3><p>神都摇摆摄影师征集令立！保存进度后，去十字街品尝河洛美食。</p><div class=ch-end-row><button class=ch-save-btn onclick=saveChapter(3)>💾 保存进度</button><button class=ch-continue-btn onclick=goChapter(4)>➡️ 继续第4章</button></div></div></div><div class=chapter-wrap id=ch4><div class=chapter-hd><span class=chapter-badge>第4章</span><span style="font-size:0.78em;color:#6a5a3a" id=ch4Progress>0/4 小节已完成</span></div><h2 class=ch-title>🍜 十字街夜市 · 河洛滋味</h2><p class=ch-sub>老城十字街的灯笼亮成一片红海。你在一家水席簪前坐下，满是十三朝古都的市井温味。</p><div class=chapter-progress id=ch4ProgDots><div class=prog-dot id=ch4pd0></div><div class=prog-dot id=ch4pd1></div><div class=prog-dot id=ch4pd2></div><div class=prog-dot id=ch4pd3></div></div><div class=section id=s4-1><div class=section-title><span class=section-n>4-1 / 4</span><span class=section-name>🍜 美食探索①：不翻汤</span></div><div class=section-story>老城十字街的水席店里，老板上端上两碗不翻汤。酸辣鲜香，是洛阳最地道的市井味道。</div><div class=spot-row><span class=spot-check id=sc4-1>☐</span> 不翻汤簪位全景</div><div class=spot-row><span class=spot-check id=sc4-1b>☐</span> 酸辣汤近拍（含配料）</div><div class=photo-zone><div class=photo-hint id=hints4-1>不翻汤 · 美食打卡①！</div><div id=photoBtns4-1><button class=photo-btn onclick="document.getElementById('cams4-1').click()">📷 拍照打卡</button></div><input type=file id=cams4-1 accept=image/* capture=environment onchange="handlePhoto(this,'s4-1')"><div class=preview-wrap id=previews4-1><img class=preview-img id=imgs4-1 src=""><button class=preview-retake onclick=retake('s4-1')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts4-1 rows=1 placeholder="洛阳治味，一簪酸辣" maxlength=20 oninput="updateTextPreview('s4-1')"></textarea><div class=text-preview id=txtPrevs4-1></div></div><div class=meta><span class=addr>📍 老城十字街北大街 水席店</span></div></div><div class=section id=s4-2><div class=section-title><span class=section-n>4-2 / 4</span><span class=section-name>🍲 美食探索②：洛阳水席</span></div><div class=section-story>洛阳水席是河南非物质文化遗产项目，24道菜依次上桌。牡丹燕菜是头牌，用菜蔬丝做出牡丹花形状，汤汁酸辣开胃。</div><div class=spot-row><span class=spot-check id=sc4-2>☐</span> 水席全席合照</div><div class=spot-row><span class=spot-check id=sc4-2b>☐</span> 牡丹燕菜特写</div><div class=photo-zone><div class=photo-hint id=hints4-2>洛阳水席 · 美食打卡②！</div><div id=photoBtns4-2><button class=photo-btn onclick="document.getElementById('cams4-2').click()">📷 拍照打卡</button></div><input type=file id=cams4-2 accept=image/* capture=environment onchange="handlePhoto(this,'s4-2')"><div class=preview-wrap id=previews4-2><img class=preview-img id=imgs4-2 src=""><button class=preview-retake onclick=retake('s4-2')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts4-2 rows=1 placeholder="千年水席，一簪穿过" maxlength=20 oninput="updateTextPreview('s4-2')"></textarea><div class=text-preview id=txtPrevs4-2></div></div><div class=meta><span class=addr>📍 老城十字街 水席楼（多家可选）</span></div></div><div class=section id=s4-3><div class=section-title><span class=section-n>4-3 / 4</span><span class=section-name>🍢 美食探索③：烤串与锅贴</span></div><div class=section-story>十字街夜市的烟火气是洛阳夜晚的灵魂。烤面筋在炭火上滋滋作响，锅贴煎得金黄酥脆，老板娘的吆吧声混着油香。</div><div class=spot-row><span class=spot-check id=sc4-3>☐</span> 夜市烤串簪位</div><div class=spot-row><span class=spot-check id=sc4-3b>☐</span> 锅贴金黄锅巴特写</div><div class=photo-zone><div class=photo-hint id=hints4-3>烤串锅贴 · 美食打卡③！</div><div id=photoBtns4-3><button class=photo-btn onclick="document.getElementById('cams4-3').click()">📷 拍照打卡</button></div><input type=file id=cams4-3 accept=image/* capture=environment onchange="handlePhoto(this,'s4-3')"><div class=preview-wrap id=previews4-3><img class=preview-img id=imgs4-3 src=""><button class=preview-retake onclick=retake('s4-3')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts4-3 rows=1 placeholder="烟火人间，最抚凡心" maxlength=20 oninput="updateTextPreview('s4-3')"></textarea><div class=text-preview id=txtPrevs4-3></div></div><div class=meta><span class=addr>📍 老城十字街夜市簪位区</span></div></div><div class=section id=s4-4><div class=section-title><span class=section-n>4-4 / 4</span><span class=section-name>🏮 美食探索④：十字街夜景</span></div><div class=section-story>老城十字街的灯笼亮成一片红海。红黄相间的光恍把整条街染成了大唐盛世的颜色。走在这里，仿佛脸回了那个不夜神都。</div><div class=spot-row><span class=spot-check id=sc4-4>☐</span> 十字街灯笼夜景全景</div><div class=spot-row><span class=spot-check id=sc4-4b>☐</span> 红绸灯笼特写（人像背景佳）</div><div class=photo-zone><div class=photo-hint id=hints4-4>十字街夜景 · 美食打卡④！</div><div id=photoBtns4-4><button class=photo-btn onclick="document.getElementById('cams4-4').click()">📷 拍照打卡</button></div><input type=file id=cams4-4 accept=image/* capture=environment onchange="handlePhoto(this,'s4-4')"><div class=preview-wrap id=previews4-4><img class=preview-img id=imgs4-4 src=""><button class=preview-retake onclick=retake('s4-4')>🔄 重拍</button></div></div><div class=text-overlay-wrap><div class=text-overlay-hint>💬 添加文字（选填）</div><textarea class=text-input id=txts4-4 rows=1 placeholder="万家灯火，盛世姻缘" maxlength=20 oninput="updateTextPreview('s4-4')"></textarea><div class=text-preview id=txtPrevs4-4></div></div><div class=meta><span class=addr>📍 老城十字街（西大街与北大街交叉口）</span><span class=badge-tag>🏅 河洛美食家</span></div></div><div class=chapter-end id=ch4End><h3>🏅 第四章完成！</h3><p>河洛美食家征集令立！恭喜你完成了洛阳副本全部旅程！</p><div class=ch-end-row><button class=ch-save-btn onclick=saveChapter(4)>💾 保存进度</button><button class=ch-continue-btn onclick=showAchievement()>🏆 查看成就卡</button></div></div></div>
+</div>
+<div class=achievement id=achieve>
+  <h2>🏆 成就卡</h2>
+  <p class=sub-t>已完成 <span id=achieveTotal>0/15</span> 处打卡 · <span id=achieveDate></span></p>
+  <div class=achi-card>
+    <div class=achi-header>
+      <span class=trophy>🏆</span>
+      <h3>洛阳副本 · 成就卡</h3>
+      <p class=date id=achieveDateText></p>
+    </div>
+    <div class=achi-chapters>
+<div class=achi-ch><span class=achi-ch-icon>🗿</span><div><div class=achi-ch-name>龙门石窟 · 伊阙万佛</div><div class=achi-ch-spots><span class=achi-ch-spot id=achs1-1>西山石窟</span><span class=achi-ch-spot id=achs1-2>奉先寺</span><span class=achi-ch-spot id=achs1-3>卢舍那大佛</span><span class=achi-ch-spot id=achs1-4>伊河礼佛台</span></div></div></div><div class=achi-ch><span class=achi-ch-icon>🏛️</span><div><div class=achi-ch-name>应天门 · 大朝会</div><div class=achi-ch-spots><span class=achi-ch-spot id=achs2-1>唐宫乐宴</span><span class=achi-ch-spot id=achs2-2>阙楼夜景</span><span class=achi-ch-spot id=achs2-3>换装汉服</span></div></div></div><div class=achi-ch><span class=achi-ch-icon>🌙</span><div><div class=achi-ch-name>应天门夜景 · 四大机位</div><div class=achi-ch-spots><span class=achi-ch-spot id=achs3-1>正前方广场</span><span class=achi-ch-spot id=achs3-2>二层栏杆</span><span class=achi-ch-spot id=achs3-3>阙楼转角</span><span class=achi-ch-spot id=achs3-4>两侧红墙</span></div></div></div><div class=achi-ch><span class=achi-ch-icon>🍜</span><div><div class=achi-ch-name>十字街夜市 · 河洛滋味</div><div class=achi-ch-spots><span class=achi-ch-spot id=achs4-1>不翻汤</span><span class=achi-ch-spot id=achs4-2>洛阳水席</span><span class=achi-ch-spot id=achs4-3>烤串锅贴</span><span class=achi-ch-spot id=achs4-4>十字街夜景</span></div></div></div>
+    </div>
+    <div class=achi-badges>
+      <span class=achi-badge>🏅 古都探索券</span>
+      <span class=achi-badge>🏅 穿越探秘券</span>
+      <span class=achi-badge>🏅 神都摄影师</span>
+      <span class=achi-badge>🏅 河洛美食家</span>
+    </div>
+  </div>
+  <div class=save-row>
+    <button class=save-btn onclick=saveChapter(0)>💾 保存成就</button>
+    <button class=share-btn onclick=location.reload()>↩ 重新开始</button>
+  </div>
+</div>
+<div class=footer-bar id=footerBar>
+  <div class=fb-inner>
+    <div class=fb-chapters>
+      <div class=fb-ch><div class=fb-ch-fill id=fbf1></div></div>
+      <div class=fb-ch><div class=fb-ch-fill id=fbf2></div></div>
+      <div class=fb-ch><div class=fb-ch-fill id=fbf3></div></div>
+      <div class=fb-ch><div class=fb-ch-fill id=fbf4></div></div>
+    </div>
+    <span class=fb-label id=fbLabel>0/15 打卡</span>
+  </div>
+</div>
 <script>
-var photos = {};
-var STORAGE_KEY = 'luoyang_adventure_v3';
-
-function loadPhotos(){
-  try {
-    var s = JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');
-    Object.keys(s).forEach(function(k){ photos[k]=s[k]; showPreview(parseInt(k)); });
-  } catch(e){}
-}
-function savePhotos(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(photos)); }
-
-function startGame(){
-  document.getElementById('cover').style.display='none';
-  document.getElementById('game').style.display='block';
-  document.getElementById('footerBar').classList.add('show');
-  loadPhotos();
-  goNode(1);
-}
-
-function goNode(n){
-  document.querySelectorAll('.node').forEach(function(e){e.style.display='none';});
-  document.getElementById('node'+n).style.display='block';
-  document.getElementById('pf').style.width=(n/4*100)+'%';
-  updateFooter();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function handlePhoto(input,n){
-  var f=input.files[0]; if(!f)return;
-  var r=new FileReader();
-  r.onload=function(e){ photos[n]=e.target.result; savePhotos(); showPreview(n); updateFooter(); };
-  r.readAsDataURL(f);
-}
-
-function showPreview(n){
-  var wrap=document.getElementById('preview'+n);
-  document.getElementById('photoBtn'+n).style.display='none';
-  document.getElementById('hint'+n).style.display='none';
-  document.getElementById('img'+n).src=photos[n];
-  wrap.style.display='block';
-  var next=document.getElementById('next'+n);
-  next.disabled=false;
-  next.innerHTML='✅ 已打卡 → '+(n<4?'前往下一章':'生成成就卡');
-}
-
-function retake(n){
-  delete photos[n]; savePhotos();
-  document.getElementById('photoBtn'+n).style.display='block';
-  document.getElementById('hint'+n).style.display='block';
-  document.getElementById('preview'+n).style.display='none';
-  var next=document.getElementById('next'+n);
-  next.disabled=true;
-  next.innerHTML='🔒 完成打卡后解锁'+(n<4?'下一章':'成就卡');
-  updateFooter();
-}
-
-function updateFooter(){
-  var count=Object.keys(photos).length;
-  document.getElementById('fbLabel').textContent='已打卡 '+count+'/4';
-  for(var i=1;i<=4;i++){
-    document.getElementById('dot'+i).classList.toggle('done',!!photos[String(i)]);
-  }
-  var gb=document.getElementById('genBtn');
-  gb.style.display=count>=1?'inline-block':'none';
-}
-
-function showAchievement(){
-  document.getElementById('game').style.display='none';
-  document.getElementById('footerBar').classList.remove('show');
-  var achi=document.getElementById('achievement');
-  achi.style.display='block';
-
-  var now=new Date();
-  document.getElementById('achiDate').textContent=now.getFullYear()+'年'+(now.getMonth()+1)+'月'+now.getDate()+'日 打卡完成';
-
-  var grid=document.getElementById('achiPhotos');
-  grid.innerHTML='';
-  var labels=['龙门石窟','应天门','夜景机位','十字街'];
-  for(var i=1;i<=4;i++){
-    var cell=document.createElement('div');
-    cell.className='achi-photo';
-    if(photos[String(i)]){
-      cell.innerHTML='<img src="'+photos[String(i)]+'" alt=""><span class="n-label">'+labels[i-1]+'</span>';
-    } else {
-      var np=document.createElement('div'); np.className='no-ph'; np.textContent='📷';
-      cell.appendChild(np);
-    }
-    grid.appendChild(cell);
-  }
-
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-function saveCard(){
-  var el=document.getElementById('achievement');
-  var opt={type:'image/png',scale:2};
-  html2canvas(el,opt).then(function(canvas){
-    canvas.toBlob(function(blob){
-      var url=URL.createObjectURL(blob);
-      var a=document.createElement('a');
-      a.href=url; a.download='洛阳打卡成就.png'; a.click();
-      URL.revokeObjectURL(url);
-    });
-  }).catch(function(){alert('保存失败，请尝试截图');});
-}
-
-function shareCard(){
-  var txt='我刚完成了洛阳打卡副本！获得洛阳通成就 🏆 #洛阳旅行 #打卡';
-  if(navigator.share){
-    navigator.share({title:'洛阳打卡成就',text:txt,url:location.href}).catch(function(){});
-  } else {
-    prompt('分享链接已复制到剪贴板',location.href);
-  }
-}
+var photos={};var texts={};var state={chapter:1};var STORAGE_KEY='ly_v5';
+function loadAll(){try{var d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');photos=d.photos||{};texts=d.texts||{};state=d.state||{chapter:1};Object.keys(photos).forEach(function(k){showPreview(k);});Object.keys(texts).forEach(function(k){var el=document.getElementById('txt'+k);if(el){el.value=texts[k];updateTextPreview(k);}});if(Object.keys(photos).length>0){document.getElementById('resumeBtn').style.display='inline-block';var lastCh=Math.max.apply(null,Object.keys(photos).map(function(k){return parseInt(k.split('-')[0])}));document.getElementById('resumeInfo').style.display='block';document.getElementById('resumeInfo').textContent='上次：第'+lastCh+'章';}}catch(e){}}
+function saveAll(){localStorage.setItem(STORAGE_KEY,JSON.stringify({photos:photos,texts:texts,state:state}));}
+function updateTextPreview(sid){var el=document.getElementById('txt'+sid);var preview=document.getElementById('txtPrev'+sid);if(el&&preview){preview.textContent=el.value?'💬 预览：「'+el.value+'」':'';texts[sid]=el.value;saveAll();}}
+function startGame(resume){document.getElementById('cover').style.display='none';document.getElementById('game').style.display='block';document.getElementById('footerBar').classList.add('show');loadAll();if(resume&&Object.keys(photos).length>0){var ch=Math.max.apply(null,Object.keys(photos).map(function(k){return parseInt(k.split('-')[0])}));goChapter(ch,true);}else{goChapter(1);}}
+function goChapter(ch,fromResume){state.chapter=ch;document.querySelectorAll('.chapter-wrap').forEach(function(e){e.style.display='none';});var el=document.getElementById('ch'+ch);if(!el)return;el.style.display='block';document.getElementById('pf').style.width=((ch-1)/4*100)+'%';updateChapterProgress(ch);updateFooter();if(fromResume){var cnts={1:4,2:3,3:4,4:4};var count=cnts[ch]||4;for(var s=1;s<=count;s++){if(!photos[ch+'-'+s]){scrollToSection(ch,s);return;}}document.getElementById('ch'+ch+'End').classList.add('show');}else{scrollToSection(ch,1);}window.scrollTo({top:0,behavior:'smooth'});}
+function scrollToSection(ch,s){var el=document.getElementById('s'+ch+'-'+s);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+function updateChapterProgress(ch){var cnts={1:4,2:3,3:4,4:4};var count=cnts[ch]||4;var done=0;for(var i=1;i<=count;i++)if(photos[ch+'-'+i])done++;for(var i=0;i<4;i++){var dot=document.getElementById('ch'+ch+'pd'+i);if(dot)dot.classList.toggle('done',i<done);}var label=document.getElementById('ch'+ch+'Progress');if(label)label.textContent=done+'/'+count+' 小节已完成';if(done===count){var endEl=document.getElementById('ch'+ch+'End');if(endEl)endEl.classList.add('show');}}
+function handlePhoto(input,sid){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){photos[sid]=e.target.result;saveAll();showPreview(sid);updateChapterProgress(state.chapter);updateFooter();var parts=sid.split('-');var ch=parseInt(parts[0]);var num=parseInt(parts[1]);var cnts={1:4,2:3,3:4,4:4};var maxNum=cnts[ch]||4;if(num<maxNum)setTimeout(function(){scrollToSection(ch,num+1);},600);};r.readAsDataURL(f);}
+function showPreview(sid){var img=document.getElementById('img'+sid);var wrap=document.getElementById('preview'+sid);var btn=document.getElementById('photoBtn'+sid);if(img&&wrap){if(photos[sid]){img.src=photos[sid];wrap.style.display='block';if(btn)btn.style.display='none';var sec=document.getElementById('s'+sid);if(sec)sec.classList.add('done');var sc=document.getElementById('sc'+sid);if(sc){var checks=sec?sec.querySelectorAll('.spot-check'):[];if(checks[0])checks[0].innerHTML='&#x2705;';if(checks[1])checks[1].innerHTML='&#x2705;';}}else{wrap.style.display='none';if(btn)btn.style.display='block';var sec=document.getElementById('s'+sid);if(sec)sec.classList.remove('done');}}}
+function retake(sid){photos[sid]=null;saveAll();showPreview(sid);var cnts={1:4,2:3,3:4,4:4};var ch=parseInt(sid.split('-')[0]);var count=cnts[ch]||4;for(var i=1;i<=count;i++){var el=document.getElementById('s'+ch+'-'+i);if(el)el.classList.remove('done');}for(var i=1;i<=count;i++){if(photos[ch+'-'+i]){var el=document.getElementById('s'+ch+'-'+i);if(el)el.classList.add('done');}}updateChapterProgress(ch);updateFooter();document.getElementById('cam'+sid).value='';}
+function updateFooter(){var cnts={1:4,2:3,3:4,4:4};document.querySelectorAll('.fb-ch-fill').forEach(function(el,idx){var ch=idx+1;var chDone=Object.keys(photos).filter(function(k){return parseInt(k.split('-')[0])===ch}).length;el.style.width=(chDone/(cnts[ch]||4)*100)+'%';});document.querySelector('.fb-label').textContent=Object.keys(photos).length+'/15 打卡';}
+function saveChapter(ch){saveAll();var d=document.createElement('div');d.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(212,175,55,0.95);color:#1a0a00;padding:16px 32px;border-radius:14px;font-weight:bold;z-index:200';d.textContent='💾 进度已保存！';document.body.appendChild(d);setTimeout(function(){d.style.opacity='0';setTimeout(function(){d.remove();},500);},1500);}
+function showAchievement(){document.querySelectorAll('.chapter-wrap').forEach(function(e){e.style.display='none';});document.querySelectorAll('.footer-bar').forEach(function(e){e.classList.remove('show');});var el=document.getElementById('achieve');if(el){el.style.display='block';el.scrollIntoView({behavior:'smooth',block:'start'});}document.getElementById('achieveTotal').textContent=Object.keys(photos).length+'/15';var d=new Date();document.getElementById('achieveDate').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';document.getElementById('achieveDateText').textContent=d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';var spotNames={"1":{"1":"西山石窟","2":"奉先寺","3":"卢舍那大佛","4":"伊河礼佛台"},"2":{"1":"唐宫乐宴","2":"阙楼夜景","3":"换装汉服"},"3":{"1":"正前方广场","2":"二层栏杆","3":"阙楼转角","4":"两侧红墙"},"4":{"1":"不翻汤","2":"洛阳水席","3":"烤串锅贴","4":"十字街夜景"}};Object.keys(spotNames).forEach(function(ch){for(var n=1;n<=spotNames[ch].length;n++){var el=document.getElementById('achs'+ch+'-'+n);if(el)el.classList.toggle('no',!photos[ch+'-'+n]);}});}
+window.onload=loadAll;
 </script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </body>
 </html>
