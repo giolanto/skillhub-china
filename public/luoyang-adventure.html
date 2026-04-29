@@ -83,6 +83,31 @@
     .ach-card h4 { margin: 0 0 6px; color: #ffe3ab; font-size: 15px; }
     .ach-card p { margin: 0 0 6px; font-size: 13px; color: #d8e5ff; }
     .ach-card img { width: 100%; border-radius: 8px; border: 1px solid var(--line); max-height: 180px; object-fit: cover; }
+    .poster-mode {
+      background: linear-gradient(170deg, rgba(26,44,90,.95), rgba(8,14,32,.96));
+      border-color: rgba(153, 196, 255, .42);
+    }
+    .poster-mode .title { font-size: clamp(26px, 4.5vw, 46px); letter-spacing: 1px; }
+    .poster-mode #achievement-user { color: #ffe7b2; font-weight: 700; }
+    .poster-mode .ach-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      max-height: none;
+      overflow: visible;
+    }
+    .poster-mode .ach-card { padding: 8px; border-radius: 8px; background: rgba(255,255,255,.05); }
+    .poster-mode .ach-card h4 { font-size: 13px; margin-bottom: 4px; }
+    .poster-mode .ach-card p { font-size: 12px; margin-bottom: 4px; }
+    .poster-mode .ach-card img { max-height: 140px; }
+    .name-input {
+      width: min(360px, 100%);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(7, 14, 32, .65);
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 14px;
+    }
     .cover-card {
       background:
         radial-gradient(circle at 20% 20%, rgba(124, 199, 255, .22), transparent 45%),
@@ -167,6 +192,7 @@
       .card { min-height: auto; width: 100%; }
       .img-wrap { min-height: 170px; }
       .badge-photo { height: 200px; }
+      .poster-mode .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .actions { gap: 8px; }
       button { padding: 10px 12px; }
     }
@@ -185,6 +211,9 @@
           建议戴上耳机，准备好相机，开启你的洛阳探索。
         </section>
         <div class="actions">
+          <input id="traveler-name" class="name-input" type="text" maxlength="20" placeholder="输入打卡人姓名（将展示在成就页）" />
+        </div>
+        <div class="actions">
           <button class="btn-next btn-start" data-next="1">开始探索</button>
           <span class="status ok">支持断点续玩</span>
         </div>
@@ -192,7 +221,7 @@
     </section>
 
     <section class="page" data-id="longmen">
-      <article class="card">
+      <article class="card" id="achievement-card">
         <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 2 / 6 页</span></div>
         <h1 class="title">第一章 🗿 龙门石窟·伊阙万佛</h1>
         <p class="subtitle">打卡：西山石窟、奉先寺、卢舍那大佛、伊河礼佛台</p>
@@ -384,16 +413,21 @@
         <p class="subtitle">四章全部完成后，自动生成景点介绍 + 打卡照片成就墙。</p>
         <section class="panel">
           <h3>我的成就墙</h3>
+          <p id="achievement-user" class="subtitle"></p>
           <div id="ach-grid" class="ach-grid"></div>
         </section>
         <div class="actions">
+          <button class="btn-next" id="toggle-poster-mode">切换海报版</button>
+          <button class="btn-save" id="save-poster-image">保存海报版</button>
+          <button class="btn-save" id="save-achievement-image">保存整页为图片</button>
           <button class="btn-next" id="restart">再玩一次</button>
-          <span class="status ok">全部章节已达成</span>
+          <span class="status ok" id="achievement-status">全部章节已达成</span>
         </div>
       </article>
     </section>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
     const STORAGE_KEY = "luoyang-adventure-save-v2";
     const CHAPTER_START_INDEX = 1;
@@ -446,9 +480,13 @@
 
     const pages = Array.from(document.querySelectorAll(".page"));
     const achGrid = document.getElementById("ach-grid");
+    const achievementUser = document.getElementById("achievement-user");
+    const achievementCard = document.getElementById("achievement-card");
     const photos = {};
     const notes = {};
     let hasShownSaveWarn = false;
+    let travelerName = "";
+    let posterModeEnabled = false;
     let current = 0;
 
     function go(index) {
@@ -476,6 +514,12 @@
         status.classList.remove("ok", "warn");
         nextBtn.disabled = true;
       }
+    }
+
+    function updateTravelerNameUI() {
+      achievementUser.textContent = travelerName ? `打卡人：${travelerName}` : "打卡人：未填写";
+      const nameInput = document.getElementById("traveler-name");
+      if (nameInput && nameInput.value !== travelerName) nameInput.value = travelerName;
     }
 
     function readFileAsDataURL(file) {
@@ -522,14 +566,23 @@
     function renderAchievements() {
       achGrid.innerHTML = "";
       spots.forEach((spot, i) => {
-        if (!chapterDone(spot)) return;
-        const coverTask = spot.tasks.find((task) => photos[task.id]);
-        const noteText = coverTask && notes[coverTask.id] ? `\n${notes[coverTask.id]}` : "";
-        const card = document.createElement("article");
-        card.className = "ach-card";
-        card.innerHTML = `<h4>章节成就 · 第${i + 1}章</h4><p>${spot.title}</p><p>${spot.intro}</p><p>已完成 ${spot.tasks.length}/${spot.tasks.length} 小节${noteText}</p><img src="${photos[coverTask.id]}" alt="${spot.title}照片" />`;
-        achGrid.appendChild(card);
+        spot.tasks.forEach((task, tIdx) => {
+          if (!photos[task.id]) return;
+          const noteText = notes[task.id] ? `<p>${notes[task.id]}</p>` : "";
+          const card = document.createElement("article");
+          card.className = "ach-card";
+          card.innerHTML = `<h4>第${i + 1}章 · 小节${tIdx + 1}</h4><p>${spot.title}</p><p>${task.label}</p>${noteText}<img src="${photos[task.id]}" alt="${task.label}照片" />`;
+          achGrid.appendChild(card);
+        });
       });
+      updateTravelerNameUI();
+    }
+
+    function setPosterMode(enabled) {
+      posterModeEnabled = enabled;
+      achievementCard.classList.toggle("poster-mode", enabled);
+      const toggleBtn = document.getElementById("toggle-poster-mode");
+      toggleBtn.textContent = enabled ? "退出海报版" : "切换海报版";
     }
 
     function saveProgress(preferredPage = current, markResume = false) {
@@ -546,6 +599,7 @@
       const saveData = {
         photos,
         notes,
+        travelerName,
         resumePage: markResume ? preferredPage : oldResumePage,
         savedAt: Date.now()
       };
@@ -567,7 +621,7 @@
     async function onFile(spot, task, file) {
       if (!file || !file.type.startsWith("image/")) return;
       try {
-        const compressedDataUrl = await compressImageFile(file, 1280, 0.82);
+        const compressedDataUrl = await compressImageFile(file, 960, 0.72);
         photos[task.id] = compressedDataUrl;
         const preview = document.getElementById(task.previewId);
         const btn = document.querySelector(`.btn-photo[data-target="${task.inputId}"]`);
@@ -602,6 +656,12 @@
           saveProgress(current, false);
         });
       });
+    });
+
+    document.getElementById("traveler-name").addEventListener("input", (e) => {
+      travelerName = e.target.value.trim();
+      updateTravelerNameUI();
+      saveProgress(current, false);
     });
 
     document.querySelectorAll(".btn-save").forEach((btn) => {
@@ -665,6 +725,8 @@
           updateChapterStatus(spot);
         });
         renderAchievements();
+        travelerName = (data.travelerName || "").trim();
+        updateTravelerNameUI();
         const rawResume = Number.isInteger(data.resumePage) ? data.resumePage : 0;
         const pageIdx = rawResume <= 1 ? 0 : rawResume;
         go(Math.min(Math.max(pageIdx, 0), pages.length - 1));
@@ -685,6 +747,45 @@
       window.location.reload();
     });
 
+    async function exportAchievementImage(filenameSuffix, forcePosterMode = false) {
+      const status = document.getElementById("achievement-status");
+      if (!window.html2canvas) {
+        status.textContent = "截图组件加载失败，请稍后重试";
+        status.classList.add("warn");
+        return;
+      }
+      const prevMode = posterModeEnabled;
+      try {
+        if (forcePosterMode) setPosterMode(true);
+        status.textContent = "正在生成图片，请稍候...";
+        status.classList.remove("warn");
+        const canvas = await window.html2canvas(achievementCard, { scale: 2, backgroundColor: null, useCORS: true });
+        const link = document.createElement("a");
+        const safeName = travelerName || "打卡人";
+        link.download = `${safeName}-洛阳打卡${filenameSuffix}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        status.textContent = "图片已保存";
+      } catch (_error) {
+        status.textContent = "保存失败，请重试";
+        status.classList.add("warn");
+      } finally {
+        if (forcePosterMode) setPosterMode(prevMode);
+      }
+    }
+
+    document.getElementById("toggle-poster-mode").addEventListener("click", () => {
+      setPosterMode(!posterModeEnabled);
+    });
+
+    document.getElementById("save-achievement-image").addEventListener("click", async () => {
+      await exportAchievementImage("成就页", false);
+    });
+
+    document.getElementById("save-poster-image").addEventListener("click", async () => {
+      await exportAchievementImage("成就海报", true);
+    });
+
     document.querySelectorAll(".badge-photo").forEach((img) => {
       img.loading = "lazy";
       img.referrerPolicy = "no-referrer";
@@ -694,6 +795,7 @@
     });
 
     spots.forEach((spot) => updateChapterStatus(spot));
+    updateTravelerNameUI();
     restoreProgress();
   </script>
 </body>
