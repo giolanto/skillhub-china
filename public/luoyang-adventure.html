@@ -762,7 +762,25 @@
         if (forcePosterMode) setPosterMode(true);
         status.textContent = "正在生成图片，请稍候...";
         status.classList.remove("warn");
-        const canvas = await window.html2canvas(achievementCard, { scale: 2, backgroundColor: null, useCORS: true });
+        const canvas = await window.html2canvas(achievementCard, {
+          scale: 2,
+          backgroundColor: null,
+          useCORS: true,
+          onclone: (doc) => {
+            const pagesInClone = doc.querySelectorAll('.page');
+            pagesInClone.forEach((p) => {
+              p.classList.remove('active');
+              p.style.opacity = '0';
+              p.style.pointerEvents = 'none';
+            });
+            const achievementClone = doc.querySelector('.page[data-id="achievement"]');
+            if (achievementClone) {
+              achievementClone.classList.add('active');
+              achievementClone.style.opacity = '1';
+              achievementClone.style.pointerEvents = 'auto';
+            }
+          }
+        });
         const link = document.createElement("a");
         const safeName = travelerName || "打卡人";
         link.download = `${safeName}-洛阳打卡${filenameSuffix}.png`;
