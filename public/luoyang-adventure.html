@@ -50,7 +50,7 @@
     .progress { color: var(--muted); font-size: 14px; }
     .title { margin: 0; font-size: clamp(22px, 4.2vw, 38px); line-height: 1.2; }
     .subtitle { margin: 0; color: var(--muted); }
-    .content { display: grid; grid-template-columns: 1.2fr .8fr; gap: 14px; }
+    .content { display: grid; grid-template-columns: 1fr; gap: 14px; }
     .panel { border: 1px solid var(--line); border-radius: 14px; background: rgba(9,16,35,.45); padding: 12px; }
     .panel h3 { margin: 0 0 8px; color: var(--accent); }
     .panel p { margin: 0 0 8px; }
@@ -195,11 +195,14 @@
       <article class="card">
         <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 2 / 6 页</span></div>
         <h1 class="title">第一章 🗿 龙门石窟·伊阙万佛</h1>
-        <p class="subtitle">打卡：西山石窟、奉先寺、卢舍那大佛（最佳机位）、伊河礼佛台</p>
+        <p class="subtitle">打卡：西山石窟、奉先寺、卢舍那大佛、伊河礼佛台</p>
         <div class="content">
           <section class="panel">
             <h3>景点介绍</h3>
             <p>沿伊阙峡谷进入石窟群，先看西山石窟，再到奉先寺，最后去伊河礼佛台回望卢舍那大佛，完成经典线路。</p>
+            <h3>景点标志图片</h3>
+            <div class="img-wrap"><img class="badge-photo" alt="龙门石窟实景" src="assets/images/longmen.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://baike.baidu.com/item/%E9%BE%99%E9%97%A8%E7%9F%B3%E7%AA%9F/274" target="_blank" rel="noopener noreferrer">百度百科（龙门石窟）</a></div>
             <div class="list">
               <div>📍 洛阳市洛龙区238省道</div><div>⏰ 推荐时段：上午柔光/傍晚金色时刻</div><div>📸 机位建议：中轴偏右 15°</div>
             </div>
@@ -222,7 +225,7 @@
                 <textarea class="task-note" id="longmen-fx-note" placeholder="可选：记录这张照片的文字"></textarea>
               </article>
               <article class="task-item">
-                <div class="task-head"><span class="task-title">小节3：卢舍那大佛（最佳机位）</span><button class="btn-photo" data-target="longmen-buddha-input">拍照打卡</button></div>
+                <div class="task-head"><span class="task-title">小节3：卢舍那大佛</span><button class="btn-photo" data-target="longmen-buddha-input">拍照打卡</button></div>
                 <input id="longmen-buddha-input" type="file" accept="image/*" capture="environment" hidden />
                 <img id="longmen-buddha-preview" class="preview" alt="卢舍那大佛照片预览" />
                 <textarea class="task-note" id="longmen-buddha-note" placeholder="可选：记录这张照片的文字"></textarea>
@@ -235,11 +238,6 @@
               </article>
             </div>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
-          </section>
-          <section class="panel">
-            <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-photo" alt="龙门石窟实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Ancient_Buddhist_Grottoes_at_Longmen-_Middle_Binyang_Cave_Main_Buddha_Image.jpg/960px-Ancient_Buddhist_Grottoes_at_Longmen-_Middle_Binyang_Cave_Main_Buddha_Image.jpg" /></div>
-            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:Ancient_Buddhist_Grottoes_at_Longmen-_Middle_Binyang_Cave_Main_Buddha_Image.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Longmen Grottoes）</a></div>
           </section>
         </div>
       </article>
@@ -254,6 +252,9 @@
           <section class="panel">
             <h3>景点介绍</h3>
             <p>建议先看演出，再登阙楼拍夜景，最后回到一层体验唐茶唐点和汉服换装，体验完整“入朝”流程。</p>
+            <h3>景点标志图片</h3>
+            <div class="img-wrap"><img class="badge-photo" alt="应天门实景" src="assets/images/yingtian-day.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://baike.baidu.com/item/%E5%BA%94%E5%A4%A9%E9%97%A8" target="_blank" rel="noopener noreferrer">百度百科（应天门）</a></div>
             <div class="list">
               <div>📍 洛阳市应天门遗址附近</div><div>🎫 演出与登楼建议连排</div><div>📸 镜头建议：24mm + 50mm</div>
             </div>
@@ -268,11 +269,6 @@
             <textarea class="task-note" id="yingtian-day-note" placeholder="可选：记录这张照片的文字"></textarea>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
-          <section class="panel">
-            <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-photo" alt="应天门实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Yingtian_Gate%2CLuoyang.jpg/1280px-Yingtian_Gate%2CLuoyang.jpg" /></div>
-            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:Yingtian_Gate,Luoyang.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Yingtian Gate）</a></div>
-          </section>
         </div>
       </article>
     </section>
@@ -281,11 +277,14 @@
       <article class="card">
         <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 4 / 6 页</span></div>
         <h2 class="title">第三章 🌙 应天门夜景·四大打卡机位</h2>
-        <p class="subtitle">正前方广场（全景对称）、二层汉白玉栏杆、阙楼转角、两侧红墙</p>
+        <p class="subtitle">正前方广场、二层汉白玉栏杆、阙楼转角、两侧红墙</p>
         <div class="content">
           <section class="panel">
             <h3>景点介绍</h3>
             <p>蓝调时刻先拍全景对称，再拍栏杆机位，最后转角和红墙拍情绪人像，层次最完整。</p>
+            <h3>景点标志图片</h3>
+            <div class="img-wrap"><img class="badge-photo" alt="应天门夜景实景" src="assets/images/yingtian-night.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://baike.baidu.com/item/%E5%BA%94%E5%A4%A9%E9%97%A8" target="_blank" rel="noopener noreferrer">百度百科（应天门）</a></div>
             <div class="list">
               <div>🕗 最佳时间：日落后 20~50 分钟</div><div>🎞 构图顺序：全景→半身→细节</div><div>💡 建议开夜景模式</div>
             </div>
@@ -322,11 +321,6 @@
             </div>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
-          <section class="panel">
-            <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-photo" alt="应天门夜景实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/20230124_Yingtian_Gate_at_Night_06.jpg/1280px-20230124_Yingtian_Gate_at_Night_06.jpg" /></div>
-            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:20230124_Yingtian_Gate_at_Night_06.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Yingtian Gate at Night）</a></div>
-          </section>
         </div>
       </article>
     </section>
@@ -335,11 +329,14 @@
       <article class="card">
         <div class="row"><span class="badge">洛阳剧情副本</span><span class="progress">第 5 / 6 页</span></div>
         <h2 class="title">第四章 🍜 十字街夜市·河洛滋味</h2>
-        <p class="subtitle">不翻汤、水席、烤串、锅贴（乾隆皇帝同款）</p>
+        <p class="subtitle">不翻汤、水席、烤串、锅贴</p>
         <div class="content">
           <section class="panel">
             <h3>景点介绍</h3>
             <p>先汤后主食再小吃，边逛边吃最有夜市节奏。建议在灯笼暖光区拍美食，氛围更浓。</p>
+            <h3>景点标志图片</h3>
+            <div class="img-wrap"><img class="badge-photo" alt="洛阳夜市实景" src="assets/images/shizijie.jpg" /></div>
+            <div class="img-source">图片来源：<a href="https://baike.baidu.com/item/%E5%8D%81%E5%AD%97%E8%A1%97/3530460" target="_blank" rel="noopener noreferrer">百度百科（十字街）</a></div>
             <div class="list">
               <div>📍 洛阳市老城区十字街夜市</div><div>🍽 推荐顺序：不翻汤→水席→锅贴→烤串</div><div>📸 夜市人像建议靠红墙拍摄</div>
             </div>
@@ -376,11 +373,6 @@
             </div>
             <div class="tip">iPhone 支持直接拍照，也可从相册选择。</div>
           </section>
-          <section class="panel">
-            <h3>景点标志图片</h3>
-            <div class="img-wrap"><img class="badge-photo" alt="洛阳夜市实景" src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Luoyang_Nightmarket.jpg/1280px-Luoyang_Nightmarket.jpg" /></div>
-            <div class="img-source">图片来源：<a href="https://commons.wikimedia.org/wiki/File:Luoyang_Nightmarket.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons（Luoyang Nightmarket）</a></div>
-          </section>
         </div>
       </article>
     </section>
@@ -410,12 +402,12 @@
       {
         id: "longmen",
         title: "第一章 🗿 龙门石窟·伊阙万佛",
-        intro: "打卡西山石窟、奉先寺、卢舍那大佛（最佳机位）、伊河礼佛台。",
+        intro: "打卡西山石窟、奉先寺、卢舍那大佛、伊河礼佛台。",
         statusId: "longmen-status",
         tasks: [
           { id: "longmen-west", label: "西山石窟", inputId: "longmen-west-input", previewId: "longmen-west-preview", noteId: "longmen-west-note" },
           { id: "longmen-fx", label: "奉先寺", inputId: "longmen-fx-input", previewId: "longmen-fx-preview", noteId: "longmen-fx-note" },
-          { id: "longmen-buddha", label: "卢舍那大佛（最佳机位）", inputId: "longmen-buddha-input", previewId: "longmen-buddha-preview", noteId: "longmen-buddha-note" },
+          { id: "longmen-buddha", label: "卢舍那大佛", inputId: "longmen-buddha-input", previewId: "longmen-buddha-preview", noteId: "longmen-buddha-note" },
           { id: "longmen-river", label: "伊河礼佛台", inputId: "longmen-river-input", previewId: "longmen-river-preview", noteId: "longmen-river-note" }
         ]
       },
@@ -441,7 +433,7 @@
       {
         id: "shizijie",
         title: "第四章 🍜 十字街夜市·河洛滋味",
-        intro: "不翻汤、水席、烤串、锅贴（乾隆皇帝同款）逐一体验。",
+        intro: "不翻汤、水席、烤串、锅贴逐一体验。",
         statusId: "shizijie-status",
         tasks: [
           { id: "shizijie-food1", label: "美食1", inputId: "shizijie-food1-input", previewId: "shizijie-food1-preview", noteId: "shizijie-food1-note" },
