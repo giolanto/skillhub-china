@@ -78,6 +78,7 @@
       background: rgba(7, 14, 32, .65); color: var(--text); padding: 8px 10px; resize: vertical; min-height: 56px;
     }
     .btn-save { color: #062116; background: linear-gradient(90deg,#99ffd1,#63e4b2); }
+    .btn-back { color: #d7e8ff; background: linear-gradient(90deg,#556a98,#41537a); }
     .ach-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(210px,1fr)); gap: 10px; max-height: min(52vh,500px); overflow: auto; }
     .ach-card { border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: rgba(255,255,255,.03); }
     .ach-card h4 { margin: 0 0 6px; color: #ffe3ab; font-size: 15px; }
@@ -89,7 +90,8 @@
     }
     .poster-mode .title { font-size: clamp(26px, 4.5vw, 46px); letter-spacing: 1px; }
     .poster-mode #achievement-user { color: #ffe7b2; font-weight: 700; }
-    .poster-mode .ach-grid {
+    .poster-mode .btn-back { color: #d7e8ff; background: linear-gradient(90deg,#556a98,#41537a); }
+    .ach-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
       max-height: none;
@@ -192,7 +194,8 @@
       .card { min-height: auto; width: 100%; }
       .img-wrap { min-height: 170px; }
       .badge-photo { height: 200px; }
-      .poster-mode .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .poster-mode .btn-back { color: #d7e8ff; background: linear-gradient(90deg,#556a98,#41537a); }
+    .ach-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .actions { gap: 8px; }
       button { padding: 10px 12px; }
     }
@@ -797,6 +800,19 @@
     spots.forEach((spot) => updateChapterStatus(spot));
     updateTravelerNameUI();
     restoreProgress();
+    pages.forEach((page, pageIndex) => {
+      const actions = page.querySelector(".actions");
+      if (!actions || page.dataset.id === "cover") return;
+      const backBtn = document.createElement("button");
+      backBtn.className = "btn-back";
+      backBtn.type = "button";
+      backBtn.textContent = "返回前一页";
+      backBtn.addEventListener("click", () => {
+        if (pageIndex <= 0) return;
+        go(pageIndex - 1);
+      });
+      actions.insertBefore(backBtn, actions.firstChild);
+    });
   </script>
 </body>
 </html>
