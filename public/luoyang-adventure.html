@@ -482,6 +482,7 @@
     const pages = Array.from(document.querySelectorAll(".page"));
     const achGrid = document.getElementById("ach-grid");
     const achievementUser = document.getElementById("achievement-user");
+    const STORAGE_SOFT_LIMIT = 4_200_000;
     const photos = {};
     const notes = {};
     let hasShownSaveWarn = false;
@@ -563,6 +564,41 @@
       }
     }
 
+    async function recompressDataURL(dataUrl, maxSide = 560, quality = 0.48) {
+      try {
+        const img = await loadImageFromDataURL(dataUrl);
+        const srcW = img.naturalWidth || img.width;
+        const srcH = img.naturalHeight || img.height;
+        if (!srcW || !srcH) return dataUrl;
+        const scale = Math.min(1, maxSide / Math.max(srcW, srcH));
+        const targetW = Math.max(1, Math.round(srcW * scale));
+        const targetH = Math.max(1, Math.round(srcH * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = targetW;
+        canvas.height = targetH;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return dataUrl;
+        ctx.drawImage(img, 0, 0, targetW, targetH);
+        return canvas.toDataURL("image/jpeg", quality);
+      } catch (_error) {
+        return dataUrl;
+      }
+    }
+
+    function estimateStorageBytes() {
+      const snapshot = JSON.stringify({ photos, notes, travelerName });
+      // localStorage 近似按 UTF-16 计，字符约 2 字节
+      return snapshot.length * 2;
+    }
+
+    async function compactAllPhotosForStorage(maxSide = 560, quality = 0.48) {
+      const keys = Object.keys(photos);
+      for (const key of keys) {
+        if (!photos[key]) continue;
+        photos[key] = await recompressDataURL(photos[key], maxSide, quality);
+      }
+    }
+
     function renderAchievements() {
       achGrid.innerHTML = "";
       spots.forEach((spot, i) => {
@@ -613,7 +649,7 @@
         if (!hasShownSaveWarn) {
           hasShownSaveWarn = true;
           setTimeout(() => {
-            alert("图片较大，进度保存空间不足。本次仍可继续解锁下一章，建议适当压缩照片后再试保存。");
+            alert("图片较多，进度保存空间不足。系统已自动压缩照片；若仍失败，请减少部分照片后重试。");
           }, 80);
         }
         return false;
@@ -623,11 +659,14 @@
     async function onFile(spot, task, file) {
       if (!file || !file.type.startsWith("image/")) return;
       try {
-        const compressedDataUrl = await compressImageFile(file, 720, 0.58);
+        const compressedDataUrl = await compressImageFile(file, 640, 0.5);
         photos[task.id] = compressedDataUrl;
+        if (estimateStorageBytes() > STORAGE_SOFT_LIMIT) {
+          await compactAllPhotosForStorage(520, 0.42);
+        }
         const preview = document.getElementById(task.previewId);
         const btn = document.querySelector(`.btn-photo[data-target="${task.inputId}"]`);
-        preview.src = compressedDataUrl;
+        preview.src = photos[task.id];
         preview.style.display = "block";
         updateChapterStatus(spot);
         btn.classList.add("done");
@@ -798,6 +837,22 @@
               achievementClone.classList.add("active");
               achievementClone.style.opacity = "1";
               achievementClone.style.pointerEvents = "auto";
+              // 默认成就墙带 max-height + scroll，html2canvas 只会截到可视区域，后面的章节会像消失了一样
+              achievementClone.style.overflow = "visible";
+              achievementClone.style.height = "auto";
+              achievementClone.style.maxHeight = "none";
+              const cardEl = achievementClone.querySelector(".card");
+              if (cardEl) {
+                cardEl.style.overflow = "visible";
+                cardEl.style.minHeight = "auto";
+                cardEl.style.height = "auto";
+              }
+              const gridEl = achievementClone.querySelector("#ach-grid");
+              if (gridEl) {
+                gridEl.style.maxHeight = "none";
+                gridEl.style.overflow = "visible";
+                gridEl.style.height = "auto";
+              }
             }
           }
         });
