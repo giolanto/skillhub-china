@@ -5,66 +5,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>嵩山副本· 禅道双休</title>
   <style>
-    :root { --accent: #d8b36a; --bg:#201812; --text:#ebf1ff; --line:#6d5135; }
-    * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
-    .page { display:none; padding:14px; min-height:100vh; } .page.active{ display:block; }
-    .card { max-width:900px; margin:0 auto; border:1px solid var(--line); border-radius:14px; padding:14px; background:linear-gradient(160deg,#3b2b1f,#251b14); }
-    .actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; } button{ border:0; border-radius:8px; padding:10px 12px; font-weight:700; }
-    .btn{ background:linear-gradient(90deg,#7fe3ff,#8eb8ff); color:#0a1422; } .btn2{ background:#32486f; color:#e8f0ff; }
-    .task{ border:1px solid #365183; border-radius:10px; padding:10px; margin-top:8px; } .preview{ display:none; width:100%; max-width:260px; border-radius:8px; margin-top:8px; }
-    .spot{ width:100%; max-height:220px; object-fit:cover; border-radius:10px; border:1px solid #365183; margin:8px 0; }
-    .ach-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
-    .ach-card{ border:1px solid #365183; border-radius:10px; padding:8px; } .ach-card img{ width:100%; border-radius:8px; }
+    :root { --accent:#d8b36a; --bg:#201812; --text:#ebf1ff; --line:#6d5135; }
+    *{box-sizing:border-box;} body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;}
+    .page{display:none;padding:14px;min-height:100vh}.page.active{display:block}
+    .card{max-width:920px;margin:0 auto;border:1px solid var(--line);border-radius:14px;padding:14px;background:linear-gradient(160deg,#3b2b1f,#251b14);}
+    .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px} button{border:0;border-radius:8px;padding:10px 12px;font-weight:700}
+    .btn{background:linear-gradient(90deg,#7fe3ff,#8eb8ff);color:#0a1422}.btn2{background:#32486f;color:#e8f0ff}.btn-save{background:linear-gradient(90deg,#99ffd1,#63e4b2);color:#062116}
+    .task{border:1px solid #365183;border-radius:10px;padding:10px;margin-top:8px}.preview{display:none;width:100%;max-width:260px;border-radius:8px;margin-top:8px}
+    .spot{width:100%;max-height:220px;object-fit:cover;border-radius:10px;border:1px solid #365183;margin:8px 0}
+    .task-note{width:100%;margin-top:8px;border-radius:8px;border:1px solid #365183;background:#0d1628;color:#ebf1ff;padding:8px;min-height:56px}
+    .status{font-size:13px;color:#b8c8ea}.status.ok{color:#73e8b9}.status.warn{color:#ff9bb0}
+    .ach-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;max-height:min(58vh,560px);overflow:auto}
+    .ach-card{border:1px solid #365183;border-radius:10px;padding:8px}.ach-card img{width:100%;border-radius:8px}
+    .poster-mode .ach-grid{max-height:none;overflow:visible}.poster-mode .ach-card img{max-height:130px;object-fit:cover}
+    .save-modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(3,9,20,.86);padding:16px}
+    .save-modal.open{display:flex}.save-modal-card{width:min(640px,100%);max-height:92vh;overflow:auto;border-radius:14px;border:1px solid var(--line);background:#0f1a31;padding:12px}
+    .save-modal-img{width:100%;border-radius:10px;border:1px solid var(--line)}
   </style>
 </head>
 <body>
   <main id="app"></main>
+  <div id="save-modal" class="save-modal"><div class="save-modal-card"><div class="actions"><button class="btn2" id="close-save-modal" type="button">关闭</button><button class="btn-save" id="open-save-modal-image" type="button">新开页面保存</button></div><img id="save-modal-image" class="save-modal-img" alt="导出图片预览"></div></div>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
     const config = {"title":"嵩山副本· 禅道双休","subtitle":"逛完少林，逛中岳庙，体验禅、道的魅力","theme":"ancient","chapters":[{"title":"第一章 嵩山少林","intro":"依次游览：山门→天王殿→大雄宝殿→藏经阁→塔林，全程慢慢逛，给孩子讲解少林文化","image":"assets/songshan/chapter1.jpg","tasks":["山门","藏经阁","塔林","武僧表演"]},{"title":"第二章 中岳庙","intro":"逛古柏、明清古建筑、碑刻，简单科普道教文化","image":"assets/songshan/chapter2.jpg","tasks":["古柏","明清古建筑","碑刻"]},{"title":"第三章 嵩山美食","intro":"登封第一刀削面（乌啦啦同款）","image":"assets/songshan/chapter3.jpg","tasks":["登封第一刀削面"]}]};
-    const photos = {};
-    let current = 0;
+    const slug = (config.title || "adventure").toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, "-");
+    const STORAGE_KEY = "adventure-save-" + slug;
+    const RESUME_KEY = "adventure-resume-" + slug;
+    const PHOTO_DB_NAME = "adventure-photo-" + slug;
+    const PHOTO_STORE_NAME = "photos";
+    const photos = {}, notes = {};
+    let current = 0, posterModeEnabled = false, travelerName = "";
     const pages = [];
+    const spots = config.chapters.map((c, ci) => ({ id: "c"+ci, title: c.title, intro: c.intro || "", image: c.image || "", tasks: (c.tasks||[]).map((t, ti) => ({ id: "c"+ci+"-t"+ti, label: t })) }));
     function create(tag, cls, html){ const el=document.createElement(tag); if(cls)el.className=cls; if(html!==undefined)el.innerHTML=html; return el; }
-    function go(i){ if(i<0||i>=pages.length) return; pages[current].classList.remove("active"); current=i; pages[current].classList.add("active"); }
-    function doneChapter(idx){ return config.chapters[idx].tasks.every((_,t)=>photos[idx+"-"+t]); }
-    function renderAchievement(){
-      const grid = document.getElementById("ach-grid"); if(!grid) return; grid.innerHTML="";
-      config.chapters.forEach((c,ci)=>c.tasks.forEach((t,ti)=>{ const k=ci+"-"+ti; if(!photos[k])return; const card=create("article","ach-card",'<h4>'+c.title+' · '+t+'</h4><img src="'+photos[k]+'" alt="'+t+'">'); grid.appendChild(card); }));
-    }
-    function fileToDataUrl(file){ return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=e=>resolve(e.target.result); r.onerror=()=>reject(new Error("读取失败")); r.readAsDataURL(file); });}
-    function boot(){
-      const app = document.getElementById("app");
-      const cover = create("section","page active",'<div class="card"><h1>'+config.title+'</h1><p>'+config.subtitle+'</p><div class="actions"><button class="btn" id="start-btn">开始探索</button></div></div>');
-      pages.push(cover); app.appendChild(cover);
-      config.chapters.forEach((c,ci)=>{
-        const sec = create("section","page");
-        const spotHtml = c.image ? '<img class="spot" src="'+c.image+'" alt="'+c.title+' 标志图">' : '';
-        const card = create("div","card",'<h2>第'+(ci+1)+'章 · '+c.title+'</h2><p>'+c.intro+'</p>'+spotHtml);
-        c.tasks.forEach((t,ti)=>{
-          const k = ci+"-"+ti;
-          const task = create("div","task",'<strong>'+t+'</strong><div class="actions"><button class="btn2">拍照打卡</button></div><input type="file" accept="image/*" hidden><img class="preview" />');
-          const btn = task.querySelector("button");
-          const input = task.querySelector("input");
-          const img = task.querySelector("img");
-          btn.addEventListener("click",()=>input.click());
-          input.addEventListener("change", async()=>{ const f=(input.files||[])[0]; if(!f) return; photos[k]=await fileToDataUrl(f); img.src=photos[k]; img.style.display="block"; if(doneChapter(ci)) nextBtn.disabled=false; renderAchievement(); });
-          card.appendChild(task);
-        });
-        const acts = create("div","actions");
-        const backBtn = create("button","btn2","返回");
-        const nextBtn = create("button","btn", ci===config.chapters.length-1 ? "前往成就页" : "下一章");
-        nextBtn.disabled = true;
-        backBtn.addEventListener("click",()=>go(ci));
-        nextBtn.addEventListener("click",()=>{ if(doneChapter(ci)) go(ci+2); });
-        acts.appendChild(backBtn); acts.appendChild(nextBtn); card.appendChild(acts);
-        sec.appendChild(card); pages.push(sec); app.appendChild(sec);
-      });
-      const ach = create("section","page",'<div class="card"><h2>章节成就墙</h2><p>已完成任务照片展示</p><div id="ach-grid" class="ach-grid"></div><div class="actions"><button class="btn2" id="ach-back">返回上一页</button></div></div>');
-      pages.push(ach); app.appendChild(ach);
+    function go(i){ if(i<0||i>=pages.length)return; pages[current].classList.remove("active"); current=i; pages[current].classList.add("active"); }
+    function chapterDone(ci){ return spots[ci].tasks.every((t)=>photos[t.id]); }
+    function readFileAsDataURL(file){ return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=e=>resolve(e.target.result); r.onerror=()=>reject(new Error("读取失败")); r.readAsDataURL(file); });}
+    function loadImage(dataUrl){ return new Promise((resolve,reject)=>{ const img=new Image(); img.onload=()=>resolve(img); img.onerror=()=>reject(new Error("解码失败")); img.src=dataUrl; });}
+    async function compressImageFile(file,maxSide=640,quality=0.5){ const data=await readFileAsDataURL(file); const img=await loadImage(data); const sw=img.naturalWidth||img.width, sh=img.naturalHeight||img.height; if(!sw||!sh) return data; const scale=Math.min(1,maxSide/Math.max(sw,sh)); const tw=Math.max(1,Math.round(sw*scale)), th=Math.max(1,Math.round(sh*scale)); const c=document.createElement("canvas"); c.width=tw;c.height=th; const ctx=c.getContext("2d"); if(!ctx) return data; ctx.drawImage(img,0,0,tw,th); return c.toDataURL("image/jpeg",quality); }
+    function openPhotoDB(){ return new Promise((resolve,reject)=>{ if(!window.indexedDB){ reject(new Error("no idb")); return; } const req=indexedDB.open(PHOTO_DB_NAME,1); req.onupgradeneeded=()=>{ const db=req.result; if(!db.objectStoreNames.contains(PHOTO_STORE_NAME)) db.createObjectStore(PHOTO_STORE_NAME); }; req.onsuccess=()=>resolve(req.result); req.onerror=()=>reject(req.error); }); }
+    async function persistPhotos(){ try{ const db=await openPhotoDB(); await new Promise((resolve,reject)=>{ const tx=db.transaction(PHOTO_STORE_NAME,"readwrite"); const st=tx.objectStore(PHOTO_STORE_NAME); st.clear().onsuccess=()=>{ Object.entries(photos).forEach(([k,v])=>{ if(v) st.put(v,k); }); }; tx.oncomplete=()=>resolve(); tx.onerror=()=>reject(tx.error);}); db.close(); }catch(_e){} }
+    async function loadPhotos(){ try{ const db=await openPhotoDB(); const out = await new Promise((resolve)=>{ const tx=db.transaction(PHOTO_STORE_NAME,"readonly"); const st=tx.objectStore(PHOTO_STORE_NAME); const req=st.getAllKeys(); req.onsuccess=()=>{ const keys=req.result||[]; if(!keys.length){ resolve({}); return; } const o={}; let done=0; keys.forEach((k)=>{ const g=st.get(k); g.onsuccess=()=>{ if(g.result) o[k]=g.result; done+=1; if(done===keys.length) resolve(o); }; g.onerror=()=>{ done+=1; if(done===keys.length) resolve(o); }; }); }; req.onerror=()=>resolve({}); }); db.close(); return out; }catch(_e){ return {}; } }
+    function saveProgress(preferredPage=current, markResume=false){ const oldResume=Number(localStorage.getItem(RESUME_KEY)||0); const nextResume=markResume?preferredPage:oldResume; try{ localStorage.setItem(RESUME_KEY,String(nextResume)); localStorage.setItem(STORAGE_KEY, JSON.stringify({notes, travelerName, savedAt:Date.now()})); persistPhotos(); return true; }catch(_e){ return false; } }
+    function renderAchievements(){ const grid=document.getElementById("ach-grid"); if(!grid) return; grid.innerHTML=""; spots.forEach((s,si)=>s.tasks.forEach((t,ti)=>{ if(!photos[t.id]) return; const note = notes[t.id] ? "<p>"+notes[t.id]+"</p>" : ""; const card=create("article","ach-card","<h4>第"+(si+1)+"章 · 小节"+(ti+1)+"</h4><p>"+s.title+"</p><p>"+t.label+"</p>"+note+"<img src='"+photos[t.id]+"' alt='"+t.label+"'>"); grid.appendChild(card); })); document.getElementById("achievement-user").textContent = travelerName ? "打卡人："+travelerName : "打卡人：未填写"; }
+    function setPosterMode(enabled){ const card=document.getElementById("achievement-card"); if(!card) return; posterModeEnabled=enabled; card.classList.toggle("poster-mode", enabled); document.getElementById("toggle-poster-mode").textContent = enabled ? "退出海报版" : "切换海报版"; }
+    function openSaveModal(dataUrl){ const m=document.getElementById("save-modal"), img=document.getElementById("save-modal-image"); if(!m||!img) return; img.src=dataUrl; m.classList.add("open"); }
+    function closeSaveModal(){ const m=document.getElementById("save-modal"); if(m) m.classList.remove("open"); }
+    function shouldAutoDownload(){ const ua=navigator.userAgent||""; return !(/iP(hone|od|ad)/i.test(ua) || /Android/i.test(ua)); }
+    function dataUrlToFile(dataUrl, filename){ const parts=dataUrl.split(","); const mime=((/data:(.*?);base64/.exec(parts[0]||"")||[])[1])||"image/jpeg"; const b=atob(parts[1]||""); const arr=new Uint8Array(b.length); for(let i=0;i<b.length;i++) arr[i]=b.charCodeAt(i); return new File([arr],filename,{type:mime}); }
+    async function exportAchievementImage(suffix, forcePosterMode){ const status=document.getElementById("achievement-status"); const page=document.querySelector('.page[data-id="achievement"]'); const card=document.getElementById("achievement-card"); if(!window.html2canvas || !page || !card){ status.textContent="截图组件加载失败"; status.classList.add("warn"); return; } const prevMode=posterModeEnabled, prevPage=current; try{ renderAchievements(); if(current!==pages.length-1) go(pages.length-1); if(forcePosterMode) setPosterMode(true); status.textContent="正在生成图片..."; status.classList.remove("warn"); const canvas = await window.html2canvas(card,{scale:1.25,backgroundColor:null,useCORS:true,onclone:(doc)=>{ const ach=doc.querySelector(".ach-grid"); if(ach){ ach.style.maxHeight="none"; ach.style.overflow="visible"; } }}); const dataUrl=canvas.toDataURL("image/jpeg",0.82); const filename=(travelerName||"打卡人")+"-"+(config.title||"副本")+suffix+".jpg"; if(shouldAutoDownload()){ const a=document.createElement("a"); a.download=filename; a.href=dataUrl; document.body.appendChild(a); a.click(); a.remove(); } if(navigator.share && navigator.canShare){ try{ const f=dataUrlToFile(dataUrl,filename); if(navigator.canShare({files:[f]})) await navigator.share({files:[f],title:filename}); }catch(_e){} } openSaveModal(dataUrl); status.textContent="已生成图片，请长按保存"; }catch(_e){ status.textContent="保存失败，请重试"; status.classList.add("warn"); }finally{ if(forcePosterMode) setPosterMode(prevMode); if(current!==prevPage) go(prevPage); } }
+    function updateChapterStatus(ci){ const status=document.getElementById("status-"+ci), next=document.getElementById("next-"+ci); const done=spots[ci].tasks.filter((t)=>photos[t.id]).length; if(chapterDone(ci)){ status.textContent="本章任务全部完成，可解锁下一章"; status.className="status ok"; next.disabled=false; } else { status.textContent="已完成 "+done+"/"+spots[ci].tasks.length+" 个小节任务"; status.className="status"; next.disabled=true; } }
+    function boot(){ const app=document.getElementById("app"); const cover=create("section","page active","<div class='card'><h1>"+config.title+"</h1><p>"+(config.subtitle||"")+"</p><div class='actions'><input id='traveler-name' placeholder='输入打卡人姓名' style='padding:10px;border-radius:8px;border:1px solid #3a4d78;background:#0d1628;color:#ebf1ff'><button class='btn' id='start-btn'>开始探索</button></div></div>"); pages.push(cover); app.appendChild(cover);
+      spots.forEach((s,ci)=>{ const sec=create("section","page"); const spot=s.image?"<img class='spot' src='"+s.image+"' alt='"+s.title+"'>":""; const card=create("div","card","<h2>第"+(ci+1)+"章 · "+s.title+"</h2><p>"+(s.intro||"")+"</p>"+spot); s.tasks.forEach((t)=>{ const task=create("div","task","<strong>"+t.label+"</strong><div class='actions'><button class='btn2'>拍照打卡</button></div><input type='file' accept='image/*' hidden><img class='preview'><textarea class='task-note' placeholder='可选：记录这张照片'></textarea>"); const btn=task.querySelector("button"), input=task.querySelector("input"), img=task.querySelector("img"), note=task.querySelector("textarea"); btn.addEventListener("click",()=>input.click()); input.addEventListener("change",async()=>{ const f=(input.files||[])[0]; if(!f) return; photos[t.id]=await compressImageFile(f); img.src=photos[t.id]; img.style.display="block"; btn.textContent="重拍/换图"; saveProgress(); renderAchievements(); updateChapterStatus(ci); }); note.addEventListener("input",()=>{ notes[t.id]=note.value.trim(); saveProgress(); }); task.dataset.taskId=t.id; card.appendChild(task); }); const acts=create("div","actions","<button class='btn2' id='back-"+ci+"'>返回</button><button class='btn-save' id='save-"+ci+"'>保存本章进度</button><button class='btn' id='next-"+ci+"' "+(ci===0?"":"")+">"+(ci===spots.length-1?"前往成就页":"解锁下一章")+"</button><span class='status' id='status-"+ci+"'>请先完成任务</span>"); card.appendChild(acts); sec.appendChild(card); pages.push(sec); app.appendChild(sec); });
+      const ach=create("section","page","<article class='card' id='achievement-card'><h2>章节成就墙</h2><p id='achievement-user' class='status'></p><div id='ach-grid' class='ach-grid'></div><div class='actions'><button class='btn2' id='toggle-poster-mode'>切换海报版</button><button class='btn-save' id='save-poster-image'>保存海报版</button><button class='btn-save' id='save-achievement-image'>保存整页为图片</button><button class='btn2' id='restart'>再玩一次</button><span class='status ok' id='achievement-status'>全部章节可导出</span></div></article>");
+      ach.dataset.id="achievement"; pages.push(ach); app.appendChild(ach);
       document.getElementById("start-btn").addEventListener("click",()=>go(1));
-      document.getElementById("ach-back").addEventListener("click",()=>go(pages.length-2));
+      document.getElementById("traveler-name").addEventListener("input",(e)=>{ travelerName=e.target.value.trim(); renderAchievements(); saveProgress(); });
+      spots.forEach((s,ci)=>{ document.getElementById("back-"+ci).addEventListener("click",()=>go(Math.max(0,ci))); document.getElementById("save-"+ci).addEventListener("click",()=>{ saveProgress(Math.min(pages.length-1,ci+2),true); updateChapterStatus(ci); }); document.getElementById("next-"+ci).addEventListener("click",()=>{ if(!chapterDone(ci)){ const st=document.getElementById("status-"+ci); st.textContent="请先完成本章拍照打卡"; st.className="status warn"; return; } if(ci===spots.length-1){ renderAchievements(); go(pages.length-1); saveProgress(pages.length-1,true); } else { go(ci+2); saveProgress(ci+2,true); } }); updateChapterStatus(ci); });
+      document.getElementById("toggle-poster-mode").addEventListener("click",()=>setPosterMode(!posterModeEnabled));
+      document.getElementById("save-achievement-image").addEventListener("click",()=>exportAchievementImage("成就页",true));
+      document.getElementById("save-poster-image").addEventListener("click",()=>exportAchievementImage("成就海报",true));
+      document.getElementById("restart").addEventListener("click",async()=>{ localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(RESUME_KEY); try{ const db=await openPhotoDB(); const tx=db.transaction(PHOTO_STORE_NAME,"readwrite"); tx.objectStore(PHOTO_STORE_NAME).clear(); db.close(); }catch(_e){} window.location.reload(); });
+      document.getElementById("close-save-modal").addEventListener("click",closeSaveModal);
+      document.getElementById("save-modal").addEventListener("click",(e)=>{ if(e.target&&e.target.id==="save-modal") closeSaveModal(); });
+      document.getElementById("open-save-modal-image").addEventListener("click",()=>{ const img=document.getElementById("save-modal-image"); if(img&&img.src) window.open(img.src,"_blank"); });
     }
-    boot();
+    async function restoreProgress(){ const raw=localStorage.getItem(STORAGE_KEY); if(raw){ try{ const data=JSON.parse(raw); Object.assign(notes,data.notes||{}); travelerName=(data.travelerName||"").trim(); }catch(_e){} } Object.assign(photos, await loadPhotos()); const resume=Number(localStorage.getItem(RESUME_KEY)||0); spots.forEach((s,ci)=>{ s.tasks.forEach((t)=>{ if(photos[t.id]){ const node=document.querySelector('[data-task-id="'+t.id+'"]'); if(node){ const img=node.querySelector(".preview"), btn=node.querySelector("button"), note=node.querySelector("textarea"); img.src=photos[t.id]; img.style.display="block"; btn.textContent="重拍/换图"; if(notes[t.id]) note.value=notes[t.id]; } } }); updateChapterStatus(ci); }); const nameInput=document.getElementById("traveler-name"); if(nameInput&&travelerName) nameInput.value=travelerName; renderAchievements(); if(resume>0&&resume<pages.length) go(resume); }
+    boot(); restoreProgress();
   </script>
 </body>
 </html>
