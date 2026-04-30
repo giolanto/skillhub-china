@@ -430,7 +430,11 @@
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
-    const STORAGE_KEY = "luoyang-adventure-save-v2";
+    const STORAGE_KEY = "luoyang-adventure-save-v3";
+    const LEGACY_STORAGE_KEY = "luoyang-adventure-save-v2";
+    const RESUME_PAGE_KEY = "luoyang-adventure-resume-page";
+    const PHOTO_DB_NAME = "luoyang-adventure-photo-db";
+    const PHOTO_STORE_NAME = "photos";
     const CHAPTER_START_INDEX = 1;
     const ACHIEVEMENT_PAGE_INDEX = 5;
     const spots = [
@@ -489,6 +493,102 @@
     let travelerName = "";
     let posterModeEnabled = false;
     let current = 0;
+
+    function openPhotoDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error("当前浏览器不支持 IndexedDB"));
+          return;
+        }
+        const request = window.indexedDB.open(PHOTO_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+            db.createObjectStore(PHOTO_STORE_NAME);
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("打开图片数据库失败"));
+      });
+    }
+
+    async function persistPhotosToIndexedDB() {
+      const db = await openPhotoDB();
+      try {
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(PHOTO_STORE_NAME, "readwrite");
+          const store = tx.objectStore(PHOTO_STORE_NAME);
+          const clearReq = store.clear();
+          clearReq.onerror = () => reject(clearReq.error || new Error("清理旧照片失败"));
+          clearReq.onsuccess = () => {
+            Object.entries(photos).forEach(([key, value]) => {
+              if (value) store.put(value, key);
+            });
+          };
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error || new Error("写入照片失败"));
+          tx.onabort = () => reject(tx.error || new Error("写入照片被终止"));
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    async function loadPhotosFromIndexedDB() {
+      const db = await openPhotoDB();
+      try {
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(PHOTO_STORE_NAME, "readonly");
+          const store = tx.objectStore(PHOTO_STORE_NAME);
+          const req = store.getAllKeys();
+          req.onerror = () => reject(req.error || new Error("读取照片索引失败"));
+          req.onsuccess = () => {
+            const keys = req.result || [];
+            const out = {};
+            if (!keys.length) {
+              resolve(out);
+              return;
+            }
+            let done = 0;
+            keys.forEach((key) => {
+              const getReq = store.get(key);
+              getReq.onerror = () => {
+                done += 1;
+                if (done === keys.length) resolve(out);
+              };
+              getReq.onsuccess = () => {
+                if (typeof getReq.result === "string" && getReq.result) {
+                  out[key] = getReq.result;
+                }
+                done += 1;
+                if (done === keys.length) resolve(out);
+              };
+            });
+          };
+        });
+      } finally {
+        db.close();
+      }
+    }
+
+    async function clearPhotosFromIndexedDB() {
+      try {
+        const db = await openPhotoDB();
+        try {
+          await new Promise((resolve, reject) => {
+            const tx = db.transaction(PHOTO_STORE_NAME, "readwrite");
+            const store = tx.objectStore(PHOTO_STORE_NAME);
+            const req = store.clear();
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error || new Error("清空照片失败"));
+          });
+        } finally {
+          db.close();
+        }
+      } catch (_error) {
+        // 浏览器不支持时忽略，仍可继续重置页面
+      }
+    }
 
     function go(index) {
       if (index < 0 || index >= pages.length) return;
@@ -586,7 +686,7 @@
     }
 
     function estimateStorageBytes() {
-      const snapshot = JSON.stringify({ photos, notes, travelerName });
+      const snapshot = JSON.stringify({ notes, travelerName, photoCount: Object.keys(photos).length });
       // localStorage 近似按 UTF-16 计，字符约 2 字节
       return snapshot.length * 2;
     }
@@ -624,32 +724,31 @@
     }
 
     function saveProgress(preferredPage = current, markResume = false) {
-      const oldRaw = localStorage.getItem(STORAGE_KEY);
-      let oldResumePage = 0;
-      if (oldRaw) {
-        try {
-          const oldData = JSON.parse(oldRaw);
-          oldResumePage = Number.isInteger(oldData.resumePage) ? oldData.resumePage : 0;
-        } catch (_error) {
-          oldResumePage = 0;
-        }
-      }
+      const oldResumeRaw = localStorage.getItem(RESUME_PAGE_KEY);
+      const oldResumePage = Number.isInteger(Number(oldResumeRaw)) ? Number(oldResumeRaw) : 0;
+      const nextResumePage = markResume ? preferredPage : oldResumePage;
       const saveData = {
-        photos,
         notes,
         travelerName,
-        resumePage: markResume ? preferredPage : oldResumePage,
         savedAt: Date.now()
       };
       try {
+        localStorage.setItem(RESUME_PAGE_KEY, String(nextResumePage));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+        persistPhotosToIndexedDB().catch(() => {
+          if (!hasShownSaveWarn) {
+            hasShownSaveWarn = true;
+            setTimeout(() => {
+              alert("图片持久化失败，建议刷新后重试上传。");
+            }, 80);
+          }
+        });
         return true;
       } catch (_error) {
-        // iPhone 原图较大时可能触发 localStorage 配额限制，不应阻塞继续游玩
         if (!hasShownSaveWarn) {
           hasShownSaveWarn = true;
           setTimeout(() => {
-            alert("图片较多，进度保存空间不足。系统已自动压缩照片；若仍失败，请减少部分照片后重试。");
+            alert("进度保存失败，请重试。");
           }, 80);
         }
         return false;
@@ -757,12 +856,21 @@
       actions.insertBefore(backBtn, actions.firstChild);
     });
 
-    function restoreProgress() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
+    async function restoreProgress() {
+      const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+      let photosFromDb = {};
       try {
-        const data = JSON.parse(raw);
-        Object.assign(photos, data.photos || {});
+        photosFromDb = await loadPhotosFromIndexedDB();
+      } catch (_error) {
+        photosFromDb = {};
+      }
+      if (!raw && !Object.keys(photosFromDb).length) return;
+      try {
+        const data = raw ? JSON.parse(raw) : {};
+        Object.assign(photos, photosFromDb);
+        if (!Object.keys(photos).length && data.photos) {
+          Object.assign(photos, data.photos);
+        }
         Object.assign(notes, data.notes || {});
         spots.forEach((spot) => {
           spot.tasks.forEach((task) => {
@@ -782,7 +890,9 @@
         renderAchievements();
         travelerName = (data.travelerName || "").trim();
         updateTravelerNameUI();
-        const rawResume = Number.isInteger(data.resumePage) ? data.resumePage : 0;
+        const resumeRaw = localStorage.getItem(RESUME_PAGE_KEY);
+        const legacyResume = Number.isInteger(data.resumePage) ? data.resumePage : 0;
+        const rawResume = Number.isInteger(Number(resumeRaw)) ? Number(resumeRaw) : legacyResume;
         const pageIdx = rawResume <= 1 ? 0 : rawResume;
         go(Math.min(Math.max(pageIdx, 0), pages.length - 1));
         if (pageIdx > 0) {
@@ -793,11 +903,16 @@
         }
       } catch (_error) {
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(LEGACY_STORAGE_KEY);
+        localStorage.removeItem(RESUME_PAGE_KEY);
       }
     }
 
-    document.getElementById("restart").addEventListener("click", () => {
+    document.getElementById("restart").addEventListener("click", async () => {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+      localStorage.removeItem(RESUME_PAGE_KEY);
+      await clearPhotosFromIndexedDB();
       go(0);
       window.location.reload();
     });
@@ -821,7 +936,7 @@
         if (forcePosterMode) setPosterMode(true);
         status.textContent = "正在生成图片，请稍候...";
         status.classList.remove("warn");
-        const canvas = await window.html2canvas(achievementPage, {
+        const canvas = await window.html2canvas(achievementCard, {
           scale: 1.25,
           backgroundColor: null,
           useCORS: true,
@@ -846,6 +961,7 @@
                 cardEl.style.overflow = "visible";
                 cardEl.style.minHeight = "auto";
                 cardEl.style.height = "auto";
+                cardEl.style.maxHeight = "none";
               }
               const gridEl = achievementClone.querySelector("#ach-grid");
               if (gridEl) {
@@ -883,7 +999,7 @@
     });
 
     document.getElementById("save-achievement-image").addEventListener("click", async () => {
-      await exportAchievementImage("成就页", false);
+      await exportAchievementImage("成就页", true);
     });
 
     document.getElementById("save-poster-image").addEventListener("click", async () => {
