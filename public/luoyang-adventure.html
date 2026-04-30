@@ -197,6 +197,38 @@
       .actions { gap: 8px; }
       button { padding: 10px 12px; }
     }
+    .save-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(3, 9, 20, 0.86);
+      padding: 16px;
+    }
+    .save-modal.open { display: flex; }
+    .save-modal-card {
+      width: min(640px, 100%);
+      max-height: 92dvh;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: linear-gradient(160deg, rgba(36,56,102,.9), rgba(10,16,34,.95));
+      padding: 12px;
+    }
+    .save-modal-img {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,.25);
+    }
+    .save-modal-tips {
+      margin: 8px 0 0;
+      color: #dbe7ff;
+      font-size: 13px;
+      line-height: 1.5;
+    }
   </style>
 </head>
 <body>
@@ -427,6 +459,19 @@
       </article>
     </section>
   </main>
+  <div id="save-modal" class="save-modal" aria-hidden="true">
+    <div class="save-modal-card">
+      <div class="row">
+        <span class="badge">保存辅助面板</span>
+        <button class="btn-back" id="close-save-modal" type="button">关闭</button>
+      </div>
+      <img id="save-modal-image" class="save-modal-img" alt="导出图片预览" />
+      <p class="save-modal-tips">如果系统没有直接下载：可长按图片保存；或点“新开页面保存”再长按。</p>
+      <div class="actions">
+        <button class="btn-save" id="open-save-modal-image" type="button">新开页面保存</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script>
@@ -723,6 +768,33 @@
       toggleBtn.textContent = enabled ? "退出海报版" : "切换海报版";
     }
 
+    function dataUrlToFile(dataUrl, filename = "achievement.jpg") {
+      const [header, base64] = dataUrl.split(",");
+      const mimeMatch = /data:(.*?);base64/.exec(header || "");
+      const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      const binary = atob(base64 || "");
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i += 1) bytes[i] = binary.charCodeAt(i);
+      return new File([bytes], filename, { type: mime });
+    }
+
+    function openSaveModal(dataUrl) {
+      const modal = document.getElementById("save-modal");
+      const image = document.getElementById("save-modal-image");
+      if (!modal || !image) return;
+      image.src = dataUrl;
+      modal.classList.add("open");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeSaveModal() {
+      const modal = document.getElementById("save-modal");
+      if (!modal) return;
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
     function saveProgress(preferredPage = current, markResume = false) {
       const oldResumeRaw = localStorage.getItem(RESUME_PAGE_KEY);
       const oldResumePage = Number.isInteger(Number(oldResumeRaw)) ? Number(oldResumeRaw) : 0;
@@ -972,19 +1044,27 @@
             }
           }
         });
-        const link = document.createElement("a");
         const safeName = travelerName || "打卡人";
         const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
-        link.download = `${safeName}-洛阳打卡${filenameSuffix}.jpg`;
+        const filename = `${safeName}-洛阳打卡${filenameSuffix}.jpg`;
+        const link = document.createElement("a");
+        link.download = filename;
         link.href = dataUrl;
+        document.body.appendChild(link);
         link.click();
-        // iPhone Safari 可能不支持直接下载，兜底为新标签页打开图片供长按保存
-        setTimeout(() => {
-          if (document.visibilityState === "visible") {
-            window.open(dataUrl, "_blank");
+        link.remove();
+        if (navigator.share && navigator.canShare) {
+          try {
+            const file = dataUrlToFile(dataUrl, filename);
+            if (navigator.canShare({ files: [file] })) {
+              await navigator.share({ files: [file], title: filename });
+            }
+          } catch (_error) {
+            // 用户取消分享属于正常行为，不打断保存流程
           }
-        }, 180);
-        status.textContent = "图片已保存";
+        }
+        openSaveModal(dataUrl);
+        status.textContent = "已生成图片；若未自动下载，可在弹窗内长按保存";
       } catch (_error) {
         status.textContent = "保存失败，请重试";
         status.classList.add("warn");
@@ -1004,6 +1084,18 @@
 
     document.getElementById("save-poster-image").addEventListener("click", async () => {
       await exportAchievementImage("成就海报", true);
+    });
+
+    document.getElementById("close-save-modal").addEventListener("click", () => {
+      closeSaveModal();
+    });
+    document.getElementById("save-modal").addEventListener("click", (e) => {
+      if (e.target && e.target.id === "save-modal") closeSaveModal();
+    });
+    document.getElementById("open-save-modal-image").addEventListener("click", () => {
+      const image = document.getElementById("save-modal-image");
+      if (!image || !image.src) return;
+      window.open(image.src, "_blank");
     });
 
     document.querySelectorAll(".badge-photo").forEach((img) => {
