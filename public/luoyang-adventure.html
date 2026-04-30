@@ -795,6 +795,13 @@
       modal.setAttribute("aria-hidden", "true");
     }
 
+    function shouldAutoDownload() {
+      const ua = navigator.userAgent || "";
+      const isIOS = /iP(hone|od|ad)/i.test(ua);
+      const isAndroid = /Android/i.test(ua);
+      return !(isIOS || isAndroid);
+    }
+
     function saveProgress(preferredPage = current, markResume = false) {
       const oldResumeRaw = localStorage.getItem(RESUME_PAGE_KEY);
       const oldResumePage = Number.isInteger(Number(oldResumeRaw)) ? Number(oldResumeRaw) : 0;
@@ -1047,12 +1054,14 @@
         const safeName = travelerName || "打卡人";
         const dataUrl = canvas.toDataURL("image/jpeg", 0.82);
         const filename = `${safeName}-洛阳打卡${filenameSuffix}.jpg`;
-        const link = document.createElement("a");
-        link.download = filename;
-        link.href = dataUrl;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+        if (shouldAutoDownload()) {
+          const link = document.createElement("a");
+          link.download = filename;
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
         if (navigator.share && navigator.canShare) {
           try {
             const file = dataUrlToFile(dataUrl, filename);
@@ -1064,7 +1073,7 @@
           }
         }
         openSaveModal(dataUrl);
-        status.textContent = "已生成图片；若未自动下载，可在弹窗内长按保存";
+        status.textContent = shouldAutoDownload() ? "已生成图片；若未自动下载，可在弹窗内长按保存" : "已生成图片，请在弹窗内长按保存（移动端更稳定）";
       } catch (_error) {
         status.textContent = "保存失败，请重试";
         status.classList.add("warn");
