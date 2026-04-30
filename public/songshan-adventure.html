@@ -2,23 +2,69 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>嵩山副本 · 即将上线</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>嵩山副本· 禅道双休</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; background: #070b18; color: #eef3ff; display: grid; place-items: center; height: 100vh; margin: 0; }
-    .box { text-align: center; padding: 40px; border: 1px solid rgba(156,182,255,.25); border-radius: 22px; background: rgba(12,20,42,.8); max-width: 480px; }
-    h1 { font-size: 28px; margin-bottom: 12px; }
-    p { color: #b3c0e4; font-size: 15px; line-height: 1.6; }
-    .tag { display: inline-block; border: 1px solid rgba(125,180,255,.5); background: rgba(78,127,218,.2); border-radius: 999px; padding: 4px 12px; font-size: 13px; margin-bottom: 16px; }
-    .loader { margin-top: 24px; width: 40px; height: 40px; border: 3px solid rgba(105,219,255,.2); border-top-color: #69dfff; border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    :root { --accent: #d8b36a; --bg:#201812; --text:#ebf1ff; --line:#6d5135; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
+    .page { display:none; padding:14px; min-height:100vh; } .page.active{ display:block; }
+    .card { max-width:900px; margin:0 auto; border:1px solid var(--line); border-radius:14px; padding:14px; background:linear-gradient(160deg,#3b2b1f,#251b14); }
+    .actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; } button{ border:0; border-radius:8px; padding:10px 12px; font-weight:700; }
+    .btn{ background:linear-gradient(90deg,#7fe3ff,#8eb8ff); color:#0a1422; } .btn2{ background:#32486f; color:#e8f0ff; }
+    .task{ border:1px solid #365183; border-radius:10px; padding:10px; margin-top:8px; } .preview{ display:none; width:100%; max-width:260px; border-radius:8px; margin-top:8px; }
+    .spot{ width:100%; max-height:220px; object-fit:cover; border-radius:10px; border:1px solid #365183; margin:8px 0; }
+    .ach-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+    .ach-card{ border:1px solid #365183; border-radius:10px; padding:8px; } .ach-card img{ width:100%; border-radius:8px; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <span class="tag">嵩山副本 · 即将上线</span>
-    <h1>🏔️ 嵩山副本</h1>
-    <p>少林寺 · 嵩山步道 · 中岳庙<br />正在上传中，请稍候...</p>
-    <div class="loader"></div>
-  </div>
+  <main id="app"></main>
+  <script>
+    const config = {"title":"嵩山副本· 禅道双休","subtitle":"逛完少林，逛中岳庙，体验禅、道的魅力","theme":"ancient","chapters":[{"title":"第一章 嵩山少林","intro":"依次游览：山门→天王殿→大雄宝殿→藏经阁→塔林，全程慢慢逛，给孩子讲解少林文化","image":"assets/songshan/chapter1.jpg","tasks":["山门","藏经阁","塔林","武僧表演"]},{"title":"第二章 中岳庙","intro":"逛古柏、明清古建筑、碑刻，简单科普道教文化","image":"assets/songshan/chapter2.jpg","tasks":["古柏","明清古建筑","碑刻"]},{"title":"第三章 嵩山美食","intro":"登封第一刀削面（乌啦啦同款）","image":"assets/songshan/chapter3.jpg","tasks":["登封第一刀削面"]}]};
+    const photos = {};
+    let current = 0;
+    const pages = [];
+    function create(tag, cls, html){ const el=document.createElement(tag); if(cls)el.className=cls; if(html!==undefined)el.innerHTML=html; return el; }
+    function go(i){ if(i<0||i>=pages.length) return; pages[current].classList.remove("active"); current=i; pages[current].classList.add("active"); }
+    function doneChapter(idx){ return config.chapters[idx].tasks.every((_,t)=>photos[idx+"-"+t]); }
+    function renderAchievement(){
+      const grid = document.getElementById("ach-grid"); if(!grid) return; grid.innerHTML="";
+      config.chapters.forEach((c,ci)=>c.tasks.forEach((t,ti)=>{ const k=ci+"-"+ti; if(!photos[k])return; const card=create("article","ach-card",'<h4>'+c.title+' · '+t+'</h4><img src="'+photos[k]+'" alt="'+t+'">'); grid.appendChild(card); }));
+    }
+    function fileToDataUrl(file){ return new Promise((resolve,reject)=>{ const r=new FileReader(); r.onload=e=>resolve(e.target.result); r.onerror=()=>reject(new Error("读取失败")); r.readAsDataURL(file); });}
+    function boot(){
+      const app = document.getElementById("app");
+      const cover = create("section","page active",'<div class="card"><h1>'+config.title+'</h1><p>'+config.subtitle+'</p><div class="actions"><button class="btn" id="start-btn">开始探索</button></div></div>');
+      pages.push(cover); app.appendChild(cover);
+      config.chapters.forEach((c,ci)=>{
+        const sec = create("section","page");
+        const spotHtml = c.image ? '<img class="spot" src="'+c.image+'" alt="'+c.title+' 标志图">' : '';
+        const card = create("div","card",'<h2>第'+(ci+1)+'章 · '+c.title+'</h2><p>'+c.intro+'</p>'+spotHtml);
+        c.tasks.forEach((t,ti)=>{
+          const k = ci+"-"+ti;
+          const task = create("div","task",'<strong>'+t+'</strong><div class="actions"><button class="btn2">拍照打卡</button></div><input type="file" accept="image/*" hidden><img class="preview" />');
+          const btn = task.querySelector("button");
+          const input = task.querySelector("input");
+          const img = task.querySelector("img");
+          btn.addEventListener("click",()=>input.click());
+          input.addEventListener("change", async()=>{ const f=(input.files||[])[0]; if(!f) return; photos[k]=await fileToDataUrl(f); img.src=photos[k]; img.style.display="block"; if(doneChapter(ci)) nextBtn.disabled=false; renderAchievement(); });
+          card.appendChild(task);
+        });
+        const acts = create("div","actions");
+        const backBtn = create("button","btn2","返回");
+        const nextBtn = create("button","btn", ci===config.chapters.length-1 ? "前往成就页" : "下一章");
+        nextBtn.disabled = true;
+        backBtn.addEventListener("click",()=>go(ci));
+        nextBtn.addEventListener("click",()=>{ if(doneChapter(ci)) go(ci+2); });
+        acts.appendChild(backBtn); acts.appendChild(nextBtn); card.appendChild(acts);
+        sec.appendChild(card); pages.push(sec); app.appendChild(sec);
+      });
+      const ach = create("section","page",'<div class="card"><h2>章节成就墙</h2><p>已完成任务照片展示</p><div id="ach-grid" class="ach-grid"></div><div class="actions"><button class="btn2" id="ach-back">返回上一页</button></div></div>');
+      pages.push(ach); app.appendChild(ach);
+      document.getElementById("start-btn").addEventListener("click",()=>go(1));
+      document.getElementById("ach-back").addEventListener("click",()=>go(pages.length-2));
+    }
+    boot();
+  </script>
 </body>
 </html>
